@@ -1,0 +1,74 @@
+[
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/programs/engine/engine_main.cpp.o -c /home/bobthebob/repos/titanium/titanium/programs/engine/engine_main.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/programs/engine/engine_main.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/programs/engine/engine_main.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/memory/mem_core.cpp.o -c /home/bobthebob/repos/titanium/titanium/memory/mem_core.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/memory/mem_core.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/memory/mem_core.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/logger/logger.cpp.o -c /home/bobthebob/repos/titanium/titanium/logger/logger.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/logger/logger.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/logger/logger.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/util/string.cpp.o -c /home/bobthebob/repos/titanium/titanium/util/string.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/util/string.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/util/string.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/util/data/datanode.cpp.o -c /home/bobthebob/repos/titanium/titanium/util/data/datanode.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/util/data/datanode.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/util/data/datanode.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/util/data/vector_tests.cpp.o -c /home/bobthebob/repos/titanium/titanium/util/data/vector_tests.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/util/data/vector_tests.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/util/data/vector_tests.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/util/parser/bdef.cpp.o -c /home/bobthebob/repos/titanium/titanium/util/parser/bdef.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/util/parser/bdef.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/util/parser/bdef.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/util/parser/namespaced.cpp.o -c /home/bobthebob/repos/titanium/titanium/util/parser/namespaced.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/util/parser/namespaced.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/util/parser/namespaced.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/renderer/rapi/vulkan/vk_utils.cpp.o -c /home/bobthebob/repos/titanium/titanium/renderer/rapi/vulkan/vk_utils.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/renderer/rapi/vulkan/vk_utils.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/renderer/rapi/vulkan/vk_utils.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/renderer/rapi/vulkan/vk_main.cpp.o -c /home/bobthebob/repos/titanium/titanium/renderer/rapi/vulkan/vk_main.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/renderer/rapi/vulkan/vk_main.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/renderer/rapi/vulkan/vk_main.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/renderer/rapi/vulkan/vk_device.cpp.o -c /home/bobthebob/repos/titanium/titanium/renderer/rapi/vulkan/vk_device.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/renderer/rapi/vulkan/vk_device.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/renderer/rapi/vulkan/vk_device.cpp.o"
+},
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/usr/bin/clang++ -I/home/bobthebob/repos/titanium/. -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/titanium/renderer/renderer.cpp.o -c /home/bobthebob/repos/titanium/titanium/renderer/renderer.cpp",
+  "file": "/home/bobthebob/repos/titanium/titanium/renderer/renderer.cpp",
+  "output": "CMakeFiles/titanium_bin.dir/titanium/renderer/renderer.cpp.o"
+}
+]

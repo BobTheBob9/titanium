@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "titanium/renderer/rapi/vulkan",
+		"source" : "titanium/renderer/rapi/vulkan"
+	}
+}

@@ -1,0 +1,14 @@
+Localisation TestLocalisation
+{
+    english
+    {
+        GAMEMODE_test = "Test Mode"
+        GAMEMODE_DESC_test = "Mode for testing"
+
+        WEAPON_w_rocket_launcher = "Rocket Launcher"
+        WEAPON_DESC_w_rocket_launcher = "Launcher of Rockets"
+
+        WEAPON_MOD_w_rocket_launcher_infinite_ammo = "Infinite Rockets"
+        WEAPON_MOD_DESC_w_rocket_launcher_infinite_ammo = "No more reloads - Party like it's 1999!"
+    }
+}
