@@ -14,7 +14,7 @@ namespace assert
         // TODO: error
         if ( !bCondition ) [[unlikely]] 
         {
-            logger::Info( "assertion failed " ENDL );
+            logger::Info( "assertion failed %s" ENDL, pMessageFormat );
         }
     }
 

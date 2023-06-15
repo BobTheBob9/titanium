@@ -29,21 +29,19 @@ add_subdirectory(titanium)
 
 get_property(SRCS GLOBAL PROPERTY _SRCS)
 message(${SRCS})
-
-find_package( Vulkan REQUIRED )
-find_package( glfw3 REQUIRED )
-
-# TODO: VERY TEMP! this should be done in a fancy way of some kind
-add_executable(titanium_bin titanium/programs/engine/engine_main.cpp ${SRCS})
-
-# TODO: TEMP
-target_include_directories (titanium_bin 
-    PUBLIC ${GLFW3_INCLUDE_DIRS}
-    PUBLIC ${VULKAN_INCLUDE_DIRS}
+ 
+add_library( wgpu-native STATIC IMPORTED GLOBAL )
+set_target_properties( wgpu-native PROPERTIES 
+	IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/extern/wgpu-native/libwgpu_native.a"
 )
 
-target_link_libraries (titanium_bin vulkan ${VULKAN_LIBRARIES})
-target_link_libraries (titanium_bin glfw ${GLFW_LIBRARIES})
+find_package( SDL2 REQUIRED )
+
+# TODO: VERY TEMP! this should be done in a fancy way of some kind
+add_executable(titanium_bin titanium/programs/engine/engine_main.cpp ${SRCS} )
+
+include_directories( titanium_bin ${SDL2_INCLUDE_DIRS} )
+target_link_libraries( titanium_bin wgpu-native ${SDL2_LIBRARIES} )
 
 install(TARGETS titanium_bin
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

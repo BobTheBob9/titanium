@@ -1,4 +1,4 @@
-# util contains various standalone utility types, data structures, etc
+# util contains various standalone utility types, data structures, functions etc
 include_directories(*)
 add_sources(
     string.cpp

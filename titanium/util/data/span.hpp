@@ -28,7 +28,7 @@ namespace utils::data
             bool bFound;
             TSize nIndex;
         };
-
+        
         R_IndexOf_s IndexOf( const T tFindValue, const FnFindComparator fnComparator = DefaultFind ) const;
         bool Contains( const T tFindValue, const FnFindComparator fnComparator = DefaultFind ) const;
     };  
