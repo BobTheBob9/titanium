@@ -8,7 +8,9 @@
 #include "titanium/util/data/span.hpp"
 #include "titanium/util/assert.hpp"
 
-namespace utils::data
+#include "titanium/dev/tests.hpp"
+
+namespace util::data
 {
     template <typename T, std::unsigned_integral TSize = u32>
     class Vector
@@ -57,6 +59,7 @@ namespace utils::data
         inline const T* DataForReadOnly() const;
         inline TSize Length() const;
         inline TSize ElementsAllocated() const;
+        inline TSize LastIndex() const;
     };
 
 
@@ -94,7 +97,7 @@ namespace utils::data
     template<typename T, std::unsigned_integral TSize>
     void Vector<T, TSize>::AppendMultipleWithAlloc( const Span<T, u32> tElements )
     {
-        if ( m_nLastElement + tElements.m_nElements < m_nAllocatedElements )
+        if ( m_nLastElement + tElements.m_nElements > m_nAllocatedElements )
         {
             SetAllocatedLoose( m_nAllocatedElements + tElements.m_nElements );
         }
@@ -114,13 +117,11 @@ namespace utils::data
     template<typename T, std::unsigned_integral TSize>
     void Vector<T, TSize>::Remove( const T tElement )
     {
-        for ( TSize i = 0; i < Length(); i++ )
+        R_IndexOf_s indexOf = IndexOf( tElement );
+
+        if ( indexOf.bFound )
         {
-            if ( m_pElements[ i ] == tElement )
-            {
-                RemoveAt( i );
-                return;
-            }
+            RemoveAt( indexOf.nIndex );
         }
     }
 
@@ -154,19 +155,20 @@ namespace utils::data
         if ( !nElements )
         {
             memory::free( m_pElements );
-            return;
-        }
-
-        assert::Release( nElements <= m_nAbsoluteMaxElements, "Tried to allocate %i elements when m_nAbsoluteMaxElements is %i", nElements, m_nAbsoluteMaxElements );
-        assert::Release( nElements >= m_nLastElement, "Tried to allocate %i elements when m_nLastElement is %i", nElements, m_nLastElement );
-    
-        if ( !m_pElements )
-        {
-            m_pElements = memory::alloc_nT<T>( nElements );
         }
         else
         {
-            m_pElements = memory::realloc_nT<T>( m_pElements, nElements );
+            assert::Release( nElements <= m_nAbsoluteMaxElements, "Tried to allocate %i elements when m_nAbsoluteMaxElements is %i", nElements, m_nAbsoluteMaxElements );
+            assert::Release( nElements >= m_nLastElement, "Tried to allocate %i elements when m_nLastElement is %i", nElements, m_nLastElement );
+
+            if ( !m_pElements )
+            {
+                m_pElements = memory::alloc_nT<T>( nElements );
+            }
+            else
+            {
+                m_pElements = memory::realloc_nT<T>( m_pElements, nElements );
+            }
         }
 
         m_nAllocatedElements = nElements;
@@ -183,7 +185,7 @@ namespace utils::data
     T* Vector<T, TSize>::GetAt( const TSize nIdx )
     {
         assert::Release( nIdx < m_nLastElement, "Tried to access index %i when m_nLastElement is %i", nIdx, m_nLastElement );
-        return m_pElements[ nIdx ];
+        return m_pElements + nIdx;
     }
 
     template<typename T, std::unsigned_integral TSize>
@@ -234,4 +236,40 @@ namespace utils::data
 
     template<typename T, std::unsigned_integral TSize>
     inline TSize Vector<T, TSize>::ElementsAllocated() const { return m_nAllocatedElements; }
+
+    template<typename T, std::unsigned_integral TSize>
+    inline TSize Vector<T, TSize>::LastIndex() const { return m_nLastElement - 1; }
+
+    TEST( Vector )
+    {
+        Vector<u64> vnTestVec;
+
+        TEST_EXPECT( vnTestVec.Length() == 0 );
+
+        constexpr int GARBAGE_LENGTH = 299;
+        u64 pnGarbageData[ GARBAGE_LENGTH ];
+        LOG_CALL( vnTestVec.AppendMultipleWithAlloc( Span<u64>( GARBAGE_LENGTH, pnGarbageData ) ) );
+        TEST_EXPECT( vnTestVec.Length() == GARBAGE_LENGTH );
+
+        vnTestVec.AppendWithAlloc( 99 );
+        TEST_EXPECT( vnTestVec.Length() == GARBAGE_LENGTH + 1 );
+        TEST_EXPECT( vnTestVec.ElementsAllocated() >= GARBAGE_LENGTH + ( GARBAGE_LENGTH / 2 ) );
+
+        const Vector<u64>::R_IndexOf_s r_indexOf = vnTestVec.IndexOf( 99 );
+        TEST_EXPECT( r_indexOf.bFound );
+        TEST_EXPECT( vnTestVec.Contains( 99 ) );
+        TEST_EXPECT( vnTestVec.GetAt( r_indexOf.nIndex )  );
+        TEST_EXPECT( *vnTestVec.GetAt( r_indexOf.nIndex ) == 99 );
+
+        while ( vnTestVec.Length() )
+        {
+            const u64 *const pnLastValue = vnTestVec.GetAt( vnTestVec.LastIndex() );
+            vnTestVec.Remove( *pnLastValue );
+        }
+
+        TEST_EXPECT( vnTestVec.Length() == 0 );
+        TEST_EXPECT( vnTestVec.ElementsAllocated() == 0 );
+
+        return true;
+    }
 }

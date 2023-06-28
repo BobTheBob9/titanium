@@ -4,7 +4,7 @@
 
 #include "titanium/util/numerics.hpp"
 
-namespace utils::data
+namespace util::data
 {
     /*
     

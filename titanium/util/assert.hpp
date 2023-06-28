@@ -12,7 +12,7 @@ namespace assert
     inline void Release( const bool bCondition, const char * const pMessageFormat = nullptr, ... )
     {
         // TODO: error
-        if ( !bCondition ) [[unlikely]] 
+        if ( !bCondition ) [[ unlikely ]] 
         {
             logger::Info( "assertion failed %s" ENDL, pMessageFormat );
         }
@@ -27,6 +27,6 @@ namespace assert
     inline void Debug( const bool bCondition, const char * const pMessageFormat = nullptr, ... )
     {
         // TODO: error
-        if ( !bCondition ) [[unlikely]] {}
+        if ( !bCondition ) [[ unlikely ]] {}
     }
 };

@@ -5,7 +5,7 @@
 
 #include "titanium/util/data/stringbuf.hpp"
 
-namespace renderer::utils
+namespace renderer::util
 {
     namespace wgpu
     {
@@ -231,6 +231,32 @@ namespace renderer::utils
 
                 case WGPUErrorType_Unknown:
                 case WGPUErrorType_Force32:
+                {
+                    return "Unknown";
+                }
+            }
+        }
+
+        const char *const PresentModeToString( const WGPUPresentMode ewgpuPresentMode )
+        {
+            switch ( ewgpuPresentMode )
+            {
+                case WGPUPresentMode_Immediate:
+                {
+                    return "Immediate";
+                }
+
+                case WGPUPresentMode_Mailbox:
+                {
+                    return "VSync - Mailbox";
+                }
+            
+                case WGPUPresentMode_Fifo:
+                {
+                    return "VSync - FIFO";
+                }
+
+                case WGPUPresentMode_Force32:
                 {
                     return "Unknown";
                 }

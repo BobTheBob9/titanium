@@ -8,7 +8,7 @@
 #include "titanium/util/assert.hpp"
 #include "titanium/util/data/span.hpp"
 
-namespace utils::data
+namespace util::data
 {
     template <typename T>
     concept ISafeReadBuf = requires(T t)
@@ -30,7 +30,7 @@ namespace utils::data
     class SafeReadBufBasic
     {
         TSize m_nPosition = 0;
-        const utils::data::Span<byte, TSize> m_Data;
+        const util::data::Span<byte, TSize> m_Data;
 
     public:
         SafeReadBufBasic() = delete;
@@ -57,7 +57,7 @@ namespace utils::data
     template <std::unsigned_integral TSize> 
     SafeReadBufBasic<TSize>::SafeReadBufBasic( const Span<byte, TSize> data ) : m_Data( data ) {}
     template <std::unsigned_integral TSize> 
-    SafeReadBufBasic<TSize>::SafeReadBufBasic( const TSize nElements, const byte *const pData ) : m_Data( utils::data::Span<byte, TSize>( nElements, pData ) ) {}
+    SafeReadBufBasic<TSize>::SafeReadBufBasic( const TSize nElements, const byte *const pData ) : m_Data( util::data::Span<byte, TSize>( nElements, pData ) ) {}
 
     template <std::unsigned_integral TSize> 
     TSize SafeReadBufBasic<TSize>::Size() const

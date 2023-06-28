@@ -24,21 +24,19 @@ endmacro()
 
 include_directories(.)
 
+find_package( SDL2 REQUIRED ) 
+
+add_subdirectory( extern/wgpu-native )
+add_subdirectory( extern/imgui )
+
 # core subdirectories
-add_subdirectory(titanium)
+add_subdirectory( titanium )
 
 get_property(SRCS GLOBAL PROPERTY _SRCS)
 message(${SRCS})
- 
-add_library( wgpu-native STATIC IMPORTED GLOBAL )
-set_target_properties( wgpu-native PROPERTIES 
-	IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/extern/wgpu-native/libwgpu_native.a"
-)
-
-find_package( SDL2 REQUIRED )
 
 # TODO: VERY TEMP! this should be done in a fancy way of some kind
-add_executable(titanium_bin titanium/programs/engine/engine_main.cpp ${SRCS} )
+add_executable( titanium_bin titanium/programs/engine/engine_main.cpp ${SRCS} )
 
 include_directories( titanium_bin ${SDL2_INCLUDE_DIRS} )
 target_link_libraries( titanium_bin wgpu-native ${SDL2_LIBRARIES} )

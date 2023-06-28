@@ -5,7 +5,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-namespace utils::data
+namespace util::data
 {
     template <u64 TMaxSize>
     struct StringBuf

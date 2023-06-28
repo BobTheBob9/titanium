@@ -4,12 +4,12 @@
 
 namespace sys::platform::sdl
 {
-    const ::utils::data::StringBuf<32> VersionToString( const SDL_version sdlVersion )
+    const ::util::data::StringBuf<32> VersionToString( const SDL_version sdlVersion )
     {
-        return ::utils::data::StringBuf<32>( "%i.%i.%i", sdlVersion.major, sdlVersion.minor, sdlVersion.patch );
+        return ::util::data::StringBuf<32>( "%i.%i.%i", sdlVersion.major, sdlVersion.minor, sdlVersion.patch );
     }
 
-    const ::utils::data::StringBuf<32> StringRuntimeVersion()
+    const ::util::data::StringBuf<32> StringRuntimeVersion()
     {
         SDL_version sdlRuntimeVersion; 
         SDL_GetVersion( &sdlRuntimeVersion );
@@ -17,7 +17,7 @@ namespace sys::platform::sdl
         return VersionToString( sdlRuntimeVersion );
     }
 
-    const ::utils::data::StringBuf<32> StringCompilationVersion()
+    const ::util::data::StringBuf<32> StringCompilationVersion()
     {
         SDL_version sdlCompiledVersion; 
         SDL_VERSION( &sdlCompiledVersion );
