@@ -26,6 +26,18 @@ namespace renderer
 		WGPUQueue m_wgpuQueue;
 		WGPURenderPipeline m_wgpuRenderPipeline;
 
+		WGPUTextureView m_wgpuDepthTextureView;
+
+		WGPUBuffer m_wgpuUniformBuffer;
+		WGPUBindGroup m_wgpuUniformBindGroup;
+
+		WGPUBuffer m_wgpuVertexBuffer;
+		int m_nVertexBufferSize;
+
+		WGPUBuffer m_wgpuIndexBuffer;
+		int m_nIndexBufferSize;
+		int m_nIndexBufferCount;
+
 		int m_nFramesRendered;
 	};
 

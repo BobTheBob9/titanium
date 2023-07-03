@@ -10,6 +10,7 @@
 #include "titanium/renderer/utils/stringify.hpp"
 
 #include <chrono> // temp probably, idk if we wanna use this for time
+#include <vector>
 
 namespace renderer
 {
@@ -31,7 +32,7 @@ namespace renderer
             // TODO: remove magic number, this is the number of entries in the WGPUPresentMode enum
             ::util::data::StaticSpan<WGPUPresentMode, 4> sPresetModes;
             WGPUSurfaceCapabilities wgpuSurfaceCapabilities { 
-                .presentModeCount = sPresetModes.Size(), // max size of the buffer
+                .presentModeCount = sPresetModes.Elements(), // max size of the buffer
                 .presentModes = sPresetModes.m_tData 
             }; 
             wgpuSurfaceGetCapabilities( wgpuSurface, wgpuAdapter, &wgpuSurfaceCapabilities );
@@ -215,13 +216,7 @@ namespace renderer
         // Request virtual graphics device from physical adapter
         WGPUDevice wgpuVirtualDevice = pRendererState->m_wgpuVirtualDevice = [ wgpuAdapter ]()
         {
-            const WGPUDeviceDescriptor wgpuVirtualDeviceDescriptor {
-                .requiredFeaturesCount = 0,
-                .requiredLimits = nullptr,
-
-                .defaultQueue {  }
-            };
-
+            const WGPUDeviceDescriptor wgpuVirtualDeviceDescriptor { };
             WGPUDevice r_wgpuVirtualDevice;
             wgpuAdapterRequestDevice(
                 wgpuAdapter,
@@ -244,13 +239,79 @@ namespace renderer
         wgpuDeviceSetUncapturedErrorCallback( wgpuVirtualDevice, C_WGPUVirtualDeviceHandleError, &wgpuVirtualDevice );
 
         // Request queue from virtual device
-        pRendererState->m_wgpuQueue = wgpuDeviceGetQueue( wgpuVirtualDevice );
+        WGPUQueue wgpuQueue = pRendererState->m_wgpuQueue = wgpuDeviceGetQueue( wgpuVirtualDevice );
        
         // Request swapchain from device
         pRendererState->m_wgpuSwapChain = WGPUVirtualDevice_CreateSwapChainForWindow( wgpuVirtualDevice, psdlWindow, wgpuSurface, wgpuAdapter );
 
+        // Request uniform buffer from device
+        WGPUBuffer wgpuUniformBuffer = pRendererState->m_wgpuUniformBuffer = [ wgpuVirtualDevice, wgpuQueue ](){ 
+            WGPUBufferDescriptor wgpuUniformBufferDescriptor {
+                .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform,
+                .size = sizeof( float )
+            };
+
+            WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuUniformBufferDescriptor );
+
+            const float flTimeBegin = 0.0f;
+            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, 0, &flTimeBegin, sizeof( float ) );
+
+            return wgpuUniformBuffer;
+        }();
+
+        // Make uniform bind group layout and uniform bind group
+        // TODO: could we macro this syntax maybe?
+        struct R_MakeUniformBindGroup { WGPUBindGroupLayout wgpuBindGroupLayout; WGPUBindGroup wgpuBindGroup; };
+        auto [ wgpuBindGroupLayout, wgpuBindGroup ] = [ wgpuVirtualDevice, wgpuUniformBuffer ](){            
+            WGPUBindGroupLayoutEntry wgpuBindingLayout {
+                .binding = 0,
+                .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
+
+                .buffer {
+                    .type = WGPUBufferBindingType_Uniform,
+                    .minBindingSize = sizeof( float )
+                }
+            };
+
+            WGPUBindGroupLayoutDescriptor wgpuBindGroupLayoutDescriptor {
+                .entryCount = 1,
+                .entries = &wgpuBindingLayout
+            };
+
+            WGPUBindGroupLayout r_wgpuBindGroupLayout = wgpuDeviceCreateBindGroupLayout( wgpuVirtualDevice, &wgpuBindGroupLayoutDescriptor );
+
+            WGPUBindGroupEntry wgpuBinding {
+                .binding = 0,
+                .buffer = wgpuUniformBuffer,
+                .offset = 0,
+                .size = sizeof( float )
+            };
+
+            WGPUBindGroupDescriptor wgpuBindGroupDescriptor {
+                .layout = r_wgpuBindGroupLayout,
+                .entryCount = 1, // keep same as wgpuBindGroupLayoutDescriptor.entryCount!
+                .entries = &wgpuBinding
+            };
+
+            WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( wgpuVirtualDevice, &wgpuBindGroupDescriptor );
+
+            return R_MakeUniformBindGroup { r_wgpuBindGroupLayout, r_wgpuBindGroup };
+        }();
+
+        pRendererState->m_wgpuUniformBindGroup = wgpuBindGroup;
+
+        // Request pipeline layout from device
+        WGPUPipelineLayout wgpuPipelineLayout = [ wgpuVirtualDevice, wgpuBindGroupLayout ](){
+            WGPUPipelineLayoutDescriptor wgpuPipelineLayoutDescriptor {
+                .bindGroupLayoutCount = 1,
+                .bindGroupLayouts = &wgpuBindGroupLayout
+            };
+
+            return wgpuDeviceCreatePipelineLayout( wgpuVirtualDevice, &wgpuPipelineLayoutDescriptor );
+        }();
+
         // Create render pipeline for device
-        pRendererState->m_wgpuRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat ]()
+        pRendererState->m_wgpuRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat, wgpuPipelineLayout ]()
         {
             // Create shader module
             WGPUShaderModule wgpuShaderModule = [ wgpuVirtualDevice ]()
@@ -258,29 +319,41 @@ namespace renderer
                 WGPUShaderModuleWGSLDescriptor wgpuShaderCodeDescriptor {
                     .chain { .sType = WGPUSType_ShaderModuleWGSLDescriptor },
                     .code = R"(
-                                @vertex fn vs_main( @builtin( vertex_index ) in_vertex_index: u32 ) -> @builtin( position ) vec4<f32> 
+                                @group( 0 ) @binding( 0 ) var<uniform> uTime : f32;
+
+                                struct VertexInput
                                 {
-                                	var p = vec2<f32>( 0.0, 0.0 );
+                                    @location( 0 ) position : vec3<f32>,
+                                    @location( 1 ) colour : vec3<f32>
+                                };
 
-                                	if ( in_vertex_index == 0u ) 
-                                    {
-                                		p = vec2<f32>( -0.5, -0.5 );
-                                	} 
-                                    else if ( in_vertex_index == 1u ) 
-                                    {
-                                		p = vec2<f32>( 0.5, -0.5 );
-                                	} 
-                                    else if ( in_vertex_index == 2u ) 
-                                    {
-                                		p = vec2<f32>( -0.5, 0.5 );
-                                	}
+                                struct R_VertexOutput
+                                {
+                                    @builtin( position ) position : vec4<f32>,
+                                    @location( 0 ) colour : vec3<f32>
+                                };
 
-                                	return vec4<f32>( p, 0.0, 1.0 );
+                                @vertex fn vs_main( in : VertexInput ) -> R_VertexOutput
+                                {
+                                    var r_out: R_VertexOutput;
+
+                                    let alpha = cos( uTime );
+                                    let beta = sin( uTime );
+                                    var position = vec3<f32>(
+                                        in.position.x,
+                                        alpha * in.position.y + beta * in.position.z,
+                                        alpha * in.position.z - beta * in.position.y,
+                                    );
+
+                                    r_out.position = vec4<f32>( position.x, position.y, position.z * 0.5 + 0.5, 1.0 );
+                                    r_out.colour = in.colour;
+
+                                    return r_out;
                                 }
 
-                                @fragment fn fs_main() -> @location( 0 ) vec4<f32> 
+                                @fragment fn fs_main( in : R_VertexOutput ) -> @location( 0 ) vec4<f32> 
                                 {
-                                    return vec4<f32>( pow( vec3<f32>( 0.0, 0.4, 1.0 ), vec3<f32>( 2.2 ) ), 1.0 );
+                                    return vec4<f32>( pow( in.colour + ( sin( uTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
                                 }
                             )"
                 };
@@ -291,6 +364,38 @@ namespace renderer
 
                 return wgpuDeviceCreateShaderModule( wgpuVirtualDevice, &wgpuShaderDescriptor );
             }();
+
+            ::util::data::StaticSpan<WGPUVertexAttribute, 2> sVertexAttributes {
+                // position attribute
+                {
+                    .format = WGPUVertexFormat_Float32x3,
+                    .offset = 0,
+                    .shaderLocation = 0
+                },
+
+                // colour attribute
+                {
+                    .format = WGPUVertexFormat_Float32x3,
+                    .offset = 3 * sizeof( float ),
+                    .shaderLocation = 1
+                }
+            };
+
+            WGPUVertexBufferLayout wgpuVertexBufferLayout {
+                .arrayStride = sizeof( float ) * 6,
+                .stepMode = WGPUVertexStepMode_Vertex,
+                .attributeCount = static_cast<u32>( sVertexAttributes.Elements() ),
+                .attributes = sVertexAttributes.m_tData
+            };
+
+            WGPUDepthStencilState wgpuDepthStencilState {
+                .format = WGPUTextureFormat_Depth24Plus,
+                .depthWriteEnabled = true,
+                .depthCompare = WGPUCompareFunction_Less,
+
+                .stencilFront = { .compare = WGPUCompareFunction_Never },
+                .stencilBack = { .compare = WGPUCompareFunction_Never }
+            };
 
             WGPUBlendState wgpuBlendState {
                 .color {
@@ -315,19 +420,24 @@ namespace renderer
             };
 
             WGPURenderPipelineDescriptor wgpuRenderPipelineDescriptor {
+                .layout = wgpuPipelineLayout,
+
                 .vertex {
                     .module = wgpuShaderModule,
                     .entryPoint = "vs_main",
                     .constantCount = 0,
-                    .bufferCount = 0,
+                    .bufferCount = 1,
+                    .buffers = &wgpuVertexBufferLayout
                 },
 
                 .primitive {
                     .topology = WGPUPrimitiveTopology_TriangleList,
                     .stripIndexFormat = WGPUIndexFormat_Undefined,
                     .frontFace = WGPUFrontFace_CCW,
-                    .cullMode = WGPUCullMode_Back
+                    .cullMode = WGPUCullMode_None //WGPUCullMode_Back
                 },
+
+                //.depthStencil = &wgpuDepthStencilState,
 
                 .multisample {
                     .count = 1, // disable multisampling
@@ -339,6 +449,98 @@ namespace renderer
             };
 
             return wgpuDeviceCreateRenderPipeline( wgpuVirtualDevice, &wgpuRenderPipelineDescriptor );
+        }();
+
+        // make mesh buffers
+        struct R_MakeMeshBuffers { 
+            WGPUBuffer wgpuVertexBuffer; size_t nVertexBufferSize;
+            WGPUBuffer wgpuIndexBuffer; size_t nIndexBufferSize; int nIndexBufferCount;
+        };
+        auto [ wgpuVertexBuffer, nVertexBufferSize, wgpuIndexBuffer, nIndexBufferSize, nIndexBufferCount ] = [ wgpuVirtualDevice, wgpuQueue ](){
+            // create vertex buffer
+            ::util::data::StaticSpan<float, 30> sflTempVertexData {
+              // x,    y,    z,      r,   g,   b
+                // The base
+                -0.5, -0.5, -0.3,    1.0, 1.0, 1.0,
+                +0.5, -0.5, -0.3,    1.0, 1.0, 1.0,
+                +0.5, +0.5, -0.3,    1.0, 1.0, 1.0,
+                -0.5, +0.5, -0.3,    1.0, 1.0, 1.0,
+
+                // And the tip of the pyramid!
+                +0.0, +0.0, +0.5,    0.5, 0.5, 0.5
+            };
+
+            ::util::data::StaticSpan<u16, 18> snTempIndexData {
+                // Base
+                0, 1, 2,
+                0, 2, 3,
+
+                // Sides
+                0, 1, 4,
+                1, 2, 4,
+                2, 3, 4,
+                3, 0, 4
+            };
+            
+            WGPUBufferDescriptor wgpuVertexBufferDescriptor {
+                .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex,
+                .size = sflTempVertexData.Size(),
+            };
+
+            WGPUBuffer wgpuVertexBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuVertexBufferDescriptor );
+            wgpuQueueWriteBuffer( wgpuQueue, wgpuVertexBuffer, 0, sflTempVertexData.m_tData, sflTempVertexData.Size() );
+
+            WGPUBufferDescriptor wgpuIndexBufferDescriptor {
+                .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index,
+                .size = snTempIndexData.Size() 
+            };
+
+            WGPUBuffer wgpuIndexBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuIndexBufferDescriptor );
+            wgpuQueueWriteBuffer( wgpuQueue, wgpuIndexBuffer, 0, snTempIndexData.m_tData, snTempIndexData.Size() );
+
+            return R_MakeMeshBuffers { 
+                wgpuVertexBuffer, sflTempVertexData.Size(),
+                wgpuIndexBuffer, snTempIndexData.Size(), static_cast<int>( snTempIndexData.Elements() )
+            };
+        }();
+
+        pRendererState->m_wgpuVertexBuffer = wgpuVertexBuffer;
+        pRendererState->m_nVertexBufferSize = nVertexBufferSize;
+        pRendererState->m_wgpuIndexBuffer = wgpuIndexBuffer;
+        pRendererState->m_nIndexBufferSize = nIndexBufferSize;
+        pRendererState->m_nIndexBufferCount = nIndexBufferCount;
+
+        // make depth buffer
+        pRendererState->m_wgpuDepthTextureView = [ wgpuVirtualDevice ](){
+            // TODO: const or unify between depthstencilstate and here somehow
+            //
+            static const WGPUTextureFormat wgpuDepthTextureFormat = WGPUTextureFormat_Depth24Plus; 
+
+            WGPUTextureDescriptor wgpuDepthTextureDescriptor {
+                .usage = WGPUTextureUsage_RenderAttachment,
+                .dimension = WGPUTextureDimension_2D,
+                .size = { 1600, 900, 1 }, // TODO: TEMP!!!!! should recreate on preframe::ResolutionChanged
+                .format = WGPUTextureFormat_Depth24Plus, 
+                .mipLevelCount = 1,
+                .sampleCount = 1,
+                .viewFormatCount = 1,
+                .viewFormats = &wgpuDepthTextureFormat
+            };
+
+            // TODO: we probably aren't cleaning this up...
+            WGPUTexture wgpuDepthTexture = wgpuDeviceCreateTexture( wgpuVirtualDevice, &wgpuDepthTextureDescriptor );
+        
+            WGPUTextureViewDescriptor wgpuDepthTextureViewDescriptor {
+                .format = WGPUTextureFormat_Depth24Plus,
+                .dimension = WGPUTextureViewDimension_2D,
+                .baseMipLevel = 0,
+                .mipLevelCount = 1,
+                .baseArrayLayer = 0,
+                .arrayLayerCount = 1,
+                .aspect = WGPUTextureAspect_DepthOnly
+            };
+
+            return wgpuTextureCreateView( wgpuDepthTexture, &wgpuDepthTextureViewDescriptor );
         }();
 
         // imgui init
@@ -367,10 +569,14 @@ namespace renderer
 
     void Frame( TitaniumRendererState *const pRendererState )
     {
+        static auto programTimeBegin = std::chrono::high_resolution_clock::now();
         static float fsecFrameDiff = 0.0f;
+
         auto timeBegin = std::chrono::high_resolution_clock::now();
 
-        // Main body of the Demo window starts here.
+        float flCurrentTime = std::chrono::duration<double, std::ratio<1>>( std::chrono::high_resolution_clock::now() - programTimeBegin ).count();
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_wgpuUniformBuffer, 0, &flCurrentTime, sizeof( float ) );
+
         ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
         if ( ImGui::Begin( "Debug Info", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground ) )
         {
@@ -391,19 +597,36 @@ namespace renderer
             .view = wgpuNextTexture,
             .loadOp = WGPULoadOp_Clear,
             .storeOp = WGPUStoreOp_Store,
-            .clearValue { 0.9, 0.1, 0.2, 1.0 },
+            .clearValue { 0.05, 0.05, 0.05, 1.0 },
+        };
+
+        WGPURenderPassDepthStencilAttachment wgpuRenderPassDepthStencilAttachment {
+            .view = pRendererState->m_wgpuDepthTextureView,
+            .depthLoadOp = WGPULoadOp_Clear,
+            .depthStoreOp = WGPUStoreOp_Store,
+            .depthClearValue = 1.0f,
+            .depthReadOnly = false,
+
+		    .stencilLoadOp = WGPULoadOp_Clear,
+		    .stencilStoreOp = WGPUStoreOp_Store,
+            .stencilClearValue = 0,
+		    .stencilReadOnly = true
         };
  
         WGPURenderPassDescriptor wgpuRenderPassDescriptor {
             .colorAttachmentCount = 1,
             .colorAttachments = &wgpuRenderPassColourAttachment,
+            .depthStencilAttachment = &wgpuRenderPassDepthStencilAttachment
         };
 
         WGPURenderPassEncoder wgpuRenderPass = wgpuCommandEncoderBeginRenderPass( wgpuCommandEncoder, &wgpuRenderPassDescriptor );
         {
             // Select render pipeline
             wgpuRenderPassEncoderSetPipeline( wgpuRenderPass, pRendererState->m_wgpuRenderPipeline );
-            wgpuRenderPassEncoderDraw( wgpuRenderPass, 3, 1, 0, 0 );
+            wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 0, pRendererState->m_wgpuUniformBindGroup, 0, nullptr );
+            wgpuRenderPassEncoderSetVertexBuffer( wgpuRenderPass, 0, pRendererState->m_wgpuVertexBuffer, 0, pRendererState->m_nVertexBufferSize );
+            wgpuRenderPassEncoderSetIndexBuffer( wgpuRenderPass, pRendererState->m_wgpuIndexBuffer, WGPUIndexFormat_Uint16, 0, pRendererState->m_nIndexBufferSize );
+            wgpuRenderPassEncoderDrawIndexed( wgpuRenderPass, pRendererState->m_nIndexBufferCount, 1, 0, 0, 0 );
 
             ImGui_ImplWGPU_RenderDrawData( ImGui::GetDrawData(), wgpuRenderPass );
         }

@@ -176,10 +176,12 @@ namespace util::commandline
             memory::free( pcaCommandArgs->m_sBuffer.m_pData );
         }
     }
+}
 
+#if USE_TESTS
     TEST( Commandline )
     {
-        CommandArgs caArgs;
+        util::commandline::CommandArgs caArgs;
         util::data::StaticSpan<const char *, 9> sCommandlineArgs { 
             "hi", 
             "+connect", "localhost", 
@@ -189,10 +191,10 @@ namespace util::commandline
             "cool" 
         };
         
-        CreateFromSystemWithAlloc( &caArgs, sCommandlineArgs.Size(), sCommandlineArgs.m_tData );
+        util::commandline::CreateFromSystemWithAlloc( &caArgs, sCommandlineArgs.Elements(), sCommandlineArgs.m_tData );
         
-        TEST_EXPECT( caArgs.m_nArgumentStrings == sCommandlineArgs.Size() );
-        TEST_EXPECT( caArgs.m_eBufferSource == CommandArgs::EBufferSource::SYSTEM_COPY );
+        TEST_EXPECT( caArgs.m_nArgumentStrings == sCommandlineArgs.Elements() );
+        TEST_EXPECT( caArgs.m_eBufferSource == util::commandline::CommandArgs::EBufferSource::SYSTEM_COPY );
 
         {
             const char * pszArgIterator = nullptr;
@@ -203,20 +205,21 @@ namespace util::commandline
             }
         }
 
-        TEST_EXPECT( !strcmp( GetArgumentValue( &caArgs, "+sv_cheats" ), "1" ) );
-        TEST_EXPECT( !strcmp( GetArgumentValue( &caArgs, "+connect" ), "localhost" ) );
+        TEST_EXPECT( !strcmp( util::commandline::GetArgumentValue( &caArgs, "+sv_cheats" ), "1" ) );
+        TEST_EXPECT( !strcmp( util::commandline::GetArgumentValue( &caArgs, "+connect" ), "localhost" ) );
 
         {
             // find the values of all arguments prefixed with "+", e.g. for finding convar values
-            R_FindArgumentPair argIterator {};
-            while ( ( argIterator = GetNextArgumentPairByWildcard( &caArgs, "+", 1, argIterator.pszValue ) ).bFound )
+            util::commandline::R_FindArgumentPair argIterator {};
+            while ( ( argIterator = util::commandline::GetNextArgumentPairByWildcard( &caArgs, "+", 1, argIterator.pszValue ) ).bFound )
             {
-                TEST_EXPECT( !strcmp( GetArgumentValue( &caArgs, argIterator.pszKey ), argIterator.pszValue ) );
+                TEST_EXPECT( !strcmp( util::commandline::GetArgumentValue( &caArgs, argIterator.pszKey ), argIterator.pszValue ) );
             }
         }
 
-        TEST_EXPECT( GetArgumentValue( &caArgs, "cool" ) == nullptr );
+        TEST_EXPECT( util::commandline::GetArgumentValue( &caArgs, "cool" ) == nullptr );
 
         return true;
     }
-}
+#endif // #if USE_TESTS
+

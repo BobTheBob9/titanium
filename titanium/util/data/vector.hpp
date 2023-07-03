@@ -239,23 +239,25 @@ namespace util::data
 
     template<typename T, std::unsigned_integral TSize>
     inline TSize Vector<T, TSize>::LastIndex() const { return m_nLastElement - 1; }
+}
 
+#if USE_TESTS
     TEST( Vector )
     {
-        Vector<u64> vnTestVec;
+        util::data::Vector<u64> vnTestVec;
 
         TEST_EXPECT( vnTestVec.Length() == 0 );
 
         constexpr int GARBAGE_LENGTH = 299;
         u64 pnGarbageData[ GARBAGE_LENGTH ];
-        LOG_CALL( vnTestVec.AppendMultipleWithAlloc( Span<u64>( GARBAGE_LENGTH, pnGarbageData ) ) );
+        LOG_CALL( vnTestVec.AppendMultipleWithAlloc( util::data::Span<u64>( GARBAGE_LENGTH, pnGarbageData ) ) );
         TEST_EXPECT( vnTestVec.Length() == GARBAGE_LENGTH );
 
         vnTestVec.AppendWithAlloc( 99 );
         TEST_EXPECT( vnTestVec.Length() == GARBAGE_LENGTH + 1 );
         TEST_EXPECT( vnTestVec.ElementsAllocated() >= GARBAGE_LENGTH + ( GARBAGE_LENGTH / 2 ) );
 
-        const Vector<u64>::R_IndexOf_s r_indexOf = vnTestVec.IndexOf( 99 );
+        const util::data::Vector<u64>::R_IndexOf_s r_indexOf = vnTestVec.IndexOf( 99 );
         TEST_EXPECT( r_indexOf.bFound );
         TEST_EXPECT( vnTestVec.Contains( 99 ) );
         TEST_EXPECT( vnTestVec.GetAt( r_indexOf.nIndex )  );
@@ -272,4 +274,4 @@ namespace util::data
 
         return true;
     }
-}
+#endif // #if USE_TESTS

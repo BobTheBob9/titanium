@@ -34,8 +34,5 @@ namespace dev::tests
             return false; \
         } else logger::Info( "passed" ENDL ); \
 
-#else // #if USE_TESTS
-    // TODO: we should probably just #if USE_TESTS out all tests rather than generating empty functions
-    #define TEST( name ) void __##name##TestUNUSED()
 #endif // #if USE_TESTS
 }

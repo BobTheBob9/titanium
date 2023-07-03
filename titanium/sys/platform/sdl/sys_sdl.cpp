@@ -51,6 +51,7 @@ namespace sys::platform::sdl
 #endif // #ifdef linux
 
 #if _WIN32
+        #error "No win32 support, atm"
             
 #endif // #if _WIN32
 

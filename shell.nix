@@ -6,6 +6,7 @@ mkShell {
 		clang-tools_16
 		cmake
 		gdb
+		emscripten
 	];
 
 	buildInputs = [
