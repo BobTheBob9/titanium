@@ -407,8 +407,10 @@ namespace renderer
                 .depthWriteEnabled = true,
                 .depthCompare = WGPUCompareFunction_Less,
 
-                .stencilFront = { .compare = WGPUCompareFunction_Never },
-                .stencilBack = { .compare = WGPUCompareFunction_Never }
+                .stencilFront = { .compare = WGPUCompareFunction_Always, .failOp = WGPUStencilOperation_Keep, .depthFailOp = WGPUStencilOperation_Keep, .passOp = WGPUStencilOperation_Keep },
+                .stencilBack = { .compare = WGPUCompareFunction_Always, .failOp = WGPUStencilOperation_Keep, .depthFailOp = WGPUStencilOperation_Keep, .passOp = WGPUStencilOperation_Keep },
+                .stencilReadMask = 0xFFFFFFFF,
+                .stencilWriteMask = 0xFFFFFFFF
             };
 
             WGPUBlendState wgpuBlendState {
@@ -583,7 +585,12 @@ namespace renderer
 
     void Frame( TitaniumRendererState *const pRendererState )
     {
+#if WEBGPU_BACKEND_WGPU 
+        // TODO: what do i actually need here??
+        //wgpuDevicePoll( pRendererState->m_wgpuVirtualDevice );
+#elif WEBGPU_BACKEND_DAWN
         wgpuDeviceTick( pRendererState->m_wgpuVirtualDevice );
+#endif 
 
         static auto programTimeBegin = std::chrono::high_resolution_clock::now();
         static float fsecFrameDiff = 0.0f;
@@ -625,8 +632,7 @@ namespace renderer
 
 		    .stencilLoadOp = WGPULoadOp_Undefined,
 		    .stencilStoreOp = WGPUStoreOp_Undefined,
-            .stencilClearValue = 0,
-		    .stencilReadOnly = true
+		    .stencilReadOnly = false
         };
  
         WGPURenderPassDescriptor wgpuRenderPassDescriptor {
