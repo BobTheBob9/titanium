@@ -7,6 +7,10 @@ mkShell {
 		cmake
 		gdb
 		emscripten
+
+		# dawn dependencies
+		python3
+		pkg-config
 	];
 
 	buildInputs = [
@@ -14,6 +18,14 @@ mkShell {
 		vulkan-tools
 		vulkan-validation-layers
 		SDL2
+
+		# dawn dependencies
+		xorg.libXrandr
+		xorg.libXinerama
+		xorg.libXcursor
+		xorg.libXi
+		wayland-protocols
+		#wayland-client
 	];
 
 	packages = [ vulkan-loader ];

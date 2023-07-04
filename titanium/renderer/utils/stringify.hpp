@@ -1,7 +1,6 @@
 #pragma once
 
-#include "extern/wgpu-native/wgpu.h"
-#include "extern/wgpu-native/webgpu.h"
+#include <webgpu/webgpu.h>
 
 #include "titanium/util/data/stringbuf.hpp"
 
@@ -126,6 +125,9 @@ namespace renderer::util
 
                 case WGPUBackendType_Null:
                 case WGPUBackendType_Force32:
+#if WEBGPU_BACKEND_DAWN
+                case WGPUBackendType_Undefined:
+#endif // #if WEBGPU_BACKEND_DAWN 
                 {
                     return "Unknown";
                 }

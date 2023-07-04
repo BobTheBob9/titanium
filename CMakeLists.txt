@@ -26,7 +26,9 @@ include_directories(.)
 
 find_package( SDL2 REQUIRED ) 
 
-add_subdirectory( extern/wgpu-native )
+set( WEBGPU_BACKEND DAWN )
+#set( DAWN_USE_WAYLAND ON )
+add_subdirectory( extern/WebGPU-distribution )
 add_subdirectory( extern/imgui )
 
 # core subdirectories
@@ -39,7 +41,7 @@ message(${SRCS})
 add_executable( titanium_bin titanium/programs/engine/engine_main.cpp ${SRCS} )
 
 include_directories( titanium_bin ${SDL2_INCLUDE_DIRS} )
-target_link_libraries( titanium_bin wgpu-native ${SDL2_LIBRARIES} )
+target_link_libraries( titanium_bin webgpu ${SDL2_LIBRARIES} )
 
 install(TARGETS titanium_bin
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

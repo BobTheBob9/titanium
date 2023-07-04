@@ -2,8 +2,7 @@
 
 #include <SDL.h>
 #include <SDL_syswm.h>
-#include "extern/wgpu-native/wgpu.h"
-#include "extern/wgpu-native/webgpu.h"
+#include <webgpu/webgpu.h>
 
 namespace renderer
 {
@@ -59,7 +58,7 @@ namespace renderer
 		/*
 		 *  Remakes swap chains etc for a new render resolution
 		 */
-    	void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState );
+		void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState );
 
 		/*
 		 *  Calls the imgui preframe function for the current rendering api's imgui backend

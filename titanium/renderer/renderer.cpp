@@ -30,7 +30,9 @@ namespace renderer
             // wgpuSurfaceGetCapabilities function populates user-provided pointers in the struct passed to it
             // so we need to provide a buffer for all the array fields we want to query before calling (in this case, presentModes)
             // TODO: remove magic number, this is the number of entries in the WGPUPresentMode enum
-            ::util::data::StaticSpan<WGPUPresentMode, 4> sPresetModes;
+
+            // TODO: nonstandard
+            /*/::util::data::StaticSpan<WGPUPresentMode, 4> sPresetModes;
             WGPUSurfaceCapabilities wgpuSurfaceCapabilities { 
                 .presentModeCount = sPresetModes.Elements(), // max size of the buffer
                 .presentModes = sPresetModes.m_tData 
@@ -44,16 +46,23 @@ namespace renderer
                 {
                     return wgpuPreferredPresentMode;
                 }
-            }
+            }*/
 
             // i *believe* it is required for fifo to be supported (this is the case in vulkan) so default to it
             // TODO reexamine this, unsure if it's right
             return WGPUPresentMode_Fifo; 
         }();
 
+        WGPUTextureFormat wgpuSwapchainFormat;
+#if WEBGPU_BACKEND_WGPU 
+        wgpuSwapchainFormat = wgpuSurfaceGetPreferredFormat( wgpuSurface, wgpuAdapter );
+#elif WEBGPU_BACKEND_DAWN
+        wgpuSwapchainFormat = WGPUTextureFormat_BGRA8Unorm; // dawn only supports this, and doesn't have wgpuSurfaceGetPreferredFormat
+#endif 
+
         const WGPUSwapChainDescriptor wgpuSwapChainDescriptor {
             .usage = WGPUTextureUsage_RenderAttachment,
-            .format = wgpuSurfaceGetPreferredFormat( wgpuSurface, wgpuAdapter ),
+            .format = wgpuSwapchainFormat,
 
             .width = static_cast<u32>( nWindowWidth ),
             .height = static_cast<u32>( nWindowHeight ),
@@ -69,7 +78,7 @@ namespace renderer
 	void InitialisePhysicalRenderingDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice )
     {
         logger::Info( "Initialising wgpu rendering device..." ENDL );
-        logger::Info( "wgpu version is %i" ENDL, wgpuGetVersion() );
+        //logger::Info( "wgpu version is %i" ENDL, wgpuGetVersion() ); // nonstandard :c
 
         const WGPUInstanceDescriptor wgpuDesc {};
         WGPUInstance wgpuInstance = pRendererDevice->m_wgpuInstance = wgpuCreateInstance( &wgpuDesc );
@@ -105,7 +114,7 @@ namespace renderer
         // Print info about the graphics adapter
         [ wgpuAdapter ]()
         {
-            WGPUAdapterProperties wgpuAdapterProperties;
+            WGPUAdapterProperties wgpuAdapterProperties {};
             wgpuAdapterGetProperties( wgpuAdapter, &wgpuAdapterProperties );
 
             logger::Info( 
@@ -211,7 +220,12 @@ namespace renderer
         pRendererState->m_psdlWindow = psdlWindow;
         WGPUSurface wgpuSurface = pRendererState->m_wgpuSurface = sys::platform::sdl::CreateWGPUSurfaceForWindow( psdlWindow, wgpuInstance );
 
-        WGPUTextureFormat wgpuSwapchainFormat = wgpuSurfaceGetPreferredFormat( wgpuSurface, wgpuAdapter );
+        WGPUTextureFormat wgpuSwapchainFormat;
+#if WEBGPU_BACKEND_WGPU 
+        wgpuSwapchainFormat = wgpuSurfaceGetPreferredFormat( wgpuSurface, wgpuAdapter );
+#elif WEBGPU_BACKEND_DAWN
+        wgpuSwapchainFormat = WGPUTextureFormat_BGRA8Unorm; // dawn only supports this, and doesn't have wgpuSurfaceGetPreferredFormat
+#endif 
 
         // Request virtual graphics device from physical adapter
         WGPUDevice wgpuVirtualDevice = pRendererState->m_wgpuVirtualDevice = [ wgpuAdapter ]()
@@ -437,7 +451,7 @@ namespace renderer
                     .cullMode = WGPUCullMode_None //WGPUCullMode_Back
                 },
 
-                //.depthStencil = &wgpuDepthStencilState,
+                .depthStencil = &wgpuDepthStencilState,
 
                 .multisample {
                     .count = 1, // disable multisampling
@@ -537,7 +551,7 @@ namespace renderer
                 .mipLevelCount = 1,
                 .baseArrayLayer = 0,
                 .arrayLayerCount = 1,
-                .aspect = WGPUTextureAspect_DepthOnly
+                .aspect = WGPUTextureAspect_All
             };
 
             return wgpuTextureCreateView( wgpuDepthTexture, &wgpuDepthTextureViewDescriptor );
@@ -553,7 +567,7 @@ namespace renderer
     void preframe::ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState )
     {
         // swapchains rely on the window's resolution, so need to be recreated on window resize
-        wgpuSwapChainDrop( pRendererState->m_wgpuSwapChain ); // destroy old swapchain
+        wgpuSwapChainRelease( pRendererState->m_wgpuSwapChain ); // destroy old swapchain
         pRendererState->m_wgpuSwapChain = WGPUVirtualDevice_CreateSwapChainForWindow( 
             pRendererState->m_wgpuVirtualDevice, 
             pRendererState->m_psdlWindow, 
@@ -569,6 +583,8 @@ namespace renderer
 
     void Frame( TitaniumRendererState *const pRendererState )
     {
+        wgpuDeviceTick( pRendererState->m_wgpuVirtualDevice );
+
         static auto programTimeBegin = std::chrono::high_resolution_clock::now();
         static float fsecFrameDiff = 0.0f;
 
@@ -607,8 +623,8 @@ namespace renderer
             .depthClearValue = 1.0f,
             .depthReadOnly = false,
 
-		    .stencilLoadOp = WGPULoadOp_Clear,
-		    .stencilStoreOp = WGPUStoreOp_Store,
+		    .stencilLoadOp = WGPULoadOp_Undefined,
+		    .stencilStoreOp = WGPUStoreOp_Undefined,
             .stencilClearValue = 0,
 		    .stencilReadOnly = true
         };
@@ -631,11 +647,13 @@ namespace renderer
             ImGui_ImplWGPU_RenderDrawData( ImGui::GetDrawData(), wgpuRenderPass );
         }
         wgpuRenderPassEncoderEnd( wgpuRenderPass );
+        wgpuRenderPassEncoderRelease( wgpuRenderPass );
 
-        wgpuTextureViewDrop( wgpuNextTexture );
+        wgpuTextureViewRelease( wgpuNextTexture );
 
         WGPUCommandBufferDescriptor wgpuCommandBufferDescriptor {};
         WGPUCommandBuffer wgpuCommand = wgpuCommandEncoderFinish( wgpuCommandEncoder, &wgpuCommandBufferDescriptor );
+        wgpuCommandEncoderRelease( wgpuCommandEncoder );
 
         wgpuQueueSubmit( pRendererState->m_wgpuQueue, 1, &wgpuCommand );
         wgpuSwapChainPresent( pRendererState->m_wgpuSwapChain ); 
