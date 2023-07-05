@@ -1,3 +1,6 @@
+// Disable SDL's custom main (not recommended)
+#define SDL_MAIN_HANDLED
+
 #include "extern/imgui/imgui.h"
 #include "extern/imgui/imgui_impl_sdl2.h"
 #include "extern/imgui/imgui_impl_wgpu.h"
@@ -93,4 +96,5 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
 
     util::commandline::Free( &caCommandLine );
+    return 0;
 }

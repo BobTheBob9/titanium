@@ -2,8 +2,13 @@
 
 #define ENDL "\n"
 
+#ifdef ERROR
+#undef ERROR
+#endif
+
 namespace logger
 {
+
     enum class eLogLevel
     {
         INFO,

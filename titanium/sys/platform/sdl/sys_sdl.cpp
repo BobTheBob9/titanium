@@ -3,6 +3,10 @@
 #include "titanium/logger/logger.hpp"
 #include "titanium/sys/platform/sdl/stringify.hpp"
 
+#if _WIN32
+#include <windows.h>
+#endif
+
 namespace sys::platform::sdl
 {
     void Initialise()
@@ -51,8 +55,20 @@ namespace sys::platform::sdl
 #endif // #ifdef linux
 
 #if _WIN32
-        #error "No win32 support, atm"
-            
+        HWND hwnd = sdlPlatWindowInfo.info.win.window;
+        HINSTANCE hinstance = sdlPlatWindowInfo.info.win.hinstance;// GetModuleHandle(NULL);
+
+        const WGPUSurfaceDescriptorFromWindowsHWND wgpuSurfaceDescWindows{
+            .chain {
+                .next = NULL,
+                .sType = WGPUSType_SurfaceDescriptorFromWindowsHWND
+            },
+            .hinstance = hinstance,
+            .hwnd = hwnd,
+        };
+
+        wgpuSurfaceDesc.nextInChain = reinterpret_cast<const WGPUChainedStruct*>(&wgpuSurfaceDescWindows);
+
 #endif // #if _WIN32
 
         logger::Info( "CreateWebGPUSurfaceForWindow: Windowing backend is %s" ENDL, sys::platform::sdl::SysWMToString( sdlPlatWindowInfo.subsystem ) );
