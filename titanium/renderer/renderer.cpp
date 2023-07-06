@@ -75,6 +75,43 @@ namespace renderer
         return wgpuDeviceCreateSwapChain( wgpuVirtualDevice, wgpuSurface, &wgpuSwapChainDescriptor );
     }
 
+    WGPUTextureView WGPUVirtualDevice_CreateDepthTextureAndViewForWindow( WGPUDevice wgpuVirtualDevice, SDL_Window *const psdlWindow )
+    {
+        int nWindowWidth, nWindowHeight;
+        SDL_GetWindowSize( psdlWindow, &nWindowWidth, &nWindowHeight );
+
+        // make depth buffer
+        // TODO: const or unify between depthstencilstate and here somehow
+        //
+        static const WGPUTextureFormat wgpuDepthTextureFormat = WGPUTextureFormat_Depth24Plus; 
+
+        WGPUTextureDescriptor wgpuDepthTextureDescriptor {
+            .usage = WGPUTextureUsage_RenderAttachment,
+            .dimension = WGPUTextureDimension_2D,
+            .size = { static_cast<u32>( nWindowWidth ), static_cast<u32>( nWindowHeight ), 1 }, // TODO: TEMP!!!!! should recreate on preframe::ResolutionChanged
+            .format = WGPUTextureFormat_Depth24Plus, 
+            .mipLevelCount = 1,
+            .sampleCount = 1,
+            .viewFormatCount = 1,
+            .viewFormats = &wgpuDepthTextureFormat
+        };
+
+        // TODO: we probably aren't cleaning this up...
+        WGPUTexture wgpuDepthTexture = wgpuDeviceCreateTexture( wgpuVirtualDevice, &wgpuDepthTextureDescriptor );
+    
+        WGPUTextureViewDescriptor wgpuDepthTextureViewDescriptor {
+            .format = WGPUTextureFormat_Depth24Plus,
+            .dimension = WGPUTextureViewDimension_2D,
+            .baseMipLevel = 0,
+            .mipLevelCount = 1,
+            .baseArrayLayer = 0,
+            .arrayLayerCount = 1,
+            .aspect = WGPUTextureAspect_All
+        };
+
+        return wgpuTextureCreateView( wgpuDepthTexture, &wgpuDepthTextureViewDescriptor );
+    }
+
 	void InitialisePhysicalRenderingDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice )
     {
         logger::Info( "Initialising wgpu rendering device..." ENDL );
@@ -259,16 +296,20 @@ namespace renderer
         pRendererState->m_wgpuSwapChain = WGPUVirtualDevice_CreateSwapChainForWindow( wgpuVirtualDevice, psdlWindow, wgpuSurface, wgpuAdapter );
 
         // Request uniform buffer from device
-        WGPUBuffer wgpuUniformBuffer = pRendererState->m_wgpuUniformBuffer = [ wgpuVirtualDevice, wgpuQueue ](){ 
+        WGPUBuffer wgpuUniformBuffer = pRendererState->m_wgpuUniformBuffer = [ wgpuVirtualDevice, wgpuQueue, psdlWindow ](){ 
             WGPUBufferDescriptor wgpuUniformBufferDescriptor {
                 .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform,
-                .size = sizeof( float )
+                .size = sizeof( f32 ) + sizeof( u32 ) * 2
             };
 
             WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuUniformBufferDescriptor );
 
             const float flTimeBegin = 0.0f;
-            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, 0, &flTimeBegin, sizeof( float ) );
+            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, 0, &flTimeBegin, sizeof( f32 ) );
+            int nWindowWidth, nWindowHeight;
+            SDL_GetWindowSize( psdlWindow, &nWindowWidth, &nWindowHeight );
+            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, sizeof( f32 ), &nWindowWidth, sizeof( u32 ) );
+            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, sizeof( f32 ) + sizeof( u32 ), &nWindowHeight, sizeof( u32 ) );
 
             return wgpuUniformBuffer;
         }();
@@ -283,7 +324,7 @@ namespace renderer
 
                 .buffer {
                     .type = WGPUBufferBindingType_Uniform,
-                    .minBindingSize = sizeof( float )
+                    .minBindingSize = sizeof( f32 ) + sizeof( u32 ) * 2
                 }
             };
 
@@ -298,7 +339,7 @@ namespace renderer
                 .binding = 0,
                 .buffer = wgpuUniformBuffer,
                 .offset = 0,
-                .size = sizeof( float )
+                .size = sizeof( f32 ) + sizeof( u32 ) * 2
             };
 
             WGPUBindGroupDescriptor wgpuBindGroupDescriptor {
@@ -333,7 +374,14 @@ namespace renderer
                 WGPUShaderModuleWGSLDescriptor wgpuShaderCodeDescriptor {
                     .chain { .sType = WGPUSType_ShaderModuleWGSLDescriptor },
                     .code = R"(
-                                @group( 0 ) @binding( 0 ) var<uniform> uTime : f32;
+                                struct U_Input 
+                                {
+                                    flTime : f32,
+                                    nWindowHeight : u32,
+                                    nWindowWidth : u32
+                                };
+
+                                @group( 0 ) @binding( 0 ) var<uniform> u_input : U_Input;
 
                                 struct VertexInput
                                 {
@@ -349,25 +397,25 @@ namespace renderer
 
                                 @vertex fn vs_main( in : VertexInput ) -> R_VertexOutput
                                 {
-                                    var r_out: R_VertexOutput;
+                                    var r_out : R_VertexOutput;
 
-                                    let alpha = cos( uTime );
-                                    let beta = sin( uTime );
-                                    var position = vec3<f32>(
-                                        in.position.x,
-                                        alpha * in.position.y + beta * in.position.z,
-                                        alpha * in.position.z - beta * in.position.y,
-                                    );
+                                    let alpha = cos( u_input.flTime );
+                                    let beta = sin( u_input.flTime );
+                                    var position = in.position * transpose( mat3x4<f32>(
+                                        1.0, 0.0,   0.0,    0.0, // out x = x * 1.0 + y * 0.0 + z * 0.0 + 0.0 * 1.0
+                                        0.0, alpha, beta,   0.0, // out y = x * 0.0 + y * alpha + z * beta + 0.0 * 1.0
+                                        0.0, -beta, alpha,  0.0, // out z = x * 0.0 + y * -beta + z * alpha + 0.0 * 1.0
+                                    ) );
 
-                                    r_out.position = vec4<f32>( position.x, position.y, position.z * 0.5 + 0.5, 1.0 );
-                                    r_out.colour = in.colour;
+                                    r_out.position = vec4<f32>( position.x, position.y * ( f32( u_input.nWindowHeight ) / f32( u_input.nWindowWidth ) ), position.z * 0.5 + 0.5, 1.0 );
+                                    r_out.colour = r_out.position.xyz;
 
                                     return r_out;
                                 }
 
                                 @fragment fn fs_main( in : R_VertexOutput ) -> @location( 0 ) vec4<f32> 
                                 {
-                                    return vec4<f32>( pow( in.colour + ( sin( uTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
+                                    return vec4<f32>( pow( in.colour + ( sin( u_input.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
                                 }
                             )"
                 };
@@ -407,8 +455,8 @@ namespace renderer
                 .depthWriteEnabled = true,
                 .depthCompare = WGPUCompareFunction_Less,
 
-                .stencilFront = { .compare = WGPUCompareFunction_Always, .failOp = WGPUStencilOperation_Keep, .depthFailOp = WGPUStencilOperation_Keep, .passOp = WGPUStencilOperation_Keep },
-                .stencilBack = { .compare = WGPUCompareFunction_Always, .failOp = WGPUStencilOperation_Keep, .depthFailOp = WGPUStencilOperation_Keep, .passOp = WGPUStencilOperation_Keep },
+                .stencilFront = { .compare = WGPUCompareFunction_Always },
+                .stencilBack = { .compare = WGPUCompareFunction_Always },
                 .stencilReadMask = 0xFFFFFFFF,
                 .stencilWriteMask = 0xFFFFFFFF
             };
@@ -526,42 +574,11 @@ namespace renderer
         pRendererState->m_nIndexBufferSize = nIndexBufferSize;
         pRendererState->m_nIndexBufferCount = nIndexBufferCount;
 
-        // make depth buffer
-        pRendererState->m_wgpuDepthTextureView = [ wgpuVirtualDevice ](){
-            // TODO: const or unify between depthstencilstate and here somehow
-            //
-            static const WGPUTextureFormat wgpuDepthTextureFormat = WGPUTextureFormat_Depth24Plus; 
-
-            WGPUTextureDescriptor wgpuDepthTextureDescriptor {
-                .usage = WGPUTextureUsage_RenderAttachment,
-                .dimension = WGPUTextureDimension_2D,
-                .size = { 1600, 900, 1 }, // TODO: TEMP!!!!! should recreate on preframe::ResolutionChanged
-                .format = WGPUTextureFormat_Depth24Plus, 
-                .mipLevelCount = 1,
-                .sampleCount = 1,
-                .viewFormatCount = 1,
-                .viewFormats = &wgpuDepthTextureFormat
-            };
-
-            // TODO: we probably aren't cleaning this up...
-            WGPUTexture wgpuDepthTexture = wgpuDeviceCreateTexture( wgpuVirtualDevice, &wgpuDepthTextureDescriptor );
-        
-            WGPUTextureViewDescriptor wgpuDepthTextureViewDescriptor {
-                .format = WGPUTextureFormat_Depth24Plus,
-                .dimension = WGPUTextureViewDimension_2D,
-                .baseMipLevel = 0,
-                .mipLevelCount = 1,
-                .baseArrayLayer = 0,
-                .arrayLayerCount = 1,
-                .aspect = WGPUTextureAspect_All
-            };
-
-            return wgpuTextureCreateView( wgpuDepthTexture, &wgpuDepthTextureViewDescriptor );
-        }();
+        pRendererState->m_wgpuDepthTextureView = WGPUVirtualDevice_CreateDepthTextureAndViewForWindow( wgpuVirtualDevice, psdlWindow );
 
         // imgui init
         // TODO: what's the significance of having multiple frames in flight??? is this important??? idk doing 1
-        ImGui_ImplWGPU_Init( wgpuVirtualDevice, 1, wgpuSwapchainFormat );
+        ImGui_ImplWGPU_Init( wgpuVirtualDevice, 1, wgpuSwapchainFormat, WGPUTextureFormat_Depth24Plus );
 
         logger::Info( "wgpu renderer initialised successfully!" ENDL );
     }
@@ -576,6 +593,14 @@ namespace renderer
             pRendererState->m_wgpuSurface, 
             pRendererDevice->m_wgpuAdapter
         );
+
+        pRendererState->m_wgpuDepthTextureView = WGPUVirtualDevice_CreateDepthTextureAndViewForWindow( pRendererState->m_wgpuVirtualDevice, pRendererState->m_psdlWindow );
+
+        // TODO: TEMP!!! SUCKS!!!
+        int nWindowWidth, nWindowHeight;
+        SDL_GetWindowSize( pRendererState->m_psdlWindow, &nWindowWidth, &nWindowHeight );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_wgpuUniformBuffer, sizeof( f32 ), &nWindowWidth, sizeof( u32 ) );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_wgpuUniformBuffer, sizeof( f32 ) + sizeof( u32 ), &nWindowHeight, sizeof( u32 ) );
     }
 
     void preframe::ImGUI( TitaniumRendererState *const pRendererState )
@@ -601,7 +626,7 @@ namespace renderer
         wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_wgpuUniformBuffer, 0, &flCurrentTime, sizeof( float ) );
 
         ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
-        if ( ImGui::Begin( "Debug Info", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground ) )
+        if ( ImGui::Begin( "Debug Info", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize ) )
         {
             ImGui::Text( "%.0f FPS", 1 / fsecFrameDiff );
             ImGui::Text( "Frame %i", pRendererState->m_nFramesRendered );
@@ -630,8 +655,8 @@ namespace renderer
             .depthClearValue = 1.0f,
             .depthReadOnly = false,
 
-		    .stencilLoadOp = WGPULoadOp_Undefined,
-		    .stencilStoreOp = WGPUStoreOp_Undefined,
+		    .stencilLoadOp = WGPULoadOp_Clear,
+		    .stencilStoreOp = WGPUStoreOp_Store,
 		    .stencilReadOnly = false
         };
  
