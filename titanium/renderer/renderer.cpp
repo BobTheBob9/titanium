@@ -371,9 +371,12 @@ namespace renderer
             // Create shader module
             WGPUShaderModule wgpuShaderModule = [ wgpuVirtualDevice ]()
             {
+                // TODO: need projection matrices in uniforms
                 WGPUShaderModuleWGSLDescriptor wgpuShaderCodeDescriptor {
                     .chain { .sType = WGPUSType_ShaderModuleWGSLDescriptor },
                     .code = R"(
+                                const PI = 3.14159265359;
+
                                 struct U_Input 
                                 {
                                     flTime : f32,
@@ -403,19 +406,7 @@ namespace renderer
                                     let flObjectAngleC = cos( flObjectAngle );
                                     let flObjectAngleS = sin( flObjectAngle );
 
-                                    let flViewAngle = 3.0 * 3.14159 / 4.0; // three 8th of turn (1 turn = 2 pi)
-                                    let flViewAngleC = cos( flViewAngle );
-                                    let flViewAngleS = sin( flViewAngle );
-
-                                    let MCompose = 
-                                    // rotate the viewpoint in the YZ plane
-                                    transpose( mat4x4<f32> ( 
-                                        1.0, 0.0,           0.0,            0.0,
-                                        0.0, flViewAngleC,  flViewAngleS,   0.0,
-                                        0.0, -flViewAngleS, flViewAngleC,   0.0,
-                                        0.0, 0.0,           0.0,            1.0
-                                    ) ) *
-                                    
+                                    let MModelTransform = 
                                     // rotate the model in the XY plane
                                     transpose( mat4x4<f32>( 
                                         flObjectAngleC,  flObjectAngleS, 0.0, 0.0,
@@ -432,21 +423,39 @@ namespace renderer
                                         0.0, 0.0, 0.0, 1.0
                                     ) );
 
-                                    let near = -1.0;
-                                    let far = 1.0;
-                                    let scale = 1.0;
-                                    let ratio = f32( u_input.nWindowHeight ) / f32( u_input.nWindowWidth );
-                                    let MProjectOrthographic = transpose( mat4x4<f32> (
-                                        1.0 / scale, 0.0,           0.0,                0.0,
-                                        0.0,         ratio / scale, 0.0,                0.0,
-                                        0.0,         0.0,           1.0 / (far - near), -near / (far - near),
-                                        0.0,         0.0,           0.0,                1.0,
+                                    let flViewAngle = 3.0 * PI / 4.0; // three 8th of turn (1 turn = 2 pi)
+                                    let flViewAngleC = cos( flViewAngle );
+                                    let flViewAngleS = sin( flViewAngle );
+
+                                    let MViewTransform = 
+                                    transpose( mat4x4<f32> (
+                                        1.0, 0.0, 0.0, 0.0,
+                                        0.0, 1.0, 0.0, 0.0,
+                                        0.0, 0.0, 1.0, 2.0,
+                                        0.0, 0.0, 0.0, 1.0
+                                    ) ) *
+
+                                    // rotate the viewpoint in the YZ plane
+                                    transpose( mat4x4<f32> ( 
+                                        1.0, 0.0,           0.0,            0.0,
+                                        0.0, flViewAngleC,  flViewAngleS,   0.0,
+                                        0.0, -flViewAngleS, flViewAngleC,   0.0,
+                                        0.0, 0.0,           0.0,            1.0
                                     ) );
 
+                                    let flAspectRatio = f32( u_input.nWindowHeight ) / f32( u_input.nWindowWidth );
+                                    let flFocalLength = 2.0;
+                                    let flNearDist = 0.01;
+                                    let flFarDist = 100.0;
+                                	let flDivides = 1.0 / ( flFarDist - flNearDist );
+                                    let MProjectFocal = transpose(mat4x4f(
+                                		    flFocalLength, 0.0,                           0.0,                   0.0,
+                                		    0.0,           flFocalLength * flAspectRatio, 0.0,                   0.0,
+                                		    0.0,           0.0,                           flFarDist * flDivides, -flFarDist * flNearDist * flDivides,
+                                		    0.0,           0.0,                           1.0,                   0.0
+                                	));
 
-                                    let finalPosition = MProjectOrthographic * MCompose * vec4<f32>( in.position, 1.0 );
-
-                                    r_out.position = finalPosition;
+                                    r_out.position = MProjectFocal * MViewTransform * MModelTransform * vec4<f32>( in.position, 1.0 );
                                     r_out.colour = r_out.position.xyz;
 
                                     return r_out;
