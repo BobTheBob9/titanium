@@ -399,15 +399,54 @@ namespace renderer
                                 {
                                     var r_out : R_VertexOutput;
 
-                                    let alpha = cos( u_input.flTime );
-                                    let beta = sin( u_input.flTime );
-                                    var position = in.position * transpose( mat3x4<f32>(
-                                        1.0, 0.0,   0.0,    0.0, // out x = x * 1.0 + y * 0.0 + z * 0.0 + 0.0 * 1.0
-                                        0.0, alpha, beta,   0.0, // out y = x * 0.0 + y * alpha + z * beta + 0.0 * 1.0
-                                        0.0, -beta, alpha,  0.0, // out z = x * 0.0 + y * -beta + z * alpha + 0.0 * 1.0
+                                    let flObjectAngle = u_input.flTime;
+                                    let flObjectAngleC = cos( flObjectAngle );
+                                    let flObjectAngleS = sin( flObjectAngle );
+
+                                    let flViewAngle = 3.0 * 3.14159 / 4.0; // three 8th of turn (1 turn = 2 pi)
+                                    let flViewAngleC = cos( flViewAngle );
+                                    let flViewAngleS = sin( flViewAngle );
+
+                                    let MCompose = 
+                                    // rotate the viewpoint in the YZ plane
+                                    transpose( mat4x4<f32> ( 
+                                        1.0, 0.0,           0.0,            0.0,
+                                        0.0, flViewAngleC,  flViewAngleS,   0.0,
+                                        0.0, -flViewAngleS, flViewAngleC,   0.0,
+                                        0.0, 0.0,           0.0,            1.0
+                                    ) ) *
+                                    
+                                    // rotate the model in the XY plane
+                                    transpose( mat4x4<f32>( 
+                                        flObjectAngleC,  flObjectAngleS, 0.0, 0.0,
+                                        -flObjectAngleS, flObjectAngleC, 0.0, 0.0,
+                                        0.0,             0.0,            1.0, 0.0,
+                                        0.0,             0.0,            0.0, 1.0
+                                    ) ) *
+
+                                    // translate it at an offset from its current direction
+                                    transpose( mat4x4<f32>( 
+                                        0.3, 0.0, 0.0, 0.5,
+                                        0.0, 0.3, 0.0, 0.0,
+                                        0.0, 0.0, 0.3, 0.0,
+                                        0.0, 0.0, 0.0, 1.0
                                     ) );
 
-                                    r_out.position = vec4<f32>( position.x, position.y * ( f32( u_input.nWindowHeight ) / f32( u_input.nWindowWidth ) ), position.z * 0.5 + 0.5, 1.0 );
+                                    let near = -1.0;
+                                    let far = 1.0;
+                                    let scale = 1.0;
+                                    let ratio = f32( u_input.nWindowHeight ) / f32( u_input.nWindowWidth );
+                                    let MProjectOrthographic = transpose( mat4x4<f32> (
+                                        1.0 / scale, 0.0,           0.0,                0.0,
+                                        0.0,         ratio / scale, 0.0,                0.0,
+                                        0.0,         0.0,           1.0 / (far - near), -near / (far - near),
+                                        0.0,         0.0,           0.0,                1.0,
+                                    ) );
+
+
+                                    let finalPosition = MProjectOrthographic * MCompose * vec4<f32>( in.position, 1.0 );
+
+                                    r_out.position = finalPosition;
                                     r_out.colour = r_out.position.xyz;
 
                                     return r_out;
