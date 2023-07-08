@@ -4,6 +4,8 @@
 
 #include "titanium/util/numerics.hpp"
 
+#include <algorithm>
+
 namespace util::data
 {
     /*

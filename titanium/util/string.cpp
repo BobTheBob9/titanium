@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <functional>
+#include <cstdint>
 
 #include "titanium/memory/mem_core.hpp"
 
@@ -14,7 +15,7 @@ namespace util::string
 { 
     char * Clone(const char * const pszToClone)
     {
-        return Clone_n(pszToClone, __SIZE_MAX__ );
+        return Clone_n(pszToClone, SIZE_MAX );
     }
 
     char * Clone_n(const char * const pszToClone, const size_t nBufSize)
