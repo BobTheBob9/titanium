@@ -1,6 +1,6 @@
 #include "logger.hpp"
-#include <cstdarg>
-#include <cstdio>
+#include <stdarg.h>
+#include <stdio.h>
 
 void logger::Info( const char *const pFmt, ... )
 {
@@ -8,9 +8,9 @@ void logger::Info( const char *const pFmt, ... )
     va_start( vargs, pFmt );
 
     char szbuf[ 4096 ];
-    ::vsprintf( szbuf, pFmt, vargs );
+    vsprintf( szbuf, pFmt, vargs );
 
     va_end( vargs );
 
-    ::printf( "%s", szbuf );
+    printf( "%s", szbuf );
 }

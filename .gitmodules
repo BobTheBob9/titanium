@@ -1,3 +1,6 @@
 [submodule "extern/WebGPU-distribution"]
 	path = extern/WebGPU-distribution
 	url = https://github.com/eliemichel/WebGPU-distribution
+[submodule "extern/assimp"]
+	path = extern/assimp
+	url = https://github.com/assimp/assimp

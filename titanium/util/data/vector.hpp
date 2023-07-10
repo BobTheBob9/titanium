@@ -1,7 +1,7 @@
 #pragma once
 
 #include <concepts>
-#include <cstring>
+#include <string.h>
 
 #include "titanium/memory/mem_core.hpp"
 #include "titanium/util/numerics.hpp"

@@ -1,18 +1,28 @@
 #pragma once
 
-#include <filesystem> // for std::fs::path atm
-
-// TODO: should we have a custom filepath class/impl?
-namespace std { namespace fs = std::filesystem; } // alias std::filesystem => std::fs
-
-#ifndef FS_PAK_SUPPORT
-    #define FS_PAK_SUPPORT 0
-#endif // #ifndef FS_PAK_SUPPORT
+#include <atomic>
 
 namespace filesystem
 {
-    void Initialise( const std::fs::path fDirectory );
+    void Initialise();
 
-    void CreateDirectories();
-    void Open();
+    template<typename T>
+    struct ReadHandle
+    {
+        const T * m_tpParsedFile;
+        std::atomic_int m_nReferenceCount;
+    };
+
+    template<typename T>
+    ReadHandle<T> * ReadBlocking( const char *const pszFilePath );
+
+    /*
+     *  Decrements a ReadHandle's reference count
+     *  If the handle's reference count is 0 after this function is called, free the asset pointed to by the handle
+     */
+    template<typename T>
+    void ReadHandle_Derefence( ReadHandle<T> *const pReadHandle );
+
+    // TODO: functions for generating jobsystem jobs
+    // e.g. CreateMultipleReadJob
 };

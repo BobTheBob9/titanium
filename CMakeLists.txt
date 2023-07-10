@@ -31,6 +31,9 @@ set( WEBGPU_BACKEND WGPU )
 add_subdirectory( extern/WebGPU-distribution )
 add_subdirectory( extern/imgui )
 
+option( BUILD_SHARED_LIBS OFF )
+add_subdirectory( extern/assimp )
+
 # core subdirectories
 add_subdirectory( titanium )
 
@@ -41,7 +44,7 @@ message(${SRCS})
 add_executable( titanium_bin titanium/programs/engine/engine_main.cpp ${SRCS} )
 
 include_directories( titanium_bin ${SDL2_INCLUDE_DIRS} )
-target_link_libraries( titanium_bin webgpu ${SDL2_LIBRARIES} )
+target_link_libraries( titanium_bin webgpu assimp ${SDL2_LIBRARIES} )
 
 install(TARGETS titanium_bin
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

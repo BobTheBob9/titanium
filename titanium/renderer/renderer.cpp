@@ -50,7 +50,7 @@ namespace renderer
 
             // i *believe* it is required for fifo to be supported (this is the case in vulkan) so default to it
             // TODO reexamine this, unsure if it's right
-            return WGPUPresentMode_Fifo; 
+            return WGPUPresentMode_Immediate; 
         }();
 
         WGPUTextureFormat wgpuSwapchainFormat;
@@ -389,7 +389,7 @@ namespace renderer
                                 struct VertexInput
                                 {
                                     @location( 0 ) position : vec3<f32>,
-                                    @location( 1 ) colour : vec3<f32>
+                                    //@location( 1 ) colour : vec3<f32>
                                 };
 
                                 struct R_VertexOutput
@@ -427,11 +427,14 @@ namespace renderer
                                     let flViewAngleC = cos( flViewAngle );
                                     let flViewAngleS = sin( flViewAngle );
 
+                                    let vFocalPoint = vec3<f32>( 0.0, 0.0, 200.0 );
+
                                     let MViewTransform = 
+                                    // focal point
                                     transpose( mat4x4<f32> (
-                                        1.0, 0.0, 0.0, 0.0,
-                                        0.0, 1.0, 0.0, 0.0,
-                                        0.0, 0.0, 1.0, 2.0,
+                                        1.0, 0.0, 0.0, vFocalPoint.x,
+                                        0.0, 1.0, 0.0, vFocalPoint.y,
+                                        0.0, 0.0, 1.0, vFocalPoint.z,
                                         0.0, 0.0, 0.0, 1.0
                                     ) ) *
 
@@ -446,17 +449,17 @@ namespace renderer
                                     let flAspectRatio = f32( u_input.nWindowHeight ) / f32( u_input.nWindowWidth );
                                     let flFocalLength = 2.0;
                                     let flNearDist = 0.01;
-                                    let flFarDist = 100.0;
+                                    let flFarDist = 1000.0;
                                 	let flDivides = 1.0 / ( flFarDist - flNearDist );
-                                    let MProjectFocal = transpose(mat4x4f(
+                                    let MProjectFocal = transpose( mat4x4<f32>(
                                 		    flFocalLength, 0.0,                           0.0,                   0.0,
                                 		    0.0,           flFocalLength * flAspectRatio, 0.0,                   0.0,
                                 		    0.0,           0.0,                           flFarDist * flDivides, -flFarDist * flNearDist * flDivides,
                                 		    0.0,           0.0,                           1.0,                   0.0
-                                	));
+                                	) );
 
                                     r_out.position = MProjectFocal * MViewTransform * MModelTransform * vec4<f32>( in.position, 1.0 );
-                                    r_out.colour = r_out.position.xyz;
+                                    r_out.colour = r_out.position.xyz * cos( u_input.flTime );
 
                                     return r_out;
                                 }
@@ -475,7 +478,7 @@ namespace renderer
                 return wgpuDeviceCreateShaderModule( wgpuVirtualDevice, &wgpuShaderDescriptor );
             }();
 
-            ::util::data::StaticSpan<WGPUVertexAttribute, 2> sVertexAttributes {
+            ::util::data::StaticSpan<WGPUVertexAttribute, 1> sVertexAttributes {
                 // position attribute
                 {
                     .format = WGPUVertexFormat_Float32x3,
@@ -483,16 +486,16 @@ namespace renderer
                     .shaderLocation = 0
                 },
 
-                // colour attribute
+                /*// colour attribute
                 {
                     .format = WGPUVertexFormat_Float32x3,
                     .offset = 3 * sizeof( float ),
                     .shaderLocation = 1
-                }
+                }*/
             };
 
             WGPUVertexBufferLayout wgpuVertexBufferLayout {
-                .arrayStride = sizeof( float ) * 6,
+                .arrayStride = sizeof( float ) * 3,//6,
                 .stepMode = WGPUVertexStepMode_Vertex,
                 .attributeCount = static_cast<u32>( sVertexAttributes.Elements() ),
                 .attributes = sVertexAttributes.m_tData
@@ -563,65 +566,6 @@ namespace renderer
             return wgpuDeviceCreateRenderPipeline( wgpuVirtualDevice, &wgpuRenderPipelineDescriptor );
         }();
 
-        // make mesh buffers
-        struct R_MakeMeshBuffers { 
-            WGPUBuffer wgpuVertexBuffer; size_t nVertexBufferSize;
-            WGPUBuffer wgpuIndexBuffer; size_t nIndexBufferSize; int nIndexBufferCount;
-        };
-        auto [ wgpuVertexBuffer, nVertexBufferSize, wgpuIndexBuffer, nIndexBufferSize, nIndexBufferCount ] = [ wgpuVirtualDevice, wgpuQueue ](){
-            // create vertex buffer
-            ::util::data::StaticSpan<float, 30> sflTempVertexData {
-              // x,    y,    z,      r,   g,   b
-                // The base
-                -0.5, -0.5, -0.3,    1.0, 1.0, 1.0,
-                +0.5, -0.5, -0.3,    1.0, 1.0, 1.0,
-                +0.5, +0.5, -0.3,    1.0, 1.0, 1.0,
-                -0.5, +0.5, -0.3,    1.0, 1.0, 1.0,
-
-                // And the tip of the pyramid!
-                +0.0, +0.0, +0.5,    0.5, 0.5, 0.5
-            };
-
-            ::util::data::StaticSpan<u16, 18> snTempIndexData {
-                // Base
-                0, 1, 2,
-                0, 2, 3,
-
-                // Sides
-                0, 1, 4,
-                1, 2, 4,
-                2, 3, 4,
-                3, 0, 4
-            };
-            
-            WGPUBufferDescriptor wgpuVertexBufferDescriptor {
-                .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex,
-                .size = sflTempVertexData.Size(),
-            };
-
-            WGPUBuffer wgpuVertexBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuVertexBufferDescriptor );
-            wgpuQueueWriteBuffer( wgpuQueue, wgpuVertexBuffer, 0, sflTempVertexData.m_tData, sflTempVertexData.Size() );
-
-            WGPUBufferDescriptor wgpuIndexBufferDescriptor {
-                .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index,
-                .size = snTempIndexData.Size() 
-            };
-
-            WGPUBuffer wgpuIndexBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuIndexBufferDescriptor );
-            wgpuQueueWriteBuffer( wgpuQueue, wgpuIndexBuffer, 0, snTempIndexData.m_tData, snTempIndexData.Size() );
-
-            return R_MakeMeshBuffers { 
-                wgpuVertexBuffer, sflTempVertexData.Size(),
-                wgpuIndexBuffer, snTempIndexData.Size(), static_cast<int>( snTempIndexData.Elements() )
-            };
-        }();
-
-        pRendererState->m_wgpuVertexBuffer = wgpuVertexBuffer;
-        pRendererState->m_nVertexBufferSize = nVertexBufferSize;
-        pRendererState->m_wgpuIndexBuffer = wgpuIndexBuffer;
-        pRendererState->m_nIndexBufferSize = nIndexBufferSize;
-        pRendererState->m_nIndexBufferCount = nIndexBufferCount;
-
         pRendererState->m_wgpuDepthTextureView = WGPUVirtualDevice_CreateDepthTextureAndViewForWindow( wgpuVirtualDevice, psdlWindow );
 
         // imgui init
@@ -656,7 +600,34 @@ namespace renderer
         ImGui_ImplWGPU_NewFrame();
     }
 
-    void Frame( TitaniumRendererState *const pRendererState )
+    R_UploadModel UploadModel( TitaniumRendererState *const pRendererState, ::util::data::Span<float> sflVertices, ::util::data::Span<int> snIndexes )
+    {
+        const size_t nVertexBufSize = sflVertices.m_nElements * sizeof( float );
+        const size_t nIndexBufSize = snIndexes.m_nElements * sizeof( int );
+            
+        WGPUBufferDescriptor wgpuVertexBufferDescriptor {
+            .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex,
+            .size = nVertexBufSize,
+        };
+
+        WGPUBuffer wgpuVertexBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuVertexBufferDescriptor );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, wgpuVertexBuffer, 0, sflVertices.m_pData, nVertexBufSize );
+
+        WGPUBufferDescriptor wgpuIndexBufferDescriptor {
+            .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index,
+            .size = nIndexBufSize 
+        };
+
+        WGPUBuffer wgpuIndexBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuIndexBufferDescriptor );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, wgpuIndexBuffer, 0, snIndexes.m_pData, nIndexBufSize );
+
+        return { 
+            wgpuVertexBuffer, nVertexBufSize,
+            wgpuIndexBuffer, nIndexBufSize, static_cast<int>( snIndexes.m_nElements )
+        };
+    }
+
+    void Frame( TitaniumRendererState *const pRendererState, const ::util::data::Span<RenderableObject*> sRenderableObjects )
     {
 #if WEBGPU_BACKEND_WGPU 
         // TODO: what do i actually need here??
@@ -717,12 +688,19 @@ namespace renderer
         WGPURenderPassEncoder wgpuRenderPass = wgpuCommandEncoderBeginRenderPass( wgpuCommandEncoder, &wgpuRenderPassDescriptor );
         {
             // Select render pipeline
+             // TODO: only support 1 render pipeline/bindgroup atm, should support more at some point!
             wgpuRenderPassEncoderSetPipeline( wgpuRenderPass, pRendererState->m_wgpuRenderPipeline );
             wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 0, pRendererState->m_wgpuUniformBindGroup, 0, nullptr );
-            wgpuRenderPassEncoderSetVertexBuffer( wgpuRenderPass, 0, pRendererState->m_wgpuVertexBuffer, 0, pRendererState->m_nVertexBufferSize );
-            wgpuRenderPassEncoderSetIndexBuffer( wgpuRenderPass, pRendererState->m_wgpuIndexBuffer, WGPUIndexFormat_Uint16, 0, pRendererState->m_nIndexBufferSize );
-            wgpuRenderPassEncoderDrawIndexed( wgpuRenderPass, pRendererState->m_nIndexBufferCount, 1, 0, 0, 0 );
 
+            for ( int i = 0; i < sRenderableObjects.m_nElements; i++ )
+            {
+                // TODO: make uint16 again? from uint32
+                wgpuRenderPassEncoderSetVertexBuffer( wgpuRenderPass, 0, sRenderableObjects.m_pData[ i ]->m_wgpuVertexBuffer, 0, sRenderableObjects.m_pData[ i ]->m_nVertexBufferSize );
+                wgpuRenderPassEncoderSetIndexBuffer( wgpuRenderPass, sRenderableObjects.m_pData[ i ]->m_wgpuIndexBuffer, WGPUIndexFormat_Uint32, 0, sRenderableObjects.m_pData[ i ]->m_nIndexBufferSize );
+                wgpuRenderPassEncoderDrawIndexed( wgpuRenderPass, sRenderableObjects.m_pData[ i ]->m_nIndexBufferCount, 1, 0, 0, 0 );
+            }
+    
+            // imgui
             ImGui_ImplWGPU_RenderDrawData( ImGui::GetDrawData(), wgpuRenderPass );
         }
         wgpuRenderPassEncoderEnd( wgpuRenderPass );

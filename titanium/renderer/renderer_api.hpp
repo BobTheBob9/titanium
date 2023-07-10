@@ -1,8 +1,10 @@
 #pragma once
 
 #include <SDL.h>
-#include <SDL_syswm.h>
 #include <webgpu/webgpu.h>
+
+#include "titanium/util/maths.hpp"
+#include "titanium/util/data/span.hpp"
 
 namespace renderer
 {
@@ -29,14 +31,7 @@ namespace renderer
 
 		WGPUBuffer m_wgpuUniformBuffer;
 		WGPUBindGroup m_wgpuUniformBindGroup;
-
-		WGPUBuffer m_wgpuVertexBuffer;
-		int m_nVertexBufferSize;
-
-		WGPUBuffer m_wgpuIndexBuffer;
-		int m_nIndexBufferSize;
-		int m_nIndexBufferCount;
-
+		
 		int m_nFramesRendered;
 	};
 
@@ -53,6 +48,20 @@ namespace renderer
 	 */
 	void Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow );
 
+	struct R_UploadModel 
+	{
+		WGPUBuffer m_wgpuVertexBuffer;
+		size_t m_nVertexBufferSize;
+
+		WGPUBuffer m_wgpuIndexBuffer;
+		size_t m_nIndexBufferSize;
+		int m_nIndexBufferCount;
+	};
+	
+	R_UploadModel UploadModel( TitaniumRendererState *const pRendererState, ::util::data::Span<float> sflVertices, ::util::data::Span<int> snIndexes );
+
+	// TODO: need free equivalent to UploadModel
+
 	namespace preframe
 	{
 		/*
@@ -67,7 +76,23 @@ namespace renderer
 	}
 
 	/*
+	 *  An object that can be rendered by the renderer
+	 */
+	struct RenderableObject
+	{
+		util::maths::Vec3f m_vPosition;
+		util::maths::Vec3f m_vRotation;
+
+		WGPUBuffer m_wgpuVertexBuffer;
+		size_t m_nVertexBufferSize;
+
+		WGPUBuffer m_wgpuIndexBuffer;
+		size_t m_nIndexBufferSize;
+		int m_nIndexBufferCount;
+	};
+
+	/*
 	 *  Renders a frame
 	 */
-	void Frame( TitaniumRendererState *const pRendererState );
+	void Frame( TitaniumRendererState *const pRendererState, const ::util::data::Span<RenderableObject*> sRenderableObjects );
 };
