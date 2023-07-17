@@ -3,6 +3,7 @@
 #include <initializer_list>
 
 #include "titanium/util/numerics.hpp"
+#include "titanium/util/data/span.hpp"
 
 namespace util::data
 {
@@ -18,6 +19,9 @@ namespace util::data
         StaticSpan( const std::initializer_list<T> ptInitialValue );
         u64 Elements() const;
         u64 Size() const;
+
+        Span<T> ToSpan();
+        const Span<T> ToConstSpan();
     };
 
 
@@ -43,4 +47,10 @@ namespace util::data
     {
         return TSize * sizeof( T );
     }
+
+    template <typename T, u64 TSize>
+    Span<T> StaticSpan<T, TSize>::ToSpan() { return Span<T>( Elements(), m_tData ); }
+    template <typename T, u64 TSize>
+    const Span<T> StaticSpan<T, TSize>::ToConstSpan() { return Span<T>( Elements(), m_tData ); }
+
 }

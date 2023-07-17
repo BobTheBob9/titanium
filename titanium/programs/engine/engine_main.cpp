@@ -53,7 +53,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
     #endif // #if USE_TESTS
 
-    // TEMP: assimp
+    // TEMP: assimp model load
     auto fnLoadAssimpModel = [ &rendererState ]( const char *const pszModelName ){
         const aiScene *const passimpLoadedModel = aiImportFile( pszModelName, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_Triangulate );
         logger::Info( "%s" ENDL, passimpLoadedModel != nullptr ? "Loaded model! c:" : "Didn't load model :c (we will probably crash now)" );
@@ -63,14 +63,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         logger::Info( "Model has %i vertices and %i faces" ENDL, passimpLoadedMesh->mNumVertices, passimpLoadedMesh->mNumFaces );
 
-        ::util::data::Span<float> sflVertexes( passimpLoadedMesh->mNumVertices * 3, memory::alloc_nT<float>( passimpLoadedMesh->mNumVertices * 3 ) );
-        for ( int i = 0; i < passimpLoadedMesh->mNumVertices; i++ )
-        {
-            sflVertexes.m_pData[ i * 3 ] = passimpLoadedMesh->mVertices[ i ].x;
-            sflVertexes.m_pData[ i * 3 + 1 ] = passimpLoadedMesh->mVertices[ i ].y;
-            sflVertexes.m_pData[ i * 3 + 2 ] = passimpLoadedMesh->mVertices[ i ].z;
-        }
-
+        ::util::data::Span<float> sflVertexes( passimpLoadedMesh->mNumVertices * 3, reinterpret_cast<float *>( passimpLoadedMesh->mVertices ) );
         ::util::data::Span<int> snIndexes( passimpLoadedMesh->mNumFaces * 3, memory::alloc_nT<int>( passimpLoadedMesh->mNumFaces * 3 ) );
         for ( int i = 0; i < passimpLoadedMesh->mNumFaces; i++ )
         {
@@ -84,35 +77,25 @@ int main( const int nArgs, const char *const *const ppszArgs )
         return renderer::UploadModel( &rendererState, sflVertexes, snIndexes );
     };
 
-    renderer::R_UploadModel rangerUploadResult = fnLoadAssimpModel( "Quakeguy_Ranger_Rigged.obj" );
-    renderer::RenderableObject rangerRenderableObject {
-            .m_vPosition {},
-            .m_vRotation {},
+    renderer::GPUModelHandle rangerGPUModel = fnLoadAssimpModel( "rocketl_1.md3" );
+    renderer::RenderableObject rangerRenderable {
+        .m_vPosition {},
+        .m_vRotation {},
+        .m_gpuModel = rangerGPUModel
+    };
+    CreateRenderableObjectBuffers( &rendererState, &rangerRenderable );
 
-            .m_wgpuVertexBuffer = rangerUploadResult.m_wgpuVertexBuffer,
-		    .m_nVertexBufferSize = rangerUploadResult.m_nVertexBufferSize,
+    renderer::RenderableObject rangerRenderable2 {
+        .m_vPosition {},
+        .m_vRotation { .y = 90.f },
+        .m_gpuModel = rangerGPUModel
+    };
+    CreateRenderableObjectBuffers( &rendererState, &rangerRenderable2 );
 
-		    .m_wgpuIndexBuffer = rangerUploadResult.m_wgpuIndexBuffer,
-		    .m_nIndexBufferSize = rangerUploadResult.m_nIndexBufferSize,
-		    .m_nIndexBufferCount = rangerUploadResult.m_nIndexBufferCount
-        };
-
-    renderer::R_UploadModel cubeUploadResult = fnLoadAssimpModel( "cube.obj" );
-    renderer::RenderableObject cubeRenderableObject {
-            .m_vPosition {},
-            .m_vRotation {},
-
-            .m_wgpuVertexBuffer = cubeUploadResult.m_wgpuVertexBuffer,
-		    .m_nVertexBufferSize = cubeUploadResult.m_nVertexBufferSize,
-
-		    .m_wgpuIndexBuffer = cubeUploadResult.m_wgpuIndexBuffer,
-		    .m_nIndexBufferSize = cubeUploadResult.m_nIndexBufferSize,
-		    .m_nIndexBufferCount = cubeUploadResult.m_nIndexBufferCount
-        };
-
-    renderer::RenderableObject * pRenderableObjects = memory::alloc_nT<renderer::RenderableObject>( 2 );
-    pRenderableObjects[ 0 ] = rangerRenderableObject;
-    pRenderableObjects[ 1 ] = cubeRenderableObject;
+    util::data::StaticSpan<renderer::RenderableObject, 1> sRenderableObjects {
+        rangerRenderable,
+        rangerRenderable2
+    };
 
     bool bRunEngine = true;
     while ( bRunEngine )
@@ -131,7 +114,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
                         {
                             case SDL_WINDOWEVENT_SIZE_CHANGED:
                             {
-                                renderer::preframe::ResolutionChanged( &renderingDevice, &rendererState );
+                                renderer::preframe::ResolutionChanged( &renderingDevice, &rendererState, sys::platform::sdl::GetWindowSizeVector( psdlWindow ) );
                                 break;
                             }
                         }
@@ -152,9 +135,15 @@ int main( const int nArgs, const char *const *const ppszArgs )
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        //ImGui::ShowDemoWindow();
+        sRenderableObjects.m_tData[ 0 ].m_vRotation.z = fmod( rendererState.m_nFramesRendered / 50.f, 360 );
 
-        renderer::Frame( &rendererState, util::data::Span<renderer::RenderableObject *>( 2, &pRenderableObjects ) );
+        renderer::Frame( &rendererState, util::data::Span<renderer::RenderableObject>( sRenderableObjects.Elements(), sRenderableObjects.m_tData ) );
+    }
+
+    // free all loaded models
+    for ( int i = 0; i < sRenderableObjects.Elements(); i++ )
+    {
+        renderer::FreeGPUModel( sRenderableObjects.m_tData[ i ].m_gpuModel );
     }
 
     util::commandline::Free( &caCommandLine );

@@ -9,8 +9,8 @@ namespace sys::platform::sdl
     {
         SDL_Init( SDL_INIT_VIDEO );
 
-        logger::Info( "sdl runtime version is %s" ENDL, sys::platform::sdl::StringRuntimeVersion().ConstCStr() );
-        logger::Info( "engine was compiled against sdl version %s" ENDL, sys::platform::sdl::StringCompilationVersion().ConstCStr() );
+        logger::Info( "sdl runtime version is %s" ENDL, sys::platform::sdl::StringRuntimeVersion().ToConstCStr() );
+        logger::Info( "engine was compiled against sdl version %s" ENDL, sys::platform::sdl::StringCompilationVersion().ToConstCStr() );
     }
 
     WGPUSurface CreateWGPUSurfaceForWindow( SDL_Window *const psdlWindow, const WGPUInstance wgpuInstance )
@@ -57,5 +57,12 @@ namespace sys::platform::sdl
 
         logger::Info( "CreateWebGPUSurfaceForWindow: Windowing backend is %s" ENDL, sys::platform::sdl::SysWMToString( sdlPlatWindowInfo.subsystem ) );
         return wgpuInstanceCreateSurface( wgpuInstance, &wgpuSurfaceDesc );
+    }
+
+    util::maths::Vec2<u32> GetWindowSizeVector( SDL_Window *const psdlWindow )
+    {
+        int nWindowWidth, nWindowHeight;
+        SDL_GetWindowSize( psdlWindow, &nWindowWidth, &nWindowHeight );
+        return util::maths::Vec2<u32> { .x = static_cast<u32>( nWindowWidth ), .y = static_cast<u32>( nWindowHeight ) };
     }
 }

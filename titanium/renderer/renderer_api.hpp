@@ -14,23 +14,36 @@ namespace renderer
 		WGPUAdapter m_wgpuAdapter;
 	}; 
 
+	struct DepthTextureAndView
+	{
+		WGPUTexture m_wgpuDepthTexture;
+		WGPUTextureView m_wgpuDepthTextureView;
+	};
+
+	struct BufferAndBindgroup
+	{
+		WGPUBindGroup m_wgpuBindGroup;
+		WGPUBuffer m_wgpuBuffer;
+	};
+
 	/*
 	 *  Runtime state of the renderer, initialised with renderer::Initialise
 	 */
 	struct TitaniumRendererState
 	{
-		SDL_Window * m_psdlWindow; // only 1 renderer per window, at the moment this seems sensible
+		util::maths::Vec2<u32> m_vWindowSize;
 
 		WGPUDevice m_wgpuVirtualDevice;
-		WGPUSurface m_wgpuSurface;
+		WGPUSurface m_wgpuRenderSurface;
 		WGPUSwapChain m_wgpuSwapChain;
 		WGPUQueue m_wgpuQueue;
 		WGPURenderPipeline m_wgpuRenderPipeline;
 
-		WGPUTextureView m_wgpuDepthTextureView;
+		DepthTextureAndView m_depthTextureAndView;
 
-		WGPUBuffer m_wgpuUniformBuffer;
-		WGPUBindGroup m_wgpuUniformBindGroup;
+		BufferAndBindgroup m_globalUniformBuffer;
+
+		WGPUBindGroupLayout m_wgpuStandardObjectUniformBindGroupLayout;
 		
 		int m_nFramesRendered;
 	};
@@ -48,7 +61,7 @@ namespace renderer
 	 */
 	void Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow );
 
-	struct R_UploadModel 
+	struct GPUModelHandle
 	{
 		WGPUBuffer m_wgpuVertexBuffer;
 		size_t m_nVertexBufferSize;
@@ -58,16 +71,30 @@ namespace renderer
 		int m_nIndexBufferCount;
 	};
 	
-	R_UploadModel UploadModel( TitaniumRendererState *const pRendererState, ::util::data::Span<float> sflVertices, ::util::data::Span<int> snIndexes );
+	GPUModelHandle UploadModel( TitaniumRendererState *const pRendererState, const ::util::data::Span<float> sflVertices, const ::util::data::Span<int> snIndexes );
+	void FreeGPUModel( GPUModelHandle gpuModel );
 
-	// TODO: need free equivalent to UploadModel
+	/*
+	 *  An object that can be rendered by the renderer
+	 */
+	struct RenderableObject
+	{
+		util::maths::Vec3<f32> m_vPosition;
+		util::maths::Vec3<f32> m_vRotation;
+
+		BufferAndBindgroup m_standardUniforms;
+		GPUModelHandle m_gpuModel;
+	};
+
+    void CreateRenderableObjectBuffers( TitaniumRendererState *const pRendererState, RenderableObject *const pRenderableObject );
+    void FreeRenderableObjectBuffers( RenderableObject *const pRenderableObject );
 
 	namespace preframe
 	{
 		/*
 		 *  Remakes swap chains etc for a new render resolution
 		 */
-		void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState );
+    	void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, const ::util::maths::Vec2<u32> vWindowSize );
 
 		/*
 		 *  Calls the imgui preframe function for the current rendering api's imgui backend
@@ -76,23 +103,8 @@ namespace renderer
 	}
 
 	/*
-	 *  An object that can be rendered by the renderer
-	 */
-	struct RenderableObject
-	{
-		util::maths::Vec3f m_vPosition;
-		util::maths::Vec3f m_vRotation;
-
-		WGPUBuffer m_wgpuVertexBuffer;
-		size_t m_nVertexBufferSize;
-
-		WGPUBuffer m_wgpuIndexBuffer;
-		size_t m_nIndexBufferSize;
-		int m_nIndexBufferCount;
-	};
-
-	/*
 	 *  Renders a frame
 	 */
-	void Frame( TitaniumRendererState *const pRendererState, const ::util::data::Span<RenderableObject*> sRenderableObjects );
+	// TODO: should have float flCurrentTime parameter
+	void Frame( TitaniumRendererState *const pRendererState, const ::util::data::Span<RenderableObject> sRenderableObjects );
 };

@@ -4,121 +4,23 @@
 #include "extern/imgui/imgui_impl_wgpu.h"
 
 #include "titanium/util/numerics.hpp"
+#include "titanium/util/maths.hpp"
 #include "titanium/sys/platform/sdl/sys_sdl.hpp"
 #include "titanium/util/data/staticspan.hpp"
 #include "titanium/logger/logger.hpp"
 #include "titanium/renderer/utils/stringify.hpp"
 
 #include <chrono> // temp probably, idk if we wanna use this for time
-#include <vector>
 
 namespace renderer
 {
-    void C_WGPUVirtualDeviceHandleError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
-    {
-        logger::Info( "%s: type: %s, %s" ENDL, __FUNCTION__, renderer::util::wgpu::ErrorTypeToString( ewgpuErrorType ), pszMessage );
-    }
-
-    WGPUSwapChain WGPUVirtualDevice_CreateSwapChainForWindow( WGPUDevice wgpuVirtualDevice, SDL_Window *const psdlWindow, WGPUSurface wgpuSurface, WGPUAdapter wgpuAdapter )
-    {
-        int nWindowWidth, nWindowHeight;
-        SDL_GetWindowSize( psdlWindow, &nWindowWidth, &nWindowHeight );
-        
-        // get supported surface present modes, ideally take the preferred one, but if that's not available, get the default supported
-        WGPUPresentMode wgpuPreferredPresentMode = WGPUPresentMode_Immediate; // TODO: make configurable
-        const WGPUPresentMode wgpuPresentMode = [ wgpuSurface, wgpuAdapter, wgpuPreferredPresentMode ](){
-            // wgpuSurfaceGetCapabilities function populates user-provided pointers in the struct passed to it
-            // so we need to provide a buffer for all the array fields we want to query before calling (in this case, presentModes)
-            // TODO: remove magic number, this is the number of entries in the WGPUPresentMode enum
-
-            // TODO: nonstandard
-            /*/::util::data::StaticSpan<WGPUPresentMode, 4> sPresetModes;
-            WGPUSurfaceCapabilities wgpuSurfaceCapabilities { 
-                .presentModeCount = sPresetModes.Elements(), // max size of the buffer
-                .presentModes = sPresetModes.m_tData 
-            }; 
-            wgpuSurfaceGetCapabilities( wgpuSurface, wgpuAdapter, &wgpuSurfaceCapabilities );
-
-            // we want WGPUPresentMode_Fifo for vsync, or WGPUPresentMode_Immediate for non-vsync
-            for ( int i = 0; i < wgpuSurfaceCapabilities.presentModeCount; i++ )
-            {
-                if ( wgpuSurfaceCapabilities.presentModes[ i ] == wgpuPreferredPresentMode )
-                {
-                    return wgpuPreferredPresentMode;
-                }
-            }*/
-
-            // i *believe* it is required for fifo to be supported (this is the case in vulkan) so default to it
-            // TODO reexamine this, unsure if it's right
-            return WGPUPresentMode_Immediate; 
-        }();
-
-        WGPUTextureFormat wgpuSwapchainFormat;
-#if WEBGPU_BACKEND_WGPU 
-        wgpuSwapchainFormat = wgpuSurfaceGetPreferredFormat( wgpuSurface, wgpuAdapter );
-#elif WEBGPU_BACKEND_DAWN
-        wgpuSwapchainFormat = WGPUTextureFormat_BGRA8Unorm; // dawn only supports this, and doesn't have wgpuSurfaceGetPreferredFormat
-#endif 
-
-        const WGPUSwapChainDescriptor wgpuSwapChainDescriptor {
-            .usage = WGPUTextureUsage_RenderAttachment,
-            .format = wgpuSwapchainFormat,
-
-            .width = static_cast<u32>( nWindowWidth ),
-            .height = static_cast<u32>( nWindowHeight ),
-
-            .presentMode = wgpuPresentMode 
-        };
-
-        // TODO: this is a bit spammy, add when we have designated spam logs
-        //logger::Info( "Creating swapchain: width %i, height %i present mode: %s" ENDL, nWindowWidth, nWindowHeight, renderer::util::wgpu::PresentModeToString( wgpuPresentMode ) );
-        return wgpuDeviceCreateSwapChain( wgpuVirtualDevice, wgpuSurface, &wgpuSwapChainDescriptor );
-    }
-
-    WGPUTextureView WGPUVirtualDevice_CreateDepthTextureAndViewForWindow( WGPUDevice wgpuVirtualDevice, SDL_Window *const psdlWindow )
-    {
-        int nWindowWidth, nWindowHeight;
-        SDL_GetWindowSize( psdlWindow, &nWindowWidth, &nWindowHeight );
-
-        // make depth buffer
-        // TODO: const or unify between depthstencilstate and here somehow
-        //
-        static const WGPUTextureFormat wgpuDepthTextureFormat = WGPUTextureFormat_Depth24Plus; 
-
-        WGPUTextureDescriptor wgpuDepthTextureDescriptor {
-            .usage = WGPUTextureUsage_RenderAttachment,
-            .dimension = WGPUTextureDimension_2D,
-            .size = { static_cast<u32>( nWindowWidth ), static_cast<u32>( nWindowHeight ), 1 }, // TODO: TEMP!!!!! should recreate on preframe::ResolutionChanged
-            .format = WGPUTextureFormat_Depth24Plus, 
-            .mipLevelCount = 1,
-            .sampleCount = 1,
-            .viewFormatCount = 1,
-            .viewFormats = &wgpuDepthTextureFormat
-        };
-
-        // TODO: we probably aren't cleaning this up...
-        WGPUTexture wgpuDepthTexture = wgpuDeviceCreateTexture( wgpuVirtualDevice, &wgpuDepthTextureDescriptor );
-    
-        WGPUTextureViewDescriptor wgpuDepthTextureViewDescriptor {
-            .format = WGPUTextureFormat_Depth24Plus,
-            .dimension = WGPUTextureViewDimension_2D,
-            .baseMipLevel = 0,
-            .mipLevelCount = 1,
-            .baseArrayLayer = 0,
-            .arrayLayerCount = 1,
-            .aspect = WGPUTextureAspect_All
-        };
-
-        return wgpuTextureCreateView( wgpuDepthTexture, &wgpuDepthTextureViewDescriptor );
-    }
-
 	void InitialisePhysicalRenderingDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice )
     {
         logger::Info( "Initialising wgpu rendering device..." ENDL );
-        //logger::Info( "wgpu version is %i" ENDL, wgpuGetVersion() ); // nonstandard :c
+        //logger::Info( "wgpu version is %i" ENDL, wgpuGetVersion() ); // nonstandard :<
 
-        const WGPUInstanceDescriptor wgpuDesc {};
-        WGPUInstance wgpuInstance = pRendererDevice->m_wgpuInstance = wgpuCreateInstance( &wgpuDesc );
+        const WGPUInstanceDescriptor wgpuInstanceDescriptor {};
+        WGPUInstance wgpuInstance = pRendererDevice->m_wgpuInstance = wgpuCreateInstance( &wgpuInstanceDescriptor );
 
         // Request graphics adapter from instance
         WGPUAdapter wgpuAdapter = pRendererDevice->m_wgpuAdapter = [ wgpuInstance ]()
@@ -247,6 +149,142 @@ namespace renderer
         }();
     }
 
+    // TODO: temp structs
+    #pragma pack( push, 1 )
+    struct UShaderGlobals
+    {
+        float m_flTime;
+        u32 ok;
+        ::util::maths::Vec2<u32> m_vWindowSize;
+    };
+    #pragma pack( pop, 1 )
+
+    #pragma pack( push, 1 )
+    struct UShaderStandardVars
+    {
+        ::util::maths::Vec3<f32> m_vPosition;
+        f32 pad0;
+        ::util::maths::Vec3<f32> m_vRotation;
+        f32 pad1;
+    };
+    #pragma pack( pop, 1 )
+    
+    void C_WGPUVirtualDeviceHandleError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
+    {
+        logger::Info( "%s: type: %s, %s" ENDL, __FUNCTION__, renderer::util::wgpu::ErrorTypeToString( ewgpuErrorType ), pszMessage );
+    }
+
+    WGPUSwapChain CreateSwapChainForWindowDimensions( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, const ::util::maths::Vec2<u32> vWindowSize )
+    {
+        // get supported surface present modes, ideally take the preferred one, but if that's not available, get the default supported
+        WGPUPresentMode wgpuPreferredPresentMode = WGPUPresentMode_Fifo; // TODO: make configurable
+        const WGPUPresentMode wgpuPresentMode = wgpuPreferredPresentMode; 
+
+        // TODO: this is nonstandard, need a proper way to do it
+        /*const WGPUPresentMode wgpuPresentMode = [ wgpuSurface, wgpuAdapter, wgpuPreferredPresentMode ](){
+            // wgpuSurfaceGetCapabilities function populates user-provided pointers in the struct passed to it
+            // so we need to provide a buffer for all the array fields we want to query before calling (in this case, presentModes)
+            // TODO: remove magic number, this is the number of entries in the WGPUPresentMode enum
+
+            // TODO: nonstandard
+            /::util::data::StaticSpan<WGPUPresentMode, 4> sPresetModes;
+            WGPUSurfaceCapabilities wgpuSurfaceCapabilities { 
+                .presentModeCount = sPresetModes.Elements(), // max size of the buffer
+                .presentModes = sPresetModes.m_tData 
+            }; 
+            wgpuSurfaceGetCapabilities( wgpuSurface, wgpuAdapter, &wgpuSurfaceCapabilities );
+
+            // we want WGPUPresentMode_Fifo for vsync, or WGPUPresentMode_Immediate for non-vsync
+            for ( int i = 0; i < wgpuSurfaceCapabilities.presentModeCount; i++ )
+            {
+                if ( wgpuSurfaceCapabilities.presentModes[ i ] == wgpuPreferredPresentMode )
+                {
+                    return wgpuPreferredPresentMode;
+                }
+            }
+
+            // i *believe* it is required for fifo to be supported (this is the case in vulkan) so default to it
+            // TODO reexamine this, unsure if it's right
+            return WGPUPresentMode_Immediate; 
+        }();*/
+
+        WGPUTextureFormat wgpuSwapchainFormat;
+#if WEBGPU_BACKEND_WGPU 
+        wgpuSwapchainFormat = wgpuSurfaceGetPreferredFormat( pRendererState->m_wgpuRenderSurface, pRendererDevice->m_wgpuAdapter );
+#elif WEBGPU_BACKEND_DAWN
+        wgpuSwapchainFormat = WGPUTextureFormat_BGRA8Unorm; // dawn only supports this, and doesn't have wgpuSurfaceGetPreferredFormat
+#endif 
+
+        const WGPUSwapChainDescriptor wgpuSwapChainDescriptor {
+            .usage = WGPUTextureUsage_RenderAttachment,
+            .format = wgpuSwapchainFormat,
+
+            .width = vWindowSize.x,
+            .height = vWindowSize.y,
+
+            .presentMode = wgpuPresentMode 
+        };
+
+        // TODO: this is a bit spammy, add when we have designated spam logs
+        //logger::Info( "Creating swapchain: width %i, height %i present mode: %s" ENDL, nWindowWidth, nWindowHeight, renderer::util::wgpu::PresentModeToString( wgpuPresentMode ) );
+        return wgpuDeviceCreateSwapChain( pRendererState->m_wgpuVirtualDevice, pRendererState->m_wgpuRenderSurface, &wgpuSwapChainDescriptor );
+    }
+
+    DepthTextureAndView CreateDepthTextureAndViewForWindowSize( TitaniumRendererState *const pRendererState, const ::util::maths::Vec2<u32> vWindowSize )
+    {
+        // make depth buffer
+        // TODO: const or unify between depthstencilstate and here somehow
+        //
+        static const WGPUTextureFormat wgpuDepthTextureFormat = WGPUTextureFormat_Depth24Plus; 
+
+        WGPUTextureDescriptor wgpuDepthTextureDescriptor {
+            .usage = WGPUTextureUsage_RenderAttachment,
+            .dimension = WGPUTextureDimension_2D,
+            .size = { vWindowSize.x, vWindowSize.y, 1 },
+            .format = WGPUTextureFormat_Depth24Plus, 
+            .mipLevelCount = 1,
+            .sampleCount = 1,
+            .viewFormatCount = 1,
+            .viewFormats = &wgpuDepthTextureFormat
+        };
+
+        // TODO: we probably aren't cleaning this up...
+        WGPUTexture wgpuDepthTexture = wgpuDeviceCreateTexture( pRendererState->m_wgpuVirtualDevice, &wgpuDepthTextureDescriptor );
+    
+        WGPUTextureViewDescriptor wgpuDepthTextureViewDescriptor {
+            .format = WGPUTextureFormat_Depth24Plus,
+            .dimension = WGPUTextureViewDimension_2D,
+            .baseMipLevel = 0,
+            .mipLevelCount = 1,
+            .baseArrayLayer = 0,
+            .arrayLayerCount = 1,
+            .aspect = WGPUTextureAspect_All
+        };
+
+        WGPUTextureView r_wgpuDepthTextureView = wgpuTextureCreateView( wgpuDepthTexture, &wgpuDepthTextureViewDescriptor );
+        return {
+            .m_wgpuDepthTexture = wgpuDepthTexture, 
+            .m_wgpuDepthTextureView = r_wgpuDepthTextureView
+        };
+    }
+
+    void FreeDepthTextureAndView( DepthTextureAndView *const pDepthTexture )
+    {
+        wgpuTextureDestroy( pDepthTexture->m_wgpuDepthTexture );
+        wgpuTextureRelease( pDepthTexture->m_wgpuDepthTexture );
+        wgpuTextureViewRelease( pDepthTexture->m_wgpuDepthTextureView );
+    }
+
+    WGPUBindGroupLayout CreateBindGroupLayout( TitaniumRendererState *const pRendererState, ::util::data::Span<WGPUBindGroupLayoutEntry> swgpuBindGroupLayoutEntries )
+    {
+        WGPUBindGroupLayoutDescriptor wgpuUniformBindGroupLayoutDescriptor {
+            .entryCount = static_cast<u32>( swgpuBindGroupLayoutEntries.m_nElements ),
+            .entries = swgpuBindGroupLayoutEntries.m_pData
+        };
+
+        return wgpuDeviceCreateBindGroupLayout( pRendererState->m_wgpuVirtualDevice, &wgpuUniformBindGroupLayoutDescriptor );
+    }
+
     void Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow )
     {
         logger::Info( "Initialising wgpu renderer..." ENDL );
@@ -254,8 +292,8 @@ namespace renderer
         WGPUInstance wgpuInstance = pRendererDevice->m_wgpuInstance;
         WGPUAdapter wgpuAdapter = pRendererDevice->m_wgpuAdapter;
 
-        pRendererState->m_psdlWindow = psdlWindow;
-        WGPUSurface wgpuSurface = pRendererState->m_wgpuSurface = sys::platform::sdl::CreateWGPUSurfaceForWindow( psdlWindow, wgpuInstance );
+        const ::util::maths::Vec2<u32> vWindowSize = sys::platform::sdl::GetWindowSizeVector( psdlWindow );
+        WGPUSurface wgpuSurface = pRendererState->m_wgpuRenderSurface = sys::platform::sdl::CreateWGPUSurfaceForWindow( psdlWindow, wgpuInstance );
 
         WGPUTextureFormat wgpuSwapchainFormat;
 #if WEBGPU_BACKEND_WGPU 
@@ -293,80 +331,68 @@ namespace renderer
         WGPUQueue wgpuQueue = pRendererState->m_wgpuQueue = wgpuDeviceGetQueue( wgpuVirtualDevice );
        
         // Request swapchain from device
-        pRendererState->m_wgpuSwapChain = WGPUVirtualDevice_CreateSwapChainForWindow( wgpuVirtualDevice, psdlWindow, wgpuSurface, wgpuAdapter );
+        pRendererState->m_wgpuSwapChain = CreateSwapChainForWindowDimensions( pRendererDevice, pRendererState, vWindowSize );
 
-        // Request uniform buffer from device
-        WGPUBuffer wgpuUniformBuffer = pRendererState->m_wgpuUniformBuffer = [ wgpuVirtualDevice, wgpuQueue, psdlWindow ](){ 
-            WGPUBufferDescriptor wgpuUniformBufferDescriptor {
-                .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform,
-                .size = sizeof( f32 ) + sizeof( u32 ) * 2
-            };
-
-            WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuUniformBufferDescriptor );
-
-            const float flTimeBegin = 0.0f;
-            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, 0, &flTimeBegin, sizeof( f32 ) );
-            int nWindowWidth, nWindowHeight;
-            SDL_GetWindowSize( psdlWindow, &nWindowWidth, &nWindowHeight );
-            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, sizeof( f32 ), &nWindowWidth, sizeof( u32 ) );
-            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, sizeof( f32 ) + sizeof( u32 ), &nWindowHeight, sizeof( u32 ) );
-
-            return wgpuUniformBuffer;
-        }();
-
-        // Make uniform bind group layout and uniform bind group
-        // TODO: could we macro this syntax maybe?
-        struct R_MakeUniformBindGroup { WGPUBindGroupLayout wgpuBindGroupLayout; WGPUBindGroup wgpuBindGroup; };
-        auto [ wgpuBindGroupLayout, wgpuBindGroup ] = [ wgpuVirtualDevice, wgpuUniformBuffer ](){            
-            WGPUBindGroupLayoutEntry wgpuBindingLayout {
+        // TODO: temp, this should probably be provided by caller, rather than defined in renderer
+        // create uniform bindgroup layout, this defines the way uniforms are laid out in the render pipeline
+        WGPUBindGroupLayout wgpuBindGroupLayout = CreateBindGroupLayout( pRendererState, ::util::data::StaticSpan<WGPUBindGroupLayoutEntry, 1> {
+            {
                 .binding = 0,
                 .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
 
                 .buffer {
                     .type = WGPUBufferBindingType_Uniform,
-                    .minBindingSize = sizeof( f32 ) + sizeof( u32 ) * 2
+                    .minBindingSize = sizeof( UShaderGlobals )
                 }
+            }
+        }.ToConstSpan() );
+
+        // create global uniform buffer, and it's bindgroup 
+        // TODO: could we macro this syntax maybe?
+        pRendererState->m_globalUniformBuffer = [ wgpuVirtualDevice, wgpuQueue, wgpuBindGroupLayout, vWindowSize ](){            
+            WGPUBufferDescriptor wgpuUniformBufferDescriptor {
+                .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform,
+                .size = sizeof( UShaderGlobals )  
             };
 
-            WGPUBindGroupLayoutDescriptor wgpuBindGroupLayoutDescriptor {
-                .entryCount = 1,
-                .entries = &wgpuBindingLayout
-            };
+            WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuUniformBufferDescriptor );   
 
-            WGPUBindGroupLayout r_wgpuBindGroupLayout = wgpuDeviceCreateBindGroupLayout( wgpuVirtualDevice, &wgpuBindGroupLayoutDescriptor );
+            // wrute defaults
+            UShaderGlobals uDefaultShaderGlobals { .m_vWindowSize = vWindowSize };
+            wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, 0, &uDefaultShaderGlobals, sizeof( uDefaultShaderGlobals ) ); 
 
             WGPUBindGroupEntry wgpuBinding {
                 .binding = 0,
                 .buffer = wgpuUniformBuffer,
                 .offset = 0,
-                .size = sizeof( f32 ) + sizeof( u32 ) * 2
+                .size = sizeof( UShaderGlobals )
             };
 
             WGPUBindGroupDescriptor wgpuBindGroupDescriptor {
-                .layout = r_wgpuBindGroupLayout,
+                .layout = wgpuBindGroupLayout,
                 .entryCount = 1, // keep same as wgpuBindGroupLayoutDescriptor.entryCount!
                 .entries = &wgpuBinding
             };
 
             WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( wgpuVirtualDevice, &wgpuBindGroupDescriptor );
 
-            return R_MakeUniformBindGroup { r_wgpuBindGroupLayout, r_wgpuBindGroup };
+            return BufferAndBindgroup { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
         }();
 
-        pRendererState->m_wgpuUniformBindGroup = wgpuBindGroup;
+        WGPUBindGroupLayout wgpuStandardObjectUniformBindGroupLayout = pRendererState->m_wgpuStandardObjectUniformBindGroupLayout = CreateBindGroupLayout( pRendererState, ::util::data::StaticSpan<WGPUBindGroupLayoutEntry, 1> {
+            {
+                .binding = 0,
+                .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
 
-        // Request pipeline layout from device
-        WGPUPipelineLayout wgpuPipelineLayout = [ wgpuVirtualDevice, wgpuBindGroupLayout ](){
-            WGPUPipelineLayoutDescriptor wgpuPipelineLayoutDescriptor {
-                .bindGroupLayoutCount = 1,
-                .bindGroupLayouts = &wgpuBindGroupLayout
-            };
-
-            return wgpuDeviceCreatePipelineLayout( wgpuVirtualDevice, &wgpuPipelineLayoutDescriptor );
-        }();
+                .buffer {
+                    .type = WGPUBufferBindingType_Uniform,
+                    .minBindingSize = sizeof( UShaderStandardVars )
+                }
+            }
+        }.ToConstSpan() );
 
         // Create render pipeline for device
-        pRendererState->m_wgpuRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat, wgpuPipelineLayout ]()
+        pRendererState->m_wgpuRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat, wgpuBindGroupLayout, wgpuStandardObjectUniformBindGroupLayout ]()
         {
             // Create shader module
             WGPUShaderModule wgpuShaderModule = [ wgpuVirtualDevice ]()
@@ -377,20 +403,20 @@ namespace renderer
                     .code = R"(
                                 const PI = 3.14159265359;
 
-                                struct U_Input 
+                                struct UShaderGlobals
                                 {
                                     flTime : f32,
-                                    nWindowHeight : u32,
-                                    nWindowWidth : u32
+                                    vWindowSize : vec2<u32>
                                 };
 
-                                @group( 0 ) @binding( 0 ) var<uniform> u_input : U_Input;
-
-                                struct VertexInput
+                                struct UShaderStandardVars
                                 {
-                                    @location( 0 ) position : vec3<f32>,
-                                    //@location( 1 ) colour : vec3<f32>
+                                    vRootPosition : vec3<f32>,
+                                    vRootRotation : vec3<f32>
                                 };
+
+                                @group( 0 ) @binding( 0 ) var<uniform> u_globals : UShaderGlobals;
+                                @group( 1 ) @binding( 0 ) var<uniform> u_standardInput : UShaderStandardVars;
 
                                 struct R_VertexOutput
                                 {
@@ -398,30 +424,38 @@ namespace renderer
                                     @location( 0 ) colour : vec3<f32>
                                 };
 
-                                @vertex fn vs_main( in : VertexInput ) -> R_VertexOutput
+                                @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> R_VertexOutput
                                 {
-                                    var r_out : R_VertexOutput;
+                                    // offset input vertex position and rotation by the object's position
+                                    let flObjectZC = cos( u_standardInput.vRootRotation.z );
+                                    let flObjectZS = sin( u_standardInput.vRootRotation.z );
+                                    let flObjectYC = cos( u_standardInput.vRootRotation.y );
+                                    let flObjectYS = sin( u_standardInput.vRootRotation.y );
+                                    let flObjectXC = cos( u_standardInput.vRootRotation.x );
+                                    let flObjectXS = sin( u_standardInput.vRootRotation.x );
+                                    let MTransformBaseModel =                          
+                                    transpose( mat4x4<f32>(
+                                        1.0, 0.0, 0.0, u_standardInput.vRootPosition.x,
+                                        0.0, 1.0, 0.0, u_standardInput.vRootPosition.y,
+                                        0.0, 0.0, 1.0, u_standardInput.vRootPosition.z,
+                                        0.0, 0.0, 0.0, 1.0
+                                    ) ) *
+                                    transpose( mat4x4<f32>( 
+                                        flObjectYC * flObjectZC,                                        flObjectYC * flObjectZS,                                        -flObjectYS,             0.0,
+                                        flObjectYS * flObjectXS * flObjectZC - flObjectZS * flObjectXC, flObjectZS * flObjectYS * flObjectXS + flObjectZC * flObjectXC, flObjectXS * flObjectYC, 0.0,
+                                        flObjectYS * flObjectXC * flObjectZC + flObjectZS * flObjectXS, flObjectZS * flObjectYS * flObjectXC - flObjectZC * flObjectYS, flObjectXC * flObjectYC, 0.0,
+                                        0.0,                                                            0.0,                                                            0.0,                     1.0
+                                    ) );
 
-                                    let flObjectAngle = u_input.flTime;
+
+                                    let flObjectAngle = u_globals.flTime;
                                     let flObjectAngleC = cos( flObjectAngle );
                                     let flObjectAngleS = sin( flObjectAngle );
 
-                                    let MModelTransform = 
-                                    // rotate the model in the XY plane
-                                    transpose( mat4x4<f32>( 
-                                        flObjectAngleC,  flObjectAngleS, 0.0, 0.0,
-                                        -flObjectAngleS, flObjectAngleC, 0.0, 0.0,
-                                        0.0,             0.0,            1.0, 0.0,
-                                        0.0,             0.0,            0.0, 1.0
-                                    ) ) *
+                                    //let MModelTransform 
 
-                                    // translate it at an offset from its current direction
-                                    transpose( mat4x4<f32>( 
-                                        0.3, 0.0, 0.0, 0.5,
-                                        0.0, 0.3, 0.0, 0.0,
-                                        0.0, 0.0, 0.3, 0.0,
-                                        0.0, 0.0, 0.0, 1.0
-                                    ) );
+                                    // base translation
+          
 
                                     let flViewAngle = 3.0 * PI / 4.0; // three 8th of turn (1 turn = 2 pi)
                                     let flViewAngleC = cos( flViewAngle );
@@ -446,7 +480,7 @@ namespace renderer
                                         0.0, 0.0,           0.0,            1.0
                                     ) );
 
-                                    let flAspectRatio = f32( u_input.nWindowHeight ) / f32( u_input.nWindowWidth );
+                                    let flAspectRatio = f32( u_globals.vWindowSize.x ) / f32( u_globals.vWindowSize.y );
                                     let flFocalLength = 2.0;
                                     let flNearDist = 0.01;
                                     let flFarDist = 1000.0;
@@ -458,15 +492,16 @@ namespace renderer
                                 		    0.0,           0.0,                           1.0,                   0.0
                                 	) );
 
-                                    r_out.position = MProjectFocal * MViewTransform * MModelTransform * vec4<f32>( in.position, 1.0 );
-                                    r_out.colour = r_out.position.xyz * cos( u_input.flTime );
+                                    var r_out : R_VertexOutput;
+                                    r_out.position = MProjectFocal * MViewTransform * MTransformBaseModel * vec4<f32>( vertexPosition, 1.0 );
+                                    r_out.colour = vec3<f32>( 1.0, 1.0, 1.0 ); // r_out.position.xyz * cos( u_globals.flTime );
 
                                     return r_out;
                                 }
 
                                 @fragment fn fs_main( in : R_VertexOutput ) -> @location( 0 ) vec4<f32> 
                                 {
-                                    return vec4<f32>( pow( in.colour + ( sin( u_input.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
+                                    return vec4<f32>( in.position.xyz, 1.0 ); // vec4<f32>( pow( in.colour + ( sin( u_globals.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
                                 }
                             )"
                 };
@@ -478,6 +513,19 @@ namespace renderer
                 return wgpuDeviceCreateShaderModule( wgpuVirtualDevice, &wgpuShaderDescriptor );
             }();
 
+            ::util::data::StaticSpan<WGPUBindGroupLayout, 2> swgpuBindGroupLayouts {
+                wgpuBindGroupLayout,
+                wgpuStandardObjectUniformBindGroupLayout
+            };
+
+            // create pipeline layout
+            WGPUPipelineLayoutDescriptor wgpuPipelineLayoutDescriptor {
+                .bindGroupLayoutCount = static_cast<u32>( swgpuBindGroupLayouts.Elements() ),
+                .bindGroupLayouts = swgpuBindGroupLayouts.m_tData
+            };
+
+            WGPUPipelineLayout wgpuPipelineLayout =  wgpuDeviceCreatePipelineLayout( wgpuVirtualDevice, &wgpuPipelineLayoutDescriptor );
+
             ::util::data::StaticSpan<WGPUVertexAttribute, 1> sVertexAttributes {
                 // position attribute
                 {
@@ -485,17 +533,10 @@ namespace renderer
                     .offset = 0,
                     .shaderLocation = 0
                 },
-
-                /*// colour attribute
-                {
-                    .format = WGPUVertexFormat_Float32x3,
-                    .offset = 3 * sizeof( float ),
-                    .shaderLocation = 1
-                }*/
             };
 
             WGPUVertexBufferLayout wgpuVertexBufferLayout {
-                .arrayStride = sizeof( float ) * 3,//6,
+                .arrayStride = sizeof( float ) * 3,
                 .stepMode = WGPUVertexStepMode_Vertex,
                 .attributeCount = static_cast<u32>( sVertexAttributes.Elements() ),
                 .attributes = sVertexAttributes.m_tData
@@ -566,7 +607,7 @@ namespace renderer
             return wgpuDeviceCreateRenderPipeline( wgpuVirtualDevice, &wgpuRenderPipelineDescriptor );
         }();
 
-        pRendererState->m_wgpuDepthTextureView = WGPUVirtualDevice_CreateDepthTextureAndViewForWindow( wgpuVirtualDevice, psdlWindow );
+        pRendererState->m_depthTextureAndView = CreateDepthTextureAndViewForWindowSize( pRendererState, vWindowSize );
 
         // imgui init
         // TODO: what's the significance of having multiple frames in flight??? is this important??? idk doing 1
@@ -575,24 +616,16 @@ namespace renderer
         logger::Info( "wgpu renderer initialised successfully!" ENDL );
     }
 
-    void preframe::ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState )
+    void preframe::ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, const ::util::maths::Vec2<u32> vWindowSize )
     {
         // swapchains rely on the window's resolution, so need to be recreated on window resize
         wgpuSwapChainRelease( pRendererState->m_wgpuSwapChain ); // destroy old swapchain
-        pRendererState->m_wgpuSwapChain = WGPUVirtualDevice_CreateSwapChainForWindow( 
-            pRendererState->m_wgpuVirtualDevice, 
-            pRendererState->m_psdlWindow, 
-            pRendererState->m_wgpuSurface, 
-            pRendererDevice->m_wgpuAdapter
-        );
+        pRendererState->m_wgpuSwapChain = CreateSwapChainForWindowDimensions( pRendererDevice, pRendererState, vWindowSize );
 
-        pRendererState->m_wgpuDepthTextureView = WGPUVirtualDevice_CreateDepthTextureAndViewForWindow( pRendererState->m_wgpuVirtualDevice, pRendererState->m_psdlWindow );
+        FreeDepthTextureAndView( &pRendererState->m_depthTextureAndView );
+        pRendererState->m_depthTextureAndView = CreateDepthTextureAndViewForWindowSize( pRendererState, vWindowSize );
 
-        // TODO: TEMP!!! SUCKS!!!
-        int nWindowWidth, nWindowHeight;
-        SDL_GetWindowSize( pRendererState->m_psdlWindow, &nWindowWidth, &nWindowHeight );
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_wgpuUniformBuffer, sizeof( f32 ), &nWindowWidth, sizeof( u32 ) );
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_wgpuUniformBuffer, sizeof( f32 ) + sizeof( u32 ), &nWindowHeight, sizeof( u32 ) );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_globalUniformBuffer.m_wgpuBuffer, offsetof( UShaderGlobals, m_vWindowSize ), &vWindowSize, sizeof( ::util::maths::Vec2<u32> ) );
     }
 
     void preframe::ImGUI( TitaniumRendererState *const pRendererState )
@@ -600,7 +633,7 @@ namespace renderer
         ImGui_ImplWGPU_NewFrame();
     }
 
-    R_UploadModel UploadModel( TitaniumRendererState *const pRendererState, ::util::data::Span<float> sflVertices, ::util::data::Span<int> snIndexes )
+    GPUModelHandle UploadModel( TitaniumRendererState *const pRendererState, const ::util::data::Span<float> sflVertices, const ::util::data::Span<int> snIndexes )
     {
         const size_t nVertexBufSize = sflVertices.m_nElements * sizeof( float );
         const size_t nIndexBufSize = snIndexes.m_nElements * sizeof( int );
@@ -627,7 +660,52 @@ namespace renderer
         };
     }
 
-    void Frame( TitaniumRendererState *const pRendererState, const ::util::data::Span<RenderableObject*> sRenderableObjects )
+    void FreeGPUModel( GPUModelHandle gpuModel )
+    {
+        wgpuBufferDestroy( gpuModel.m_wgpuVertexBuffer );
+        wgpuBufferRelease( gpuModel.m_wgpuVertexBuffer );
+
+        wgpuBufferDestroy( gpuModel.m_wgpuIndexBuffer );
+        wgpuBufferRelease( gpuModel.m_wgpuIndexBuffer );
+    }
+
+    void CreateRenderableObjectBuffers( TitaniumRendererState *const pRendererState, RenderableObject *const pRenderableObject )
+    {
+        // TODO: this method of creating buffers kind of sucks, would be nice if there was a way to just map these to c structs at runtime
+        WGPUBufferDescriptor wgpuStandardUniformBufferDescriptor {
+            .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform,
+            .size = sizeof( UShaderStandardVars )
+        };
+
+        WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuStandardUniformBufferDescriptor );
+
+        WGPUBindGroupEntry wgpuBinding {
+            .binding = 0,
+            .buffer = wgpuUniformBuffer,
+            .offset = 0,
+            .size = sizeof( UShaderStandardVars )
+        };
+
+        WGPUBindGroupDescriptor wgpuBindGroupDescriptor {
+            .layout = pRendererState->m_wgpuStandardObjectUniformBindGroupLayout,
+            .entryCount = 1,
+            .entries = &wgpuBinding
+        };
+
+        WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
+
+        pRenderableObject->m_standardUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
+    }
+
+    void FreeRenderableObjectBuffers( RenderableObject *const pRenderableObject )
+    {
+        wgpuBindGroupRelease( pRenderableObject->m_standardUniforms.m_wgpuBindGroup );
+
+        wgpuBufferDestroy( pRenderableObject->m_standardUniforms.m_wgpuBuffer );
+        wgpuBufferRelease( pRenderableObject->m_standardUniforms.m_wgpuBuffer );
+    }
+
+    void Frame( TitaniumRendererState *const pRendererState, const ::util::data::Span<RenderableObject> sRenderableObjects )
     {
 #if WEBGPU_BACKEND_WGPU 
         // TODO: what do i actually need here??
@@ -642,7 +720,7 @@ namespace renderer
         auto timeBegin = std::chrono::high_resolution_clock::now();
 
         float flCurrentTime = std::chrono::duration<double, std::ratio<1>>( std::chrono::high_resolution_clock::now() - programTimeBegin ).count();
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_wgpuUniformBuffer, 0, &flCurrentTime, sizeof( float ) );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_globalUniformBuffer.m_wgpuBuffer, offsetof( UShaderGlobals, m_flTime ), &flCurrentTime, sizeof( f32 ) );
 
         ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
         if ( ImGui::Begin( "Debug Info", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize ) )
@@ -668,14 +746,18 @@ namespace renderer
         };
 
         WGPURenderPassDepthStencilAttachment wgpuRenderPassDepthStencilAttachment {
-            .view = pRendererState->m_wgpuDepthTextureView,
+            .view = pRendererState->m_depthTextureAndView.m_wgpuDepthTextureView,
             .depthLoadOp = WGPULoadOp_Clear,
             .depthStoreOp = WGPUStoreOp_Store,
             .depthClearValue = 1.0f,
             .depthReadOnly = false,
 
+            // wgpu and dawn disagree here if stencil isn't in use
+            // dawn wants these to be undefined (0) in this case, wgpu will complain if they're ever undefined
+#if WEBGPU_BACKEND_WGPU
 		    .stencilLoadOp = WGPULoadOp_Clear,
 		    .stencilStoreOp = WGPUStoreOp_Store,
+#endif 
 		    .stencilReadOnly = false
         };
  
@@ -690,14 +772,20 @@ namespace renderer
             // Select render pipeline
              // TODO: only support 1 render pipeline/bindgroup atm, should support more at some point!
             wgpuRenderPassEncoderSetPipeline( wgpuRenderPass, pRendererState->m_wgpuRenderPipeline );
-            wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 0, pRendererState->m_wgpuUniformBindGroup, 0, nullptr );
+            wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 0, pRendererState->m_globalUniformBuffer.m_wgpuBindGroup, 0, nullptr );
 
             for ( int i = 0; i < sRenderableObjects.m_nElements; i++ )
             {
+                // TODO: should check if we need to write this (dirty bit), and also write more efficiently (1 call, not 2)
+                wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, sRenderableObjects.m_pData[ i ].m_standardUniforms.m_wgpuBuffer, offsetof( UShaderStandardVars, m_vPosition ), &sRenderableObjects.m_pData[ i ].m_vPosition, sizeof( ::util::maths::Vec3<f32> ) );
+                wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, sRenderableObjects.m_pData[ i ].m_standardUniforms.m_wgpuBuffer, offsetof( UShaderStandardVars, m_vRotation ), &sRenderableObjects.m_pData[ i ].m_vRotation, sizeof( ::util::maths::Vec3<f32> ) );
+
+                wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 1, sRenderableObjects.m_pData[ i ].m_standardUniforms.m_wgpuBindGroup, 0, nullptr );
+
                 // TODO: make uint16 again? from uint32
-                wgpuRenderPassEncoderSetVertexBuffer( wgpuRenderPass, 0, sRenderableObjects.m_pData[ i ]->m_wgpuVertexBuffer, 0, sRenderableObjects.m_pData[ i ]->m_nVertexBufferSize );
-                wgpuRenderPassEncoderSetIndexBuffer( wgpuRenderPass, sRenderableObjects.m_pData[ i ]->m_wgpuIndexBuffer, WGPUIndexFormat_Uint32, 0, sRenderableObjects.m_pData[ i ]->m_nIndexBufferSize );
-                wgpuRenderPassEncoderDrawIndexed( wgpuRenderPass, sRenderableObjects.m_pData[ i ]->m_nIndexBufferCount, 1, 0, 0, 0 );
+                wgpuRenderPassEncoderSetVertexBuffer( wgpuRenderPass, 0, sRenderableObjects.m_pData[ i ].m_gpuModel.m_wgpuVertexBuffer, 0, sRenderableObjects.m_pData[ i ].m_gpuModel.m_nVertexBufferSize );
+                wgpuRenderPassEncoderSetIndexBuffer( wgpuRenderPass, sRenderableObjects.m_pData[ i ].m_gpuModel.m_wgpuIndexBuffer, WGPUIndexFormat_Uint32, 0, sRenderableObjects.m_pData[ i ].m_gpuModel.m_nIndexBufferSize );
+                wgpuRenderPassEncoderDrawIndexed( wgpuRenderPass, sRenderableObjects.m_pData[ i ].m_gpuModel.m_nIndexBufferCount, 1, 0, 0, 0 );
             }
     
             // imgui

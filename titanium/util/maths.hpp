@@ -11,15 +11,14 @@ namespace util::maths
         return tValue >= tBegin && tValue < tEnd;
     }
 
-    // TODO: could split up this header into multiple files
-    // TODO: is this the right header for these types? could be in a more physics-focused header perhaps
-    /*
-     *  DOUBLE_PRECISION_DEFAULT_VECTOR controls whether we should use 64-bit floats (doubles) as our default vector type
-     *  Not needed by default, but could be useful later
-     */
-    #ifndef DOUBLE_PRECISION_DEFAULT_VECTOR
-        #define DOUBLE_PRECISION_DEFAULT_VECTOR 0
-    #endif // #ifndef DOUBLE_PRECISION_POSITIONS
+    template<typename T> requires util::templateconstraints::Arithmetic<T>
+    struct Vec2 
+    {
+        T x, y;
+    };
+
+    static_assert( sizeof( Vec2<i32> ) == sizeof( i32 ) * 2 );
+    static_assert( sizeof( Vec2<f32> ) == sizeof( f32 ) * 2 );
 
     template<typename T> requires util::templateconstraints::Arithmetic<T>
     struct Vec3 
@@ -27,14 +26,6 @@ namespace util::maths
         T x, y, z;
     };
 
-    using Vec3i = Vec3<i32>;
-
-    #if DOUBLE_PRECISION_DEFAULT_VECTOR 
-        using Vec3f = Vec3<f64>;
-    #else // #if DOUBLE_PRECISION_DEFAULT_VECTOR
-        using Vec3f = Vec3<f32>;
-    #endif // #if DOUBLE_PRECISION_DEFAULT_VECTOR
-
-
-
+    static_assert( sizeof( Vec3<i32> ) == sizeof( i32 ) * 3 );
+    static_assert( sizeof( Vec3<f32> ) == sizeof( f32 ) * 3 );
 }

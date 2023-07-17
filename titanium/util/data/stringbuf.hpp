@@ -15,8 +15,8 @@ namespace util::data
         StringBuf();
         StringBuf( const char *const pszFmt, ... );
 
-        char * CStr();
-        const char * ConstCStr() const;
+        char * ToCStr();
+        const char * ToConstCStr() const;
         operator char * ();
         operator const char * () const;
     };
@@ -45,11 +45,11 @@ namespace util::data
     }
 
     template <u64 TMaxSize>
-    char * StringBuf<TMaxSize>::CStr() { return m_szStr; }
+    char * StringBuf<TMaxSize>::ToCStr() { return m_szStr; }
     template <u64 TMaxSize>
-    const char * StringBuf<TMaxSize>::ConstCStr() const { return m_szStr; }
+    const char * StringBuf<TMaxSize>::ToConstCStr() const { return m_szStr; }
     template <u64 TMaxSize>
-    StringBuf<TMaxSize>::operator char * () { return CStr(); }
+    StringBuf<TMaxSize>::operator char * () { return ToCStr(); }
     template <u64 TMaxSize>
-    StringBuf<TMaxSize>::operator const char * () const { return ConstCStr(); }
+    StringBuf<TMaxSize>::operator const char * () const { return ToConstCStr(); }
 }
