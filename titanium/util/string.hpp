@@ -9,21 +9,20 @@ Functions for more easily performing common string operations
 */
 namespace util::string
 {
-    /*
-    
-    Creates a new string buffer, copying the input string
-    Returns the new string buffer
-    Returns nullptr if the string could not be cloned
-    MEM: Caller is responsible for freeing memory allocated by this function!
-    
-    */
-    char * Clone(const char * const pszToClone);
+    // NOTE: these work because all lowercase ascii chars are +32 from uppercase
+    void ToLowercase( char *const pszStringToConvert )
+    {
+        for ( char * pszStringIterator = pszStringToConvert; *pszStringIterator; pszStringIterator++ )
+        {
+            *pszStringIterator += 32 * ( *pszStringIterator >= 'A' && *pszStringIterator <= 'Z' );
+        }
+    }
 
-    /*
-    
-    Refer to util::string::Clone
-    Operates identically, but takes a max size, cloning will fail if the buffer being read is larger than the max size
-    
-    */
-    char * Clone_n(const char * const pszToClone, const size_t nBufSize);
+    void ToUppercase( char *const pszStringToConvert )
+    {
+        for ( char * pszStringIterator = pszStringToConvert; *pszStringIterator; pszStringIterator++ )
+        {
+            *pszStringIterator -= 32 * ( *pszStringIterator >= 'a' && *pszStringIterator <= 'z' );
+        }
+    }
 };

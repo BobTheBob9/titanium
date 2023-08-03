@@ -21,6 +21,9 @@ namespace memory
         #define MALLOC_DEBUG 1
     #endif  // #ifndef MALLOC_DEBUG
 
+
+    // TODO: REWORKING!!!
+
     /*
     
     Debug allocation stuff
@@ -29,41 +32,6 @@ namespace memory
     */
     class MemPool
     {
-        // no data, unless we have memory debugging on
-        #if MALLOC_DEBUG
-            char * m_pszName;
-            char * m_pszFileName;
-            char * m_pszFunctionName;
-            u32 m_nLine;
-            u32 m_nColumn;
-
-            const MemPool * m_pParent = nullptr;
-
-            void SetLocation(const std::source_location *const location);
-        #endif // #if MALLOC_DEBUG
-    public:
-        /*
-        
-        "Normal" MemPool constructor: creates a new named mempool for continuous usage over the lifetime of a system
-
-        */
-        MemPool(const char *const pszName, const std::source_location location = std::source_location::current());
-
-        /*
-        
-        Child MemPool constructor: primarily for passing to util functions that allocate memory, so we can still track allocations for them
-                                   creates a new mempool, but parent should be used for almost all getters/setters
-        
-        */
-        MemPool(const MemPool *const pParentPool, const std::source_location location = std::source_location::current());
-
-        inline const char * GetName() const;
-        inline const char * GetFileName() const;
-
-        // these should only really be used when a child pool is expected! These won't be useful values on non-children!
-        inline const char * GetFunctionName() const;
-        inline u32 GetLine() const;
-        inline u32 GetColumn() const;
     };
 
     /*

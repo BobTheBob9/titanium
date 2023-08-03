@@ -5,12 +5,6 @@
 
 namespace util::maths
 {
-    template<typename T> requires util::templateconstraints::Numeric<T>
-    bool NumberWithinRange( const T tValue, const T tBegin, const T tEnd )
-    {
-        return tValue >= tBegin && tValue < tEnd;
-    }
-
     template<typename T> requires util::templateconstraints::Arithmetic<T>
     struct Vec2 
     {
@@ -28,4 +22,30 @@ namespace util::maths
 
     static_assert( sizeof( Vec3<i32> ) == sizeof( i32 ) * 3 );
     static_assert( sizeof( Vec3<f32> ) == sizeof( f32 ) * 3 );
+
+    template<typename T> requires util::templateconstraints::Arithmetic<T>
+    struct Matrix4x4
+    {
+        
+    };
+
+    // TODO: would be good if we had a (compile time!!!) way to take a variable number of args to these
+    // TODO: is this even faster branchless? need a way to check assembly of func
+    template<typename T> requires util::templateconstraints::Numeric<T>
+    T Min( const T nFirst, const T nSecond )
+    {
+        return ( nFirst * ( nFirst < nSecond ) ) + ( nSecond * ( nSecond <= nFirst ) ); 
+    }
+
+    template<typename T> requires util::templateconstraints::Numeric<T>
+    T Max( const T nFirst, const T nSecond )
+    {
+        return ( nFirst * ( nFirst > nSecond ) ) + ( nSecond * ( nSecond >= nFirst ) ); 
+    }
+
+    template<typename T> requires util::templateconstraints::Numeric<T>
+    bool WithinRange( const T tValue, const T tBegin, const T tEnd )
+    {
+        return tValue >= tBegin && tValue < tEnd;
+    }
 }

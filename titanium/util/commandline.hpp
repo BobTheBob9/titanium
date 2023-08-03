@@ -86,7 +86,7 @@ namespace util::commandline
         }
 
         const char *const pBufUpperIndex = pcaCommandArgs->m_sBuffer.m_pData + pcaCommandArgs->m_sBuffer.m_nElements;
-        assert::Debug( util::maths::NumberWithinRange<const void *>( pszCurrentArgument, pcaCommandArgs->m_sBuffer.m_pData, pBufUpperIndex ) );
+        assert::Debug( util::maths::WithinRange<const void *>( pszCurrentArgument, pcaCommandArgs->m_sBuffer.m_pData, pBufUpperIndex ) );
 
         // iterate from the current arg, to the next, then return it
         // if we exceed the argument buffer, return nullptr

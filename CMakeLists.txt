@@ -26,7 +26,7 @@ include_directories(.)
 
 find_package( SDL2 REQUIRED ) 
 
-set( WEBGPU_BACKEND DAWN )
+set( WEBGPU_BACKEND WGPU )
 #set( DAWN_USE_WAYLAND ON )
 add_subdirectory( extern/WebGPU-distribution )
 add_subdirectory( extern/imgui )

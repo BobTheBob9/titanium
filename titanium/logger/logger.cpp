@@ -2,6 +2,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "titanium/util/data/hashmap.hpp"
+
 void logger::Info( const char *const pFmt, ... )
 {
     va_list vargs;

@@ -1,7 +1,6 @@
 # util contains various standalone utility types, data structures, functions etc
 include_directories(*)
 add_sources(
-    string.cpp
 )
 
 # util/data contains core data structures used across titanium

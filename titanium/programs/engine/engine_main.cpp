@@ -77,7 +77,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         return renderer::UploadModel( &rendererState, sflVertexes, snIndexes );
     };
 
-    renderer::GPUModelHandle rangerGPUModel = fnLoadAssimpModel( "rocketl_1.md3" );
+    renderer::GPUModelHandle rangerGPUModel = fnLoadAssimpModel( "Quakeguy_Ranger_Rigged.obj" );
     renderer::RenderableObject rangerRenderable {
         .m_vPosition {},
         .m_vRotation {},

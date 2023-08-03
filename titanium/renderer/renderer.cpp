@@ -150,16 +150,17 @@ namespace renderer
     }
 
     // TODO: temp structs
-    #pragma pack( push, 1 )
+    #pragma pack( push, 16 )
     struct UShaderGlobals
     {
         float m_flTime;
         u32 ok;
         ::util::maths::Vec2<u32> m_vWindowSize;
     };
-    #pragma pack( pop, 1 )
+    #pragma pack( pop, 16 )
+    static_assert( sizeof( UShaderGlobals ) % 16 == 0 );
 
-    #pragma pack( push, 1 )
+    #pragma pack( push, 16 )
     struct UShaderStandardVars
     {
         ::util::maths::Vec3<f32> m_vPosition;
@@ -167,9 +168,10 @@ namespace renderer
         ::util::maths::Vec3<f32> m_vRotation;
         f32 pad1;
     };
-    #pragma pack( pop, 1 )
+    #pragma pack( pop, 16 )
+    static_assert( sizeof( UShaderStandardVars ) % 16 == 0 );
     
-    void C_WGPUVirtualDeviceHandleError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
+    void C_WGPUVirtualDeviceHandleUncaughtError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
     {
         logger::Info( "%s: type: %s, %s" ENDL, __FUNCTION__, renderer::util::wgpu::ErrorTypeToString( ewgpuErrorType ), pszMessage );
     }
@@ -325,7 +327,7 @@ namespace renderer
             return r_wgpuVirtualDevice;
         }();
 
-        wgpuDeviceSetUncapturedErrorCallback( wgpuVirtualDevice, C_WGPUVirtualDeviceHandleError, &wgpuVirtualDevice );
+        wgpuDeviceSetUncapturedErrorCallback( wgpuVirtualDevice, C_WGPUVirtualDeviceHandleUncaughtError, &wgpuVirtualDevice );
 
         // Request queue from virtual device
         WGPUQueue wgpuQueue = pRendererState->m_wgpuQueue = wgpuDeviceGetQueue( wgpuVirtualDevice );
@@ -391,221 +393,231 @@ namespace renderer
             }
         }.ToConstSpan() );
 
-        // Create render pipeline for device
-        pRendererState->m_wgpuRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat, wgpuBindGroupLayout, wgpuStandardObjectUniformBindGroupLayout ]()
+        // create error scope for pipeline creation so we can react to it
+        wgpuDevicePushErrorScope( wgpuVirtualDevice, WGPUErrorFilter_Validation );
         {
-            // Create shader module
-            WGPUShaderModule wgpuShaderModule = [ wgpuVirtualDevice ]()
+            // Create render pipeline for device
+            pRendererState->m_wgpuRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat, wgpuBindGroupLayout, wgpuStandardObjectUniformBindGroupLayout ]()
             {
-                // TODO: need projection matrices in uniforms
-                WGPUShaderModuleWGSLDescriptor wgpuShaderCodeDescriptor {
-                    .chain { .sType = WGPUSType_ShaderModuleWGSLDescriptor },
-                    .code = R"(
-                                const PI = 3.14159265359;
-
-                                struct UShaderGlobals
-                                {
-                                    flTime : f32,
-                                    vWindowSize : vec2<u32>
-                                };
-
-                                struct UShaderStandardVars
-                                {
-                                    vRootPosition : vec3<f32>,
-                                    vRootRotation : vec3<f32>
-                                };
-
-                                @group( 0 ) @binding( 0 ) var<uniform> u_globals : UShaderGlobals;
-                                @group( 1 ) @binding( 0 ) var<uniform> u_standardInput : UShaderStandardVars;
-
-                                struct R_VertexOutput
-                                {
-                                    @builtin( position ) position : vec4<f32>,
-                                    @location( 0 ) colour : vec3<f32>
-                                };
-
-                                @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> R_VertexOutput
-                                {
-                                    // offset input vertex position and rotation by the object's position
-                                    let flObjectZC = cos( u_standardInput.vRootRotation.z );
-                                    let flObjectZS = sin( u_standardInput.vRootRotation.z );
-                                    let flObjectYC = cos( u_standardInput.vRootRotation.y );
-                                    let flObjectYS = sin( u_standardInput.vRootRotation.y );
-                                    let flObjectXC = cos( u_standardInput.vRootRotation.x );
-                                    let flObjectXS = sin( u_standardInput.vRootRotation.x );
-                                    let MTransformBaseModel =                          
-                                    transpose( mat4x4<f32>(
-                                        1.0, 0.0, 0.0, u_standardInput.vRootPosition.x,
-                                        0.0, 1.0, 0.0, u_standardInput.vRootPosition.y,
-                                        0.0, 0.0, 1.0, u_standardInput.vRootPosition.z,
-                                        0.0, 0.0, 0.0, 1.0
-                                    ) ) *
-                                    transpose( mat4x4<f32>( 
-                                        flObjectYC * flObjectZC,                                        flObjectYC * flObjectZS,                                        -flObjectYS,             0.0,
-                                        flObjectYS * flObjectXS * flObjectZC - flObjectZS * flObjectXC, flObjectZS * flObjectYS * flObjectXS + flObjectZC * flObjectXC, flObjectXS * flObjectYC, 0.0,
-                                        flObjectYS * flObjectXC * flObjectZC + flObjectZS * flObjectXS, flObjectZS * flObjectYS * flObjectXC - flObjectZC * flObjectYS, flObjectXC * flObjectYC, 0.0,
-                                        0.0,                                                            0.0,                                                            0.0,                     1.0
-                                    ) );
-
-
-                                    let flObjectAngle = u_globals.flTime;
-                                    let flObjectAngleC = cos( flObjectAngle );
-                                    let flObjectAngleS = sin( flObjectAngle );
-
-                                    //let MModelTransform 
-
-                                    // base translation
-          
-
-                                    let flViewAngle = 3.0 * PI / 4.0; // three 8th of turn (1 turn = 2 pi)
-                                    let flViewAngleC = cos( flViewAngle );
-                                    let flViewAngleS = sin( flViewAngle );
-
-                                    let vFocalPoint = vec3<f32>( 0.0, 0.0, 200.0 );
-
-                                    let MViewTransform = 
-                                    // focal point
-                                    transpose( mat4x4<f32> (
-                                        1.0, 0.0, 0.0, vFocalPoint.x,
-                                        0.0, 1.0, 0.0, vFocalPoint.y,
-                                        0.0, 0.0, 1.0, vFocalPoint.z,
-                                        0.0, 0.0, 0.0, 1.0
-                                    ) ) *
-
-                                    // rotate the viewpoint in the YZ plane
-                                    transpose( mat4x4<f32> ( 
-                                        1.0, 0.0,           0.0,            0.0,
-                                        0.0, flViewAngleC,  flViewAngleS,   0.0,
-                                        0.0, -flViewAngleS, flViewAngleC,   0.0,
-                                        0.0, 0.0,           0.0,            1.0
-                                    ) );
-
-                                    let flAspectRatio = f32( u_globals.vWindowSize.x ) / f32( u_globals.vWindowSize.y );
-                                    let flFocalLength = 2.0;
-                                    let flNearDist = 0.01;
-                                    let flFarDist = 1000.0;
-                                	let flDivides = 1.0 / ( flFarDist - flNearDist );
-                                    let MProjectFocal = transpose( mat4x4<f32>(
-                                		    flFocalLength, 0.0,                           0.0,                   0.0,
-                                		    0.0,           flFocalLength * flAspectRatio, 0.0,                   0.0,
-                                		    0.0,           0.0,                           flFarDist * flDivides, -flFarDist * flNearDist * flDivides,
-                                		    0.0,           0.0,                           1.0,                   0.0
-                                	) );
-
-                                    var r_out : R_VertexOutput;
-                                    r_out.position = MProjectFocal * MViewTransform * MTransformBaseModel * vec4<f32>( vertexPosition, 1.0 );
-                                    r_out.colour = vec3<f32>( 1.0, 1.0, 1.0 ); // r_out.position.xyz * cos( u_globals.flTime );
-
-                                    return r_out;
-                                }
-
-                                @fragment fn fs_main( in : R_VertexOutput ) -> @location( 0 ) vec4<f32> 
-                                {
-                                    return vec4<f32>( in.position.xyz, 1.0 ); // vec4<f32>( pow( in.colour + ( sin( u_globals.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
-                                }
-                            )"
-                };
-
-                WGPUShaderModuleDescriptor wgpuShaderDescriptor {
-                    .nextInChain = &wgpuShaderCodeDescriptor.chain
-                };
-
-                return wgpuDeviceCreateShaderModule( wgpuVirtualDevice, &wgpuShaderDescriptor );
-            }();
-
-            ::util::data::StaticSpan<WGPUBindGroupLayout, 2> swgpuBindGroupLayouts {
-                wgpuBindGroupLayout,
-                wgpuStandardObjectUniformBindGroupLayout
-            };
-
-            // create pipeline layout
-            WGPUPipelineLayoutDescriptor wgpuPipelineLayoutDescriptor {
-                .bindGroupLayoutCount = static_cast<u32>( swgpuBindGroupLayouts.Elements() ),
-                .bindGroupLayouts = swgpuBindGroupLayouts.m_tData
-            };
-
-            WGPUPipelineLayout wgpuPipelineLayout =  wgpuDeviceCreatePipelineLayout( wgpuVirtualDevice, &wgpuPipelineLayoutDescriptor );
-
-            ::util::data::StaticSpan<WGPUVertexAttribute, 1> sVertexAttributes {
-                // position attribute
+                // Create shader module
+                WGPUShaderModule wgpuShaderModule = [ wgpuVirtualDevice ]()
                 {
-                    .format = WGPUVertexFormat_Float32x3,
-                    .offset = 0,
-                    .shaderLocation = 0
-                },
-            };
+                    // TODO: need projection matrices in uniforms
+                    WGPUShaderModuleWGSLDescriptor wgpuShaderCodeDescriptor {
+                        .chain { .sType = WGPUSType_ShaderModuleWGSLDescriptor },
+                        .code = R"(
+                                    const PI = 3.14159265359;
 
-            WGPUVertexBufferLayout wgpuVertexBufferLayout {
-                .arrayStride = sizeof( float ) * 3,
-                .stepMode = WGPUVertexStepMode_Vertex,
-                .attributeCount = static_cast<u32>( sVertexAttributes.Elements() ),
-                .attributes = sVertexAttributes.m_tData
-            };
+                                    struct UShaderGlobals
+                                    {
+                                        flTime : f32,
+                                        vWindowSize : vec2<u32>
+                                    };
 
-            WGPUDepthStencilState wgpuDepthStencilState {
-                .format = WGPUTextureFormat_Depth24Plus,
-                .depthWriteEnabled = true,
-                .depthCompare = WGPUCompareFunction_Less,
+                                    struct UShaderStandardVars
+                                    {
+                                        vRootPosition : vec3<f32>,
+                                        vRootRotation : vec3<f32>
+                                    };
 
-                .stencilFront = { .compare = WGPUCompareFunction_Always },
-                .stencilBack = { .compare = WGPUCompareFunction_Always },
-                .stencilReadMask = 0xFFFFFFFF,
-                .stencilWriteMask = 0xFFFFFFFF
-            };
+                                    @group( 0 ) @binding( 0 ) var<uniform> u_globals : UShaderGlobals;
+                                    @group( 1 ) @binding( 0 ) var<uniform> u_standardInput : UShaderStandardVars;
 
-            WGPUBlendState wgpuBlendState {
-                .color {
-                    .operation = WGPUBlendOperation_Add,
-                    .srcFactor = WGPUBlendFactor_SrcAlpha,
-                    .dstFactor = WGPUBlendFactor_OneMinusSrcAlpha
-                }
-            };
+                                    struct R_VertexOutput
+                                    {
+                                        @builtin( position ) position : vec4<f32>,
+                                        @location( 0 ) colour : vec3<f32>
+                                    };
 
-            WGPUColorTargetState wgpuColourTargetState {
-                .format = wgpuSwapchainFormat,
-                .blend = &wgpuBlendState,
-                .writeMask = WGPUColorWriteMask_All
-            };
+                                    @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> R_VertexOutput
+                                    {
+                                        // offset input vertex position and rotation by the object's position
+                                        let flObjectZC = cos( u_standardInput.vRootRotation.z );
+                                        let flObjectZS = sin( u_standardInput.vRootRotation.z );
+                                        let flObjectYC = cos( u_standardInput.vRootRotation.y );
+                                        let flObjectYS = sin( u_standardInput.vRootRotation.y );
+                                        let flObjectXC = cos( u_standardInput.vRootRotation.x );
+                                        let flObjectXS = sin( u_standardInput.vRootRotation.x );
+                                        let MTransformBaseModel =                          
+                                        transpose( mat4x4<f32>(
+                                            1.0, 0.0, 0.0, u_standardInput.vRootPosition.x,
+                                            0.0, 1.0, 0.0, u_standardInput.vRootPosition.y,
+                                            0.0, 0.0, 1.0, u_standardInput.vRootPosition.z,
+                                            0.0, 0.0, 0.0, 1.0
+                                        ) ) *
+                                        transpose( mat4x4<f32>( 
+                                            flObjectYC * flObjectZC,                                        flObjectYC * flObjectZS,                                        -flObjectYS,             0.0,
+                                            flObjectYS * flObjectXS * flObjectZC - flObjectZS * flObjectXC, flObjectZS * flObjectYS * flObjectXS + flObjectZC * flObjectXC, flObjectXS * flObjectYC, 0.0,
+                                            flObjectYS * flObjectXC * flObjectZC + flObjectZS * flObjectXS, flObjectZS * flObjectYS * flObjectXC - flObjectZC * flObjectYS, flObjectXC * flObjectYC, 0.0,
+                                            0.0,                                                            0.0,                                                            0.0,                     1.0
+                                        ) );
 
-            WGPUFragmentState wgpuFragmentState {
-                .module = wgpuShaderModule,
-                .entryPoint = "fs_main",
-                .constantCount = 0,
-                .targetCount = 1,
-                .targets = &wgpuColourTargetState
-            };
 
-            WGPURenderPipelineDescriptor wgpuRenderPipelineDescriptor {
-                .layout = wgpuPipelineLayout,
+                                        let flObjectAngle = u_globals.flTime;
+                                        let flObjectAngleC = cos( flObjectAngle );
+                                        let flObjectAngleS = sin( flObjectAngle );
 
-                .vertex {
+                                        //let MModelTransform 
+
+                                        // base translation
+
+
+                                        let flViewAngle = 3.0 * PI / 4.0; // three 8th of turn (1 turn = 2 pi)
+                                        let flViewAngleC = cos( flViewAngle );
+                                        let flViewAngleS = sin( flViewAngle );
+
+                                        let vFocalPoint = vec3<f32>( 0.0, 0.0, 200.0 );
+
+                                        let MViewTransform = 
+                                        // focal point
+                                        transpose( mat4x4<f32> (
+                                            1.0, 0.0, 0.0, vFocalPoint.x,
+                                            0.0, 1.0, 0.0, vFocalPoint.y,
+                                            0.0, 0.0, 1.0, vFocalPoint.z,
+                                            0.0, 0.0, 0.0, 1.0
+                                        ) ) *
+
+                                        // rotate the viewpoint in the YZ plane
+                                        transpose( mat4x4<f32> ( 
+                                            1.0, 0.0,           0.0,            0.0,
+                                            0.0, flViewAngleC,  flViewAngleS,   0.0,
+                                            0.0, -flViewAngleS, flViewAngleC,   0.0,
+                                            0.0, 0.0,           0.0,            1.0
+                                        ) );
+
+                                        let flAspectRatio = f32( u_globals.vWindowSize.x ) / f32( u_globals.vWindowSize.y );
+                                        let flFocalLength = 2.0;
+                                        let flNearDist = 0.01;
+                                        let flFarDist = 1000.0;
+                                    	let flDivides = 1.0 / ( flFarDist - flNearDist );
+                                        let MProjectFocal = transpose( mat4x4<f32>(
+                                    		    flFocalLength, 0.0,                           0.0,                   0.0,
+                                    		    0.0,           flFocalLength * flAspectRatio, 0.0,                   0.0,
+                                    		    0.0,           0.0,                           flFarDist * flDivides, -flFarDist * flNearDist * flDivides,
+                                    		    0.0,           0.0,                           1.0,                   0.0
+                                    	) );
+
+                                        var r_out : R_VertexOutput;
+                                        r_out.position = MProjectFocal * MViewTransform * MTransformBaseModel * vec4<f32>( vertexPosition, 1.0 );
+                                        r_out.colour = vec3<f32>( 1.0, 1.0, 1.0 ); // r_out.position.xyz * cos( u_globals.flTime );
+
+                                        return r_out;
+                                    }
+
+                                    @fragment fn fs_main( in : R_VertexOutput ) -> @location( 0 ) vec4<f32> 
+                                    {
+                                        return vec4<f32>( in.position.xyz, 1.0 ); // vec4<f32>( pow( in.colour + ( sin( u_globals.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
+                                    }
+                                )"
+                    };
+
+                    WGPUShaderModuleDescriptor wgpuShaderDescriptor {
+                        .nextInChain = &wgpuShaderCodeDescriptor.chain
+                    };
+
+                    return wgpuDeviceCreateShaderModule( wgpuVirtualDevice, &wgpuShaderDescriptor );
+                }();
+
+                ::util::data::StaticSpan<WGPUBindGroupLayout, 2> swgpuBindGroupLayouts {
+                    wgpuBindGroupLayout,
+                    wgpuStandardObjectUniformBindGroupLayout
+                };
+
+                // create pipeline layout
+                WGPUPipelineLayoutDescriptor wgpuPipelineLayoutDescriptor {
+                    .bindGroupLayoutCount = static_cast<u32>( swgpuBindGroupLayouts.Elements() ),
+                    .bindGroupLayouts = swgpuBindGroupLayouts.m_tData
+                };
+
+                WGPUPipelineLayout wgpuPipelineLayout =  wgpuDeviceCreatePipelineLayout( wgpuVirtualDevice, &wgpuPipelineLayoutDescriptor );
+
+                ::util::data::StaticSpan<WGPUVertexAttribute, 1> sVertexAttributes {
+                    // position attribute
+                    {
+                        .format = WGPUVertexFormat_Float32x3,
+                        .offset = 0,
+                        .shaderLocation = 0
+                    },
+                };
+
+                WGPUVertexBufferLayout wgpuVertexBufferLayout {
+                    .arrayStride = sizeof( float ) * 3,
+                    .stepMode = WGPUVertexStepMode_Vertex,
+                    .attributeCount = static_cast<u32>( sVertexAttributes.Elements() ),
+                    .attributes = sVertexAttributes.m_tData
+                };
+
+                WGPUDepthStencilState wgpuDepthStencilState {
+                    .format = WGPUTextureFormat_Depth24Plus,
+                    .depthWriteEnabled = true,
+                    .depthCompare = WGPUCompareFunction_Less,
+
+                    .stencilFront = { .compare = WGPUCompareFunction_Always },
+                    .stencilBack = { .compare = WGPUCompareFunction_Always },
+                    .stencilReadMask = 0xFFFFFFFF,
+                    .stencilWriteMask = 0xFFFFFFFF
+                };
+
+                WGPUBlendState wgpuBlendState {
+                    .color {
+                        .operation = WGPUBlendOperation_Add,
+                        .srcFactor = WGPUBlendFactor_SrcAlpha,
+                        .dstFactor = WGPUBlendFactor_OneMinusSrcAlpha
+                    }
+                };
+
+                WGPUColorTargetState wgpuColourTargetState {
+                    .format = wgpuSwapchainFormat,
+                    .blend = &wgpuBlendState,
+                    .writeMask = WGPUColorWriteMask_All
+                };
+
+                WGPUFragmentState wgpuFragmentState {
                     .module = wgpuShaderModule,
-                    .entryPoint = "vs_main",
+                    .entryPoint = "fs_main",
                     .constantCount = 0,
-                    .bufferCount = 1,
-                    .buffers = &wgpuVertexBufferLayout
-                },
+                    .targetCount = 1,
+                    .targets = &wgpuColourTargetState
+                };
 
-                .primitive {
-                    .topology = WGPUPrimitiveTopology_TriangleList,
-                    .stripIndexFormat = WGPUIndexFormat_Undefined,
-                    .frontFace = WGPUFrontFace_CCW,
-                    .cullMode = WGPUCullMode_None //WGPUCullMode_Back
-                },
+                WGPURenderPipelineDescriptor wgpuRenderPipelineDescriptor {
+                    .layout = wgpuPipelineLayout,
 
-                .depthStencil = &wgpuDepthStencilState,
+                    .vertex {
+                        .module = wgpuShaderModule,
+                        .entryPoint = "vs_main",
+                        .constantCount = 0,
+                        .bufferCount = 1,
+                        .buffers = &wgpuVertexBufferLayout
+                    },
 
-                .multisample {
-                    .count = 1, // disable multisampling
-                    .mask = ~0u,
-                    .alphaToCoverageEnabled = false
-                },
+                    .primitive {
+                        .topology = WGPUPrimitiveTopology_TriangleList,
+                        .stripIndexFormat = WGPUIndexFormat_Undefined,
+                        .frontFace = WGPUFrontFace_CCW,
+                        .cullMode = WGPUCullMode_None //WGPUCullMode_Back
+                    },
 
-                .fragment = &wgpuFragmentState // this sucks, wish there was a way of aggregate-initialising this inline
-            };
+                    .depthStencil = &wgpuDepthStencilState,
 
-            return wgpuDeviceCreateRenderPipeline( wgpuVirtualDevice, &wgpuRenderPipelineDescriptor );
-        }();
+                    .multisample {
+                        .count = 1, // disable multisampling
+                        .mask = ~0u,
+                        .alphaToCoverageEnabled = false
+                    },
+
+                    .fragment = &wgpuFragmentState // this sucks, wish there was a way of aggregate-initialising this inline
+                };
+
+                return wgpuDeviceCreateRenderPipeline( wgpuVirtualDevice, &wgpuRenderPipelineDescriptor );
+            }();
+        } 
+
+        bool bPipelineCompilationFailed = false;
+        wgpuDevicePopErrorScope( wgpuVirtualDevice, []( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const bPipelineCompilationFailed ){ 
+            logger::Info( "Pipeline creation failed with message: %s" ENDL, pszMessage );
+            *static_cast<bool *>( bPipelineCompilationFailed ) = true;
+        }, &bPipelineCompilationFailed );
 
         pRendererState->m_depthTextureAndView = CreateDepthTextureAndViewForWindowSize( pRendererState, vWindowSize );
 
