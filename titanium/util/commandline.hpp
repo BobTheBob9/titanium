@@ -6,6 +6,7 @@
 #include "titanium/util/data/span.hpp"
 #include "titanium/util/data/staticspan.hpp"
 #include "titanium/memory/mem_core.hpp"
+
 #include "titanium/dev/tests.hpp"
 
 
@@ -222,4 +223,3 @@ namespace util::commandline
         return true;
     }
 #endif // #if USE_TESTS
-

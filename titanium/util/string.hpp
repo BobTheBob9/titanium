@@ -9,20 +9,17 @@ Functions for more easily performing common string operations
 */
 namespace util::string
 {
-    // NOTE: these work because all lowercase ascii chars are +32 from uppercase
-    void ToLowercase( char *const pszStringToConvert )
-    {
-        for ( char * pszStringIterator = pszStringToConvert; *pszStringIterator; pszStringIterator++ )
-        {
-            *pszStringIterator += 32 * ( *pszStringIterator >= 'A' && *pszStringIterator <= 'Z' );
-        }
-    }
+    char * AllocForSIMD( const size_t nChars );
 
-    void ToUppercase( char *const pszStringToConvert )
-    {
-        for ( char * pszStringIterator = pszStringToConvert; *pszStringIterator; pszStringIterator++ )
-        {
-            *pszStringIterator -= 32 * ( *pszStringIterator >= 'a' && *pszStringIterator <= 'z' );
-        }
-    }
+    int Length( char *const pszStringToCheck );
+    int Length_SSE( char *const pa16szStringToCheck );
+
+    void CopyTo( const char *const pszSource, char *const pszDestinationBuffer );
+    void CopyTo_SSE( const char *const pa16szSource, char *const pa16szDestinationBuffer );
+
+    void ToLowercase( char *const pszStringToConvert );
+    void ToLowercase_SSE( char *const pa16szStringToConvert );
+
+    void ToUppercase( char *const pszStringToConvert );
+    void ToUppercase_SSE( char *const pa16szStringToConvert );
 };

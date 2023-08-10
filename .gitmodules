@@ -7,3 +7,6 @@
 [submodule "extern/ImGuizmo"]
 	path = extern/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
+[submodule "extern/simde-no-tests"]
+	path = extern/simde-no-tests
+	url = https://github.com/simd-everywhere/simde-no-tests

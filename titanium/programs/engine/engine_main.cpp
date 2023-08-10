@@ -3,6 +3,7 @@
 #include "extern/imgui/imgui_impl_wgpu.h"
 
 #include "titanium/util/commandline.hpp"
+#include "titanium/util/string.hpp"
 
 // systems that need initialising
 #include "titanium/sys/platform/sdl/sys_sdl.hpp"
