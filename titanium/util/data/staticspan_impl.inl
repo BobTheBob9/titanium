@@ -1,9 +1,12 @@
+#include <string.h>
+#include "titanium/util/maths.hpp"
+
 namespace util::data
 {
     template <typename T, u64 TSize>
     StaticSpan<T, TSize>::StaticSpan( const std::initializer_list<T> ptInitialValue )
     {
-        memcpy( m_tData, ptInitialValue.begin(), std::min( ptInitialValue.size() * sizeof( T ), TSize * sizeof( T ) ) );
+        memcpy( m_tData, ptInitialValue.begin(), util::maths::Min( ptInitialValue.size() * sizeof( T ), TSize * sizeof( T ) ) );
     }
 
     template <typename T, u64 TSize>

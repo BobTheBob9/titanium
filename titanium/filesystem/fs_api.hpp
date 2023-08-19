@@ -9,7 +9,7 @@ namespace filesystem
     template<typename T>
     struct ReadHandle
     {
-        const T * m_tpParsedFile;
+        const T * m_ptParsedFile;
         std::atomic_int m_nReferenceCount;
     };
 

@@ -42,4 +42,10 @@ namespace util::data
     {
         return IndexOf( tFindValue, fnComparator ).bFound;
     }
+
+    template <typename T, std::unsigned_integral TSize> 
+    Span<T, TSize> Span<T, TSize>::Offset( const TSize nOffset )
+    {
+        return Span<T, TSize>( m_nElements - nOffset, m_pData + nOffset );
+    }
 }

@@ -3,6 +3,7 @@
 #include "titanium/memory/mem_core.hpp"
 #include "titanium/dev/tests.hpp"
 #include "titanium/logger/logger.hpp"
+#include "titanium/util/maths.hpp"
 
 #include "extern/simde-no-tests/x86/sse.h"
 #include "extern/simde-no-tests/x86/sse2.h"
@@ -11,11 +12,68 @@
 
 namespace util::string
 {
+    // NOTE: as a general rule, prefer mapping these directly to string.h functions as they'll generally be way more optimised than any implementation we can do in pure c++
+    int LengthOfCString( const char *const pszString )
+    {
+        return strlen( pszString );
+    }
+
+    int LengthOfCStringWithTerminator( const char *const pszString )
+    {
+        return strlen( pszString ) + 1;
+    }
+
+    int LengthOfSpanString( const util::data::Span<char> spszString )
+    {
+        return strlen( spszString.m_pData );
+    }
+
+    void CopyTo( const char *const pszSource, util::data::Span<char> spszDestinationBuffer )
+    {
+        const int nCopySize = util::maths::Min<int>( util::string::LengthOfCStringWithTerminator( pszSource ), spszDestinationBuffer.m_nElements );
+        memcpy( spszDestinationBuffer.m_pData, pszSource, nCopySize );
+    }
+
+    void ConcatinateTo( const char* const pszSource, util::data::Span<char> spszDestinationBuffer )
+    {
+        const int nDestinationCopyBegin = util::string::LengthOfSpanString( spszDestinationBuffer );
+        const int nSourceLength = util::string::LengthOfCStringWithTerminator( pszSource );
+        int nCopySize = util::maths::Min<int>( nDestinationCopyBegin + nSourceLength, spszDestinationBuffer.m_nElements - 1 );
+
+        util::data::Span<char> spszEndingBuffer = spszDestinationBuffer.Offset( nCopySize );
+        util::string::CopyTo( pszSource, spszEndingBuffer );
+    }
+
+    // NOTE: these work because all lowercase ascii chars are +32 from uppercase
+    void ToLowercase( char *const pszString )
+    {
+        for ( char * pszStringIterator = pszString; *pszStringIterator; pszStringIterator++ )
+        {
+            *pszStringIterator += 32 * ( *pszStringIterator >= 'A' && *pszStringIterator <= 'Z' );
+        }
+    }
+
+    void ToUppercase( char *const pszString )
+    {
+        for ( char * pszStringIterator = pszString; *pszStringIterator; pszStringIterator++ )
+        {
+            *pszStringIterator -= 32 * ( *pszStringIterator >= 'a' && *pszStringIterator <= 'z' );
+        }
+    }
+
+    bool CStringsEqual( const char *const pszFirstString, const char *const pszSecondString )
+    {
+        return !strcmp( pszFirstString, pszSecondString );
+    }
+
+    // experimental simd stuff
+    // TODO: profile, check if these are actually at all faster than non-simd since they swap between vector and scalar quite often
+    /*
     char * AllocForSIMD( const size_t nChars )
     {
         // the + and - 1s here are to force rounding up (cxx diving truncates towards zero, so rounds down with unsigneds), so trying to allocate 18 chars actually allocates 32
         constexpr int ALIGNMENT = 16;
-        size_t nSize = ALIGNMENT * ( nChars - 1 / ALIGNMENT + 1 );
+        size_t nSize = ALIGNMENT * ( ( nChars - 1 ) / ( ALIGNMENT + 1 ) );
 
         char * pResult = memory::alloc_nT<char>( nSize );
         memset( pResult, 0, nSize );
@@ -23,17 +81,7 @@ namespace util::string
         return pResult;
     }
 
-    int Length( char *const pszStringToCheck )
-    {
-        int nChars = 0;
-        for ( char * pszStringIterator = pszStringToCheck; *pszStringIterator; pszStringIterator++ )
-        {
-            nChars++;
-        }
-
-        return nChars;
-    }
-    
+        
     int Length_SSE( char *const pa16szStringToCheck )
     {
         int nChars = 0;
@@ -54,16 +102,6 @@ namespace util::string
         return nChars;
     }
 
-    void CopyTo( const char *const pszSource, char *const pszDestinationBuffer )
-    {
-        int i;
-        for ( i = 0; pszSource[ i ]; i++ )
-        {
-            pszDestinationBuffer[ i ] = pszSource[ i ];
-        }
-
-        pszDestinationBuffer[ i ] = '\0';
-    }
 
     void CopyTo_SSE( const char *const pa16szSource, char *const pa16szDestinationBuffer )
     {
@@ -79,28 +117,6 @@ namespace util::string
                 break;
         }
     } 
-
-    void CopyToWithBufferSize( const char *const pszSource, char *const pszDestinationBuffer, const size_t nDestinationBufferSize )
-    {
-        for ( int i = 0; pszSource[ i ] && i < nDestinationBufferSize; i++ )
-        {
-            pszDestinationBuffer[ i ] = pszSource[ i ];
-        }
-
-        pszDestinationBuffer[ nDestinationBufferSize - 1 ] = '\0';
-    }
-
-    // TODO: CopyToWithBufferSize_SSE doesn't really make sense i think? we can't really block copy if the buffer size isn't necessarily 16 byte aligned
-    // unsure, i suppose maybe we could just exit if remaining buf < 16 chars
-
-    // NOTE: these work because all lowercase ascii chars are +32 from uppercase
-    void ToLowercase( char *const pszStringToConvert )
-    {
-        for ( char * pszStringIterator = pszStringToConvert; *pszStringIterator; pszStringIterator++ )
-        {
-            *pszStringIterator += 32 * ( *pszStringIterator >= 'A' && *pszStringIterator <= 'Z' );
-        }
-    }
 
     void ToLowercase_SSE( char *const pa16szStringToConvert )
     {
@@ -142,14 +158,6 @@ namespace util::string
         }
     }
 
-    void ToUppercase( char *const pszStringToConvert )
-    {
-        for ( char * pszStringIterator = pszStringToConvert; *pszStringIterator; pszStringIterator++ )
-        {
-            *pszStringIterator -= 32 * ( *pszStringIterator >= 'a' && *pszStringIterator <= 'z' );
-        }
-    }
-
     void ToUppercase_SSE( char *const pa16szStringToConvert )
     {
         // see ToLowercase_SSE for comments/explanation
@@ -177,35 +185,5 @@ namespace util::string
                 break;
         }
     }
+    */
 };
-
-#if USE_TESTS
-    TEST( SSEString )
-    {
-        constexpr const char *const UPPERCASE_TEXT = "WOWWWWWWWWWW!!!!WWWWWWWWWWWWWWWW";
-
-        char * pszStringForNonSSE = memory::alloc_nT<char>( strlen( UPPERCASE_TEXT ) + 1 );
-        char * pszStringForSSE = util::string::AllocForSIMD( strlen( UPPERCASE_TEXT ) + 1 );
-
-        util::string::CopyTo( UPPERCASE_TEXT, pszStringForNonSSE );
-        util::string::CopyTo_SSE( pszStringForNonSSE, pszStringForSSE );
-
-        TEST_EXPECT( !strcmp( pszStringForNonSSE, pszStringForSSE ) );
-
-        util::string::ToLowercase( pszStringForNonSSE );
-        util::string::ToLowercase_SSE( pszStringForSSE );
-
-        TEST_EXPECT( !strcmp( pszStringForNonSSE, pszStringForSSE ) );
-
-        util::string::ToUppercase( pszStringForNonSSE );
-        util::string::ToUppercase_SSE( pszStringForSSE );
-
-        TEST_EXPECT( !strcmp( pszStringForNonSSE, pszStringForSSE ) );
-        TEST_EXPECT( !strcmp( pszStringForSSE, UPPERCASE_TEXT ) );
-
-        TEST_EXPECT( util::string::Length( pszStringForNonSSE ) == strlen( UPPERCASE_TEXT ) );
-        TEST_EXPECT( util::string::Length_SSE( pszStringForSSE ) == strlen( UPPERCASE_TEXT ) );
-
-        return true;
-    }
-#endif // #if USE_TESTS

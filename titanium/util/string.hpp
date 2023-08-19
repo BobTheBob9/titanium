@@ -1,6 +1,7 @@
 #pragma once
 
 #include "titanium/util/numerics.hpp"
+#include "titanium/util/data/span.hpp"
 
 /*
 
@@ -9,17 +10,12 @@ Functions for more easily performing common string operations
 */
 namespace util::string
 {
-    char * AllocForSIMD( const size_t nChars );
-
-    int Length( char *const pszStringToCheck );
-    int Length_SSE( char *const pa16szStringToCheck );
-
-    void CopyTo( const char *const pszSource, char *const pszDestinationBuffer );
-    void CopyTo_SSE( const char *const pa16szSource, char *const pa16szDestinationBuffer );
-
-    void ToLowercase( char *const pszStringToConvert );
-    void ToLowercase_SSE( char *const pa16szStringToConvert );
-
-    void ToUppercase( char *const pszStringToConvert );
-    void ToUppercase_SSE( char *const pa16szStringToConvert );
+    int LengthOfCString( const char *const pszString );
+    int LengthOfCStringWithTerminator( const char *const pszString );
+    int LengthOfSpanString( const util::data::Span<char> spszString );
+    void CopyTo( const char *const pszSource, util::data::Span<char> spszDestinationBuffer );
+    void ConcatinateTo( const char* const pszSource, util::data::Span<char> spszDestinationBuffer );
+    void ToLowercase( char *const pszString );
+    void ToUppercase( char *const pszString );
+    bool CStringsEqual( const char *const pszFirstString, const char *const pszSecondString );
 };

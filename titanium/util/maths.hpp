@@ -24,10 +24,12 @@ namespace util::maths
     static_assert( sizeof( Vec3<f32> ) == sizeof( f32 ) * 3 );
 
     template<typename T> requires util::templateconstraints::Arithmetic<T>
-    struct Matrix4x4
+    using Matrix4x4 = T[ 4 ][ 4 ]; 
+
+    Matrix4x4 Matrix4x4_Multiply( const Matrix4x4 mat4x4First, const Matrix4x4 mat4x4Second )
     {
-        
-    };
+        //return 
+    }
 
     // TODO: would be good if we had a (compile time!!!) way to take a variable number of args to these
     // TODO: is this even faster branchless? need a way to check assembly of func

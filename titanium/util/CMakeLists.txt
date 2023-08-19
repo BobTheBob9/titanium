@@ -2,6 +2,7 @@
 include_directories(*)
 add_sources(
     string.cpp
+    commandline.cpp
 )
 
 # util/data contains core data structures used across titanium

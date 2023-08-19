@@ -31,6 +31,8 @@ namespace util::data
         
         R_IndexOf_s IndexOf( const T tFindValue, const FnFindComparator fnComparator = DefaultFind ) const;
         bool Contains( const T tFindValue, const FnFindComparator fnComparator = DefaultFind ) const;
+
+        Span<T, TSize> Offset( const TSize nOffset );
     };  
 }
 

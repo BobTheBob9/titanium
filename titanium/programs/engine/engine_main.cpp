@@ -4,6 +4,7 @@
 
 #include "titanium/util/commandline.hpp"
 #include "titanium/util/string.hpp"
+#include "titanium/memory/mem_core.hpp"
 
 // systems that need initialising
 #include "titanium/sys/platform/sdl/sys_sdl.hpp"
