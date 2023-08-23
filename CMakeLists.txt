@@ -35,13 +35,13 @@ option( BUILD_SHARED_LIBS OFF )
 add_subdirectory( extern/assimp )
 
 # core subdirectories
-add_subdirectory( titanium )
+add_subdirectory( libtitanium )
 
 get_property(SRCS GLOBAL PROPERTY _SRCS)
 message(${SRCS})
 
 # TODO: VERY TEMP! this should be done in a fancy way of some kind
-add_executable( titanium_bin titanium/programs/engine/engine_main.cpp ${SRCS} )
+add_executable( titanium_bin game/game_main.cpp ${SRCS} )
 
 include_directories( titanium_bin ${SDL2_INCLUDE_DIRS} )
 target_link_libraries( titanium_bin webgpu assimp ${SDL2_LIBRARIES} )
