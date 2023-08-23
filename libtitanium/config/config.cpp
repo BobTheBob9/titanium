@@ -89,10 +89,9 @@ namespace config
         Var<bool> * pCvar = *Var<bool>::s_vpcvarVarsForType.GetAt( 0 );
         logger::Info( "%s" ENDL, pCvar->V_GetName() ); // logs dev:runtests, as expected
         IVarAny * pCvarAny = pCvar; // upcast, Var<bool> inherits IVarAny
-        IVarAny cvar = *pCvarAny;
-        logger::Info( "%s" ENDL, cvar.V_GetName() );
-        
         logger::Info( "%s" ENDL, pCvarAny->V_GetName() ); // segfaults, what????
+
+        // sanity checks over, actual functionality resumes
 
         for ( int i = 0; i < g_vpcvarConfigVarsUserFacing.Length(); i++ )
         {
