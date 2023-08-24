@@ -19,7 +19,7 @@ namespace config
 
     template <typename T> Var<T> * RegisterVar( const char *const pszVarName, const T tDefaultValue, const EFVarUsageFlags efVarFlags )
     {
-        Var<T> * pcvarNewVar = memory::alloc_nT<Var<T>>( 1 );
+        Var<T> * pcvarNewVar = memory::alloc_nT<Var<T>>( 1 ); new( pcvarNewVar ) Var<T>; // need to manually initialise anything with a vtable
         pcvarNewVar->efVarFlags = efVarFlags;
         util::string::CopyTo( pszVarName, util::data::Span<char>( sizeof( pcvarNewVar->szName ), pcvarNewVar->szName ) );
         pcvarNewVar->Set( tDefaultValue, EFVarSetFlags::SKIP_ALL_CHECKS );
@@ -30,18 +30,10 @@ namespace config
         return pcvarNewVar;
     }
 
-   //template <typename T> const char *const Var<T>::V_GetName() const
-   //{
-   //    logger::Info( "WHAT!" ENDL );
-   //    return szName;
-   //}
-
-    template <> const char *const Var<bool>::V_GetName() const
+    template <typename T> const char *const Var<T>::V_GetName() const
     {
-        logger::Info( "WHAT!" ENDL );
         return szName;
     }
-
 
 
     template <> EVarSetResult Var<bool>::Set( const bool tValue, const EFVarSetFlags efVarSetFlags ) 
@@ -83,16 +75,6 @@ namespace config
 
     IVarAny * FindVarUntyped( const char *const pszVarName )
     {
-        // sanity checks (currently, insanity seems probable!):
-
-        // IVarAny is an entirely abstract class, all methods on it = 0, Var<T> overrides it
-        Var<bool> * pCvar = *Var<bool>::s_vpcvarVarsForType.GetAt( 0 );
-        logger::Info( "%s" ENDL, pCvar->V_GetName() ); // logs dev:runtests, as expected
-        IVarAny * pCvarAny = pCvar; // upcast, Var<bool> inherits IVarAny
-        logger::Info( "%s" ENDL, pCvarAny->V_GetName() ); // segfaults, what????
-
-        // sanity checks over, actual functionality resumes
-
         for ( int i = 0; i < g_vpcvarConfigVarsUserFacing.Length(); i++ )
         {
             if ( util::string::CStringsEqual( pszVarName, ( *g_vpcvarConfigVarsUserFacing.GetAt( i ) )->V_GetName() ) )
