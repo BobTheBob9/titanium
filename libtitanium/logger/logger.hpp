@@ -20,5 +20,3 @@ namespace logger
 };
 
 #define LOG_CALL( func ) logger::Info( "Call: " #func " in " __FILE__ ENDL ); func
-
-#define LOG_SCOPE( ... )  

@@ -6,19 +6,19 @@
 
 namespace memory
 {
-    int nAllocs = 0; // temp: need atomic
+    static int s_nAllocs = 0; // temp: need atomic
 
     void* alloc(const size_t nBytes, const MemPool *const pMemPool, const std::source_location location)
     {
         // TODO: mempool and logging logic
-        nAllocs++;
+        s_nAllocs++;
         return ::malloc( nBytes );
     }
 
     void free(void* pMemoryToFree, const MemPool *const pMemPool, const std::source_location location)
     {
         // TODO: mempool and logging logic
-        nAllocs--;
+        s_nAllocs--;
         ::free( pMemoryToFree );
     }
 
@@ -28,5 +28,5 @@ namespace memory
         return ::realloc( pMemoryToRealloc, nNewSize );
     }
 
-    int GetAllocs() { return nAllocs; }
+    int GetAllocs() { return s_nAllocs; }
 }

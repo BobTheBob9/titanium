@@ -6,13 +6,13 @@
 
 void logger::Info( const char *const pFmt, ... )
 {
+    char szBuf[ 4096 ];
     va_list vargs;
     va_start( vargs, pFmt );
-
-    char szbuf[ 4096 ];
-    vsprintf( szbuf, pFmt, vargs );
-
+    {
+        vsprintf( szBuf, pFmt, vargs );
+    }
     va_end( vargs );
 
-    printf( "%s", szbuf );
+    printf( "%s", szBuf );
 }

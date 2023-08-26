@@ -13,6 +13,7 @@
 #include "libtitanium/jobsystem/jobs_api.hpp"
 #include "libtitanium/logger/logger.hpp"
 #include "libtitanium/renderer/renderer_api.hpp"
+#include "libtitanium/imgui_widgets/widgets.hpp"
 
 #include "libtitanium/dev/tests.hpp"
 
@@ -22,6 +23,8 @@
 
 config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
+
+config::Var<bool> * g_pbcvarShowImguiDemo = config::RegisterVar<bool>( "dev:imguidemo", false, config::EFVarUsageFlags::NONE );
 
 int main( const int nArgs, const char *const *const ppszArgs )
 {
@@ -55,6 +58,60 @@ int main( const int nArgs, const char *const *const ppszArgs )
     io.DisplaySize.x = 1600;
     io.DisplaySize.y = 900;
     ImGui_ImplSDL2_InitForVulkan( psdlWindow ); // TODO: looking at the ImGui_ImplSDL2_InitFor* funcs, they're all pretty much identical (so doesn't matter which one we call), but sucks that we can't determine this at runtime atm
+
+    // init style
+    ImGuiStyle *const pImguiStyle = &ImGui::GetStyle();
+
+    pImguiStyle->Colors[ImGuiCol_Text]                   = ImVec4(0.81f, 0.81f, 0.81f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_TextDisabled]           = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_TextSelectedBg]         = ImVec4(0.12f, 0.37f, 0.75f, 0.50f);
+    pImguiStyle->Colors[ImGuiCol_WindowBg]               = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ChildBg]                = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_PopupBg]                = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_Border]                 = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_BorderShadow]           = ImVec4(0.04f, 0.04f, 0.04f, 0.64f);
+    pImguiStyle->Colors[ImGuiCol_FrameBg]                = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_FrameBgHovered]         = ImVec4(0.19f, 0.19f, 0.19f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_FrameBgActive]          = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_TitleBg]                = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_TitleBgActive]          = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_TitleBgCollapsed]       = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_MenuBarBg]              = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ScrollbarBg]            = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ScrollbarGrab]          = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ScrollbarGrabHovered]   = ImVec4(0.53f, 0.53f, 0.53f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ScrollbarGrabActive]    = ImVec4(0.63f, 0.63f, 0.63f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_CheckMark]              = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_SliderGrab]             = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_SliderGrabActive]       = ImVec4(0.53f, 0.53f, 0.53f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_Button]                 = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ButtonHovered]          = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ButtonActive]           = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_Header]                 = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_HeaderHovered]          = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_HeaderActive]           = ImVec4(0.53f, 0.53f, 0.53f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_Separator]              = ImVec4(0.53f, 0.53f, 0.57f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_SeparatorHovered]       = ImVec4(0.53f, 0.53f, 0.53f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_SeparatorActive]        = ImVec4(0.63f, 0.63f, 0.63f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ResizeGrip]             = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ResizeGripHovered]      = ImVec4(0.52f, 0.52f, 0.52f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_ResizeGripActive]       = ImVec4(0.63f, 0.63f, 0.63f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_Tab]                    = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_TabHovered]             = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+    pImguiStyle->Colors[ImGuiCol_TabActive]              = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
+
+    pImguiStyle->WindowBorderSize  = 0.0f;
+    pImguiStyle->FrameBorderSize   = 1.0f;
+    pImguiStyle->ChildBorderSize   = 1.0f;
+    pImguiStyle->PopupBorderSize   = 1.0f;
+    pImguiStyle->TabBorderSize     = 1.0f;
+
+    pImguiStyle->WindowRounding    = 4.0f;
+    pImguiStyle->FrameRounding     = 1.0f;
+    pImguiStyle->ChildRounding     = 1.0f;
+    pImguiStyle->PopupRounding     = 3.0f;
+    pImguiStyle->TabRounding       = 1.0f;
+    pImguiStyle->ScrollbarRounding = 1.0f;
 
     renderer::TitaniumPhysicalRenderingDevice renderingDevice {};
     renderer::InitialisePhysicalRenderingDevice( &renderingDevice );
@@ -113,6 +170,10 @@ int main( const int nArgs, const char *const *const ppszArgs )
         rangerRenderable2
     };
 
+    constexpr int CONSOLE_INPUT_SIZE = 512;
+    util::data::Span<char> spszConsoleInput( CONSOLE_INPUT_SIZE, memory::alloc_nT<char>( CONSOLE_INPUT_SIZE ) );
+    memset( spszConsoleInput.m_pData, 0, CONSOLE_INPUT_SIZE );
+
     bool bRunEngine = g_pbcvarRunGame->tValue;
     while ( bRunEngine )
     {
@@ -147,9 +208,75 @@ int main( const int nArgs, const char *const *const ppszArgs )
             }
         }
 
-        renderer::preframe::ImGUI( &rendererState ); 
+        renderer::preframe::ImGUI( &rendererState );
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
+
+        imguiwidgets::Console( spszConsoleInput, []( const util::data::Span<char> spszConsoleInput ){
+            logger::Info( "> %s" ENDL, spszConsoleInput.m_pData );
+
+            util::data::StringBuf<128> szCurrentVar;
+            memset( szCurrentVar.m_szStr, '\0', 128 );
+            int nCurrentVarLastChar = 0;
+            util::data::StringBuf<256> szCurrentValue;
+            memset( szCurrentValue.m_szStr, '\0', 128 );
+            int nCurrentValueLastChar = 0;
+            bool bShouldSetNext = false;
+
+            // parse console input
+            for ( int i = 0; i < spszConsoleInput.m_nElements && spszConsoleInput.m_pData[ i ]; i++ )
+            {
+                const char cCurrentChar = spszConsoleInput.m_pData[ i ];
+                if ( !isspace( cCurrentChar ) )
+                {
+                    if ( cCurrentChar == ';' )
+                    {
+                        // next command
+                    }
+                    else if ( cCurrentChar == '=') // set
+                    {
+                        bShouldSetNext = true;
+                    }
+                    else
+                    {
+                        if ( bShouldSetNext )
+                        {
+                            if ( nCurrentValueLastChar < 255 )
+                            {
+                                szCurrentValue.m_szStr[ nCurrentValueLastChar++ ] = cCurrentChar;
+                            }
+                        }
+                        else
+                        {
+                            if ( nCurrentVarLastChar < 127 )
+                            {
+                                szCurrentVar.m_szStr[ nCurrentVarLastChar++ ] = cCurrentChar;
+                            }
+                        }
+                    }
+                }
+            }
+
+            config::IVarAny *const pVarAny = config::FindVarUntyped( szCurrentVar.ToConstCStr() );
+            if ( pVarAny )
+            {
+                if ( bShouldSetNext )
+                {
+                    pVarAny->V_SetFromString( szCurrentValue.ToConstCStr() );
+                }
+
+                logger::Info( "%s = %s" ENDL, pVarAny->V_GetName(), pVarAny->V_ToString().ToConstCStr() );
+            }
+            else
+            {
+                logger::Info( "Unknown var \"%s\"" ENDL, szCurrentVar.ToConstCStr() );
+            }
+        } );
+
+        if ( g_pbcvarShowImguiDemo->tValue )
+        {
+            ImGui::ShowDemoWindow( &g_pbcvarShowImguiDemo->tValue );
+        }
 
         sRenderableObjects.m_tData[ 0 ].m_vRotation.z = fmod( rendererState.m_nFramesRendered / 50.f, 360 );
 
@@ -162,6 +289,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         renderer::FreeGPUModel( sRenderableObjects.m_tData[ i ].m_gpuModel );
     }
 
+    memory::free( spszConsoleInput.m_pData );
     util::commandline::Free( &caCommandLine );
 
     logger::Info( "%i unfreed allocations" ENDL, memory::GetAllocs() );

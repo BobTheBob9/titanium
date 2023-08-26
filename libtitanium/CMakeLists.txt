@@ -7,5 +7,6 @@ add_subdirectory( sys )
 add_subdirectory( config )
 add_subdirectory( filesystem )
 add_subdirectory( renderer )
+add_subdirectory( imgui_widgets )
 
 include_directories(*)

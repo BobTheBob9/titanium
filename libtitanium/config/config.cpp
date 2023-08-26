@@ -11,7 +11,7 @@ namespace config
     ENUM_FLAGS( EFVarUsageFlags );
 
     // TODO: should be a hashmap or something. This is slow to lookup through
-    util::data::Vector<IVarAny *> g_vpcvarConfigVarsUserFacing;
+    static util::data::Vector<IVarAny *> s_vpcvarConfigVarsUserFacing;
     template <typename T> util::data::Vector<Var<T> *> Var<T>::s_vpcvarVarsForType;
 
     // explicitly declare all types available to the convar templates here, doing this lets us define their implementations in this .cpp file rather than config.hpp
@@ -19,13 +19,15 @@ namespace config
 
     template <typename T> Var<T> * RegisterVar( const char *const pszVarName, const T tDefaultValue, const EFVarUsageFlags efVarFlags )
     {
-        Var<T> * pcvarNewVar = memory::alloc_nT<Var<T>>( 1 ); new( pcvarNewVar ) Var<T>; // need to manually initialise anything with a vtable
+        // TODO: this sucks and is bad, need to reexamine whether we actually need inheritance here
+        // need to manually initialise anything with a vtable (not sure why placement new is needed? idk why *pcvarNewVar = Var<T>() doesnt just work for this)
+        Var<T> * pcvarNewVar = new( memory::alloc_nT<Var<T>>( 1 ) ) Var<T>;
         pcvarNewVar->efVarFlags = efVarFlags;
         util::string::CopyTo( pszVarName, util::data::Span<char>( sizeof( pcvarNewVar->szName ), pcvarNewVar->szName ) );
         pcvarNewVar->Set( tDefaultValue, EFVarSetFlags::SKIP_ALL_CHECKS );
 
         Var<T>::s_vpcvarVarsForType.AppendWithAlloc( pcvarNewVar );
-        g_vpcvarConfigVarsUserFacing.AppendWithAlloc( pcvarNewVar );
+        s_vpcvarConfigVarsUserFacing.AppendWithAlloc( pcvarNewVar );
 
         return pcvarNewVar;
     }
@@ -75,11 +77,11 @@ namespace config
 
     IVarAny * FindVarUntyped( const char *const pszVarName )
     {
-        for ( int i = 0; i < g_vpcvarConfigVarsUserFacing.Length(); i++ )
+        for ( int i = 0; i < s_vpcvarConfigVarsUserFacing.Length(); i++ )
         {
-            if ( util::string::CStringsEqual( pszVarName, ( *g_vpcvarConfigVarsUserFacing.GetAt( i ) )->V_GetName() ) )
+            if ( util::string::CStringsEqual( pszVarName, ( *s_vpcvarConfigVarsUserFacing.GetAt( i ) )->V_GetName() ) )
             {
-                return *g_vpcvarConfigVarsUserFacing.GetAt( i );
+                return *s_vpcvarConfigVarsUserFacing.GetAt( i );
             }
         }
 
