@@ -32,7 +32,7 @@
                             pkgs.vulkan-validation-layers
                             pkgs.SDL2
 
-                            # dawn dependencies6
+                            # dawn dependencies
                             pkgs.xorg.libXrandr
                             pkgs.xorg.libXinerama
                             pkgs.xorg.libXcursor
