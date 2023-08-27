@@ -9,37 +9,47 @@
     outputs = { self, nixpkgs, futils }:
         futils.lib.eachDefaultSystem( system: let pkgs = import nixpkgs { inherit system; };
             in {
-                devShell = pkgs.mkShell rec {
-                    nativeBuildInputs = [
-                        pkgs.cmake
+                packages = {
+                    default = pkgs.stdenv.mkDerivation {
+                        name = "Titanium";
+                        src = ./.;
 
-                        pkgs.clang_16
-                        pkgs.clang-tools_16
-                        pkgs.emscripten
+                        nativeBuildInputs = [
+                            pkgs.cmake
 
-                        pkgs.gdb
+                            pkgs.clang_16
+                            pkgs.clang-tools_16
+                            pkgs.emscripten
 
-                        # dawn dependencies
-                        pkgs.python3
-                        pkgs.pkg-config
-                    ];
+                            # dawn dependencies
+                            pkgs.python3
+                            pkgs.pkg-config
+                        ];
 
-                    buildInputs = [
-                        pkgs.vulkan-headers
-                        pkgs.vulkan-tools
-                        pkgs.vulkan-validation-layers
-                        pkgs.SDL2
+                        buildInputs = [
+                            pkgs.vulkan-headers
+                            pkgs.vulkan-tools
+                            pkgs.vulkan-validation-layers
+                            pkgs.SDL2
 
-                        # dawn dependencies
-                        pkgs.xorg.libXrandr
-                        pkgs.xorg.libXinerama
-                        pkgs.xorg.libXcursor
-                        pkgs.xorg.libXi
-                        pkgs.wayland-protocols
-                        #wayland-client
-                    ];
+                            # dawn dependencies6
+                            pkgs.xorg.libXrandr
+                            pkgs.xorg.libXinerama
+                            pkgs.xorg.libXcursor
+                            pkgs.xorg.libXi
+                            pkgs.wayland-protocols
+                            #wayland-client
+                        ];
+                    };
+                };
 
-                    # we don't load vulkan correctly without this
+                devShell = pkgs.mkShell {
+                    inputsFrom = [ self.packages.${system}.default ];
+
+                    packages = [ pkgs.gdb ];
+
+                    # we don't load vulkan correctly at runtime without this
+                    # TODO: fix
                     LD_LIBRARY_PATH="${pkgs.vulkan-loader}/lib/";
                 };
             }
