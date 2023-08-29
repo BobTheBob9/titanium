@@ -36,6 +36,7 @@ add_subdirectory( extern/assimp )
 
 # core subdirectories
 add_subdirectory( libtitanium )
+add_subdirectory( game )
 
 get_property(SRCS GLOBAL PROPERTY _SRCS)
 message(${SRCS})

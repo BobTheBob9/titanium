@@ -72,4 +72,8 @@ namespace config
 
     template <typename T> Var<T> * FindVar( const char *const pszVarName );
     IVarAny * FindVarUntyped( const char *const pszVarName );
+
+    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<IVarAny*> * o_pspcvarVars );
+
+    void FreeVars();
 };

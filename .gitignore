@@ -1,4 +1,7 @@
 build
 build/*
 
+.cache
+.cache/*
+
 imgui.ini

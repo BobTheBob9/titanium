@@ -18,7 +18,6 @@
                             pkgs.cmake
 
                             pkgs.clang_16
-                            pkgs.clang-tools_16
                             pkgs.emscripten
 
                             # dawn dependencies
@@ -43,10 +42,16 @@
                     };
                 };
 
-                devShell = pkgs.mkShell {
+                devShell = pkgs.mkShell.override { stdenv = pkgs.clang16Stdenv; } {
                     inputsFrom = [ self.packages.${system}.default ];
 
-                    packages = [ pkgs.gdb ];
+                    # dev tools
+                    packages = [
+                        pkgs.lldb
+                        pkgs.clang-tools_16
+                        pkgs.pkg-config
+                        pkgs.compdb
+                    ];
 
                     # we don't load vulkan correctly at runtime without this
                     # TODO: fix

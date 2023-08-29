@@ -21,6 +21,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "game/game_consolecommand.hpp"
+
 config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
 
@@ -172,7 +174,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         rangerRenderable2
     };
 
-    constexpr int CONSOLE_INPUT_SIZE = 512;
+    constexpr int CONSOLE_INPUT_SIZE = 256;
     util::data::Span<char> spszConsoleInput( CONSOLE_INPUT_SIZE, memory::alloc_nT<char>( CONSOLE_INPUT_SIZE ) );
     memset( spszConsoleInput.m_pData, 0, CONSOLE_INPUT_SIZE );
 
@@ -214,66 +216,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        imguiwidgets::Console( spszConsoleInput, []( const util::data::Span<char> spszConsoleInput ){
-            logger::Info( "> %s" ENDL, spszConsoleInput.m_pData );
-
-            util::data::StringBuf<128> szCurrentVar;
-            memset( szCurrentVar.m_szStr, '\0', 128 );
-            int nCurrentVarLastChar = 0;
-            util::data::StringBuf<256> szCurrentValue;
-            memset( szCurrentValue.m_szStr, '\0', 128 );
-            int nCurrentValueLastChar = 0;
-            bool bShouldSetNext = false;
-
-            // parse console input
-            for ( int i = 0; i < spszConsoleInput.m_nElements && spszConsoleInput.m_pData[ i ]; i++ )
-            {
-                const char cCurrentChar = spszConsoleInput.m_pData[ i ];
-                if ( !isspace( cCurrentChar ) )
-                {
-                    if ( cCurrentChar == ';' )
-                    {
-                        // next command
-                    }
-                    else if ( cCurrentChar == '=') // set
-                    {
-                        bShouldSetNext = true;
-                    }
-                    else
-                    {
-                        if ( bShouldSetNext )
-                        {
-                            if ( nCurrentValueLastChar < 255 )
-                            {
-                                szCurrentValue.m_szStr[ nCurrentValueLastChar++ ] = cCurrentChar;
-                            }
-                        }
-                        else
-                        {
-                            if ( nCurrentVarLastChar < 127 )
-                            {
-                                szCurrentVar.m_szStr[ nCurrentVarLastChar++ ] = cCurrentChar;
-                            }
-                        }
-                    }
-                }
-            }
-
-            config::IVarAny *const pVarAny = config::FindVarUntyped( szCurrentVar.ToConstCStr() );
-            if ( pVarAny )
-            {
-                if ( bShouldSetNext )
-                {
-                    pVarAny->V_SetFromString( szCurrentValue.ToConstCStr() );
-                }
-
-                logger::Info( "%s = %s" ENDL, pVarAny->V_GetName(), pVarAny->V_ToString().ToConstCStr() );
-            }
-            else
-            {
-                logger::Info( "Unknown var \"%s\"" ENDL, szCurrentVar.ToConstCStr() );
-            }
-        } );
+        imguiwidgets::Console( spszConsoleInput, nullptr, C_ConsoleAutocomplete, C_ConsoleCommandCompletion );
 
         if ( g_pbcvarShowImguiDemo->tValue )
         {
@@ -292,7 +235,10 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
 
     memory::free( spszConsoleInput.m_pData );
+    config::FreeVars(); // TODO: this sucks
+
     util::commandline::Free( &caCommandLine );
+
 
     logger::Info( "%i unfreed allocations" ENDL, memory::GetAllocs() );
 

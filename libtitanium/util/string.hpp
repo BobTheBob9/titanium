@@ -17,5 +17,6 @@ namespace util::string
     void ConcatinateTo( const char* const pszSource, util::data::Span<char> spszDestinationBuffer );
     void ToLowercase( char *const pszString );
     void ToUppercase( char *const pszString );
+
     bool CStringsEqual( const char *const pszFirstString, const char *const pszSecondString );
 };

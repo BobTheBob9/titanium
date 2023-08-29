@@ -9,7 +9,7 @@
 #include "libtitanium/util/data/staticspan.hpp"
 #include "libtitanium/logger/logger.hpp"
 #include "libtitanium/config/config.hpp"
-#include "libtitanium/renderer/utils/stringify.hpp"
+#include "libtitanium/renderer/stringify.hpp"
 
 #include <chrono> // temp probably, idk if we wanna use this for time
 
@@ -40,7 +40,7 @@ namespace renderer
                 &wgpuAdapterOptions,  
                 []( const WGPURequestAdapterStatus wgpuRequestAdapterStatus, WGPUAdapter wgpuAdapter, const char *const pszMessage, void *const pUserdata ) 
                 {
-                    logger::Info( "wgpuInstanceRequestAdapter returned %s, with message: %s" ENDL, renderer::util::wgpu::RequestAdapterStatusToString( wgpuRequestAdapterStatus ), pszMessage );
+                    logger::Info( "wgpuInstanceRequestAdapter returned %s, with message: %s" ENDL, WGPURequestAdapterStatusToString( wgpuRequestAdapterStatus ), pszMessage );
                     
                     if ( wgpuRequestAdapterStatus == WGPURequestAdapterStatus_Success )
                     {
@@ -61,12 +61,12 @@ namespace renderer
 
             logger::Info( 
                 "Found Adapter: %s %s, using driver %s on %s" ENDL, 
-                renderer::util::wgpu::AdapterTypeToString( wgpuAdapterProperties.adapterType ), 
+                WGPUAdapterTypeToString( wgpuAdapterProperties.adapterType ),
                 wgpuAdapterProperties.name,
 
                 wgpuAdapterProperties.driverDescription,
 
-                renderer::util::wgpu::BackendTypeToString( wgpuAdapterProperties.backendType ) 
+                WGPUBackendTypeToString( wgpuAdapterProperties.backendType )
             );
 
             WGPUSupportedLimits wgpuAdapterLimits;
@@ -146,7 +146,7 @@ namespace renderer
                 for ( int i = 0; i < nFeatures; i++ )
                 {
                     // TODO: track down why we're getting invalid enum values in this
-                    logger::Info( "\t%s" ENDL, renderer::util::wgpu::FeatureNameToString( swgpuFeatures.m_tData[ i ] ) );
+                    logger::Info( "\t%s" ENDL, WGPUFeatureNameToString( swgpuFeatures.m_tData[ i ] ) );
                 } 
             }
         }();
@@ -176,7 +176,7 @@ namespace renderer
     
     void C_WGPUVirtualDeviceHandleUncaughtError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
     {
-        logger::Info( "%s: type: %s, %s" ENDL, __FUNCTION__, renderer::util::wgpu::ErrorTypeToString( ewgpuErrorType ), pszMessage );
+        logger::Info( "%s: type: %s, %s" ENDL, __FUNCTION__, WGPUErrorTypeToString( ewgpuErrorType ), pszMessage );
     }
 
     WGPUSwapChain CreateSwapChainForWindowDimensions( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, const ::util::maths::Vec2<u32> vWindowSize )
@@ -231,7 +231,7 @@ namespace renderer
         };
 
         // TODO: this is a bit spammy, add when we have designated spam logs
-        //logger::Info( "Creating swapchain: width %i, height %i present mode: %s" ENDL, nWindowWidth, nWindowHeight, renderer::util::wgpu::PresentModeToString( wgpuPresentMode ) );
+        //logger::Info( "Creating swapchain: width %i, height %i present mode: %s" ENDL, nWindowWidth, nWindowHeight, WGPUPresentModeToString( wgpuPresentMode ) );
         return wgpuDeviceCreateSwapChain( pRendererState->m_wgpuVirtualDevice, pRendererState->m_wgpuRenderSurface, &wgpuSwapChainDescriptor );
     }
 
@@ -317,7 +317,7 @@ namespace renderer
                 &wgpuVirtualDeviceDescriptor,
                 []( const WGPURequestDeviceStatus wgpuRequestDeviceStatus, WGPUDevice wgpuVirtualDevice, const char *const pszMessage, void *const pUserdata )
                 {
-                    logger::Info( "wgpuRequestDeviceStatus returned %s, with message: %s" ENDL, renderer::util::wgpu::RequestDeviceStatusToString( wgpuRequestDeviceStatus ), pszMessage );
+                    logger::Info( "wgpuRequestDeviceStatus returned %s, with message: %s" ENDL, WGPURequestDeviceStatusToString( wgpuRequestDeviceStatus ), pszMessage );
                     
                     if ( wgpuRequestDeviceStatus == WGPURequestDeviceStatus_Success )
                     {

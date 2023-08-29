@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "libtitanium/memory/mem_core.hpp"
 #include "libtitanium/util/data/span.hpp"
 #include "libtitanium/util/data/vector.hpp"
 
@@ -11,11 +12,12 @@ namespace config
     ENUM_FLAGS( EFVarUsageFlags );
 
     // TODO: should be a hashmap or something. This is slow to lookup through
-    static util::data::Vector<IVarAny *> s_vpcvarConfigVarsUserFacing;
+    static util::data::Vector<IVarAny *> s_vpcvarConfigVarsUntyped;
     template <typename T> util::data::Vector<Var<T> *> Var<T>::s_vpcvarVarsForType;
 
     // explicitly declare all types available to the convar templates here, doing this lets us define their implementations in this .cpp file rather than config.hpp
     template Var<bool> * RegisterVar( const char *const pszVarName, const bool tDefaultValue, const EFVarUsageFlags efVarFlags );
+    template Var<i32> * RegisterVar( const char *const pszVarName, const i32 tDefaultValue, const EFVarUsageFlags efVarFlags );
 
     template <typename T> Var<T> * RegisterVar( const char *const pszVarName, const T tDefaultValue, const EFVarUsageFlags efVarFlags )
     {
@@ -27,7 +29,7 @@ namespace config
         pcvarNewVar->Set( tDefaultValue, EFVarSetFlags::SKIP_ALL_CHECKS );
 
         Var<T>::s_vpcvarVarsForType.AppendWithAlloc( pcvarNewVar );
-        s_vpcvarConfigVarsUserFacing.AppendWithAlloc( pcvarNewVar );
+        s_vpcvarConfigVarsUntyped.AppendWithAlloc( pcvarNewVar );
 
         return pcvarNewVar;
     }
@@ -77,16 +79,23 @@ namespace config
 
     IVarAny * FindVarUntyped( const char *const pszVarName )
     {
-        for ( int i = 0; i < s_vpcvarConfigVarsUserFacing.Length(); i++ )
+        for ( int i = 0; i < s_vpcvarConfigVarsUntyped.Length(); i++ )
         {
-            if ( util::string::CStringsEqual( pszVarName, ( *s_vpcvarConfigVarsUserFacing.GetAt( i ) )->V_GetName() ) )
+            if ( util::string::CStringsEqual( pszVarName, ( *s_vpcvarConfigVarsUntyped.GetAt( i ) )->V_GetName() ) )
             {
-                return *s_vpcvarConfigVarsUserFacing.GetAt( i );
+                return *s_vpcvarConfigVarsUntyped.GetAt( i );
             }
         }
 
         return nullptr;
     }
 
-    //void Register
+    // TODO: this sucks, and doesn't free everything
+    void FreeVars()
+    {
+        for ( int i = 0; i < s_vpcvarConfigVarsUntyped.Length(); i++ )
+        {
+            memory::free( *s_vpcvarConfigVarsUntyped.GetAt( i ) );
+        }
+    }
 };
