@@ -2,20 +2,21 @@
 #include "extern/imgui/imgui_impl_sdl2.h"
 #include "extern/imgui/imgui_impl_wgpu.h"
 
-#include "libtitanium/util/commandline.hpp"
-#include "libtitanium/util/string.hpp"
-#include "libtitanium/memory/mem_core.hpp"
+#include <libtitanium/util/commandline.hpp>
+#include <libtitanium/util/string.hpp>
+#include <libtitanium/util/data/staticspan.hpp>
+#include <libtitanium/memory/mem_core.hpp>
 
 // systems that need initialising
-#include "libtitanium/sys/platform/sdl/sys_sdl.hpp"
-#include "libtitanium/config/config.hpp"
-#include "libtitanium/filesystem/fs_api.hpp"
-#include "libtitanium/jobsystem/jobs_api.hpp"
-#include "libtitanium/logger/logger.hpp"
-#include "libtitanium/renderer/renderer_api.hpp"
-#include "libtitanium/imgui_widgets/widgets.hpp"
+#include <libtitanium/sys/sys_sdl.hpp>
+#include <libtitanium/config/config.hpp>
+#include <libtitanium/filesystem/fs_api.hpp>
+#include <libtitanium/jobsystem/jobs_api.hpp>
+#include <libtitanium/logger/logger.hpp>
+#include <libtitanium/renderer/renderer.hpp>
+#include <libtitanium/imgui_widgets/widgets.hpp>
 
-#include "libtitanium/dev/tests.hpp"
+#include <libtitanium/dev/tests.hpp>
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -48,23 +49,21 @@ int main( const int nArgs, const char *const *const ppszArgs )
         }
     }
 
-    filesystem::Initialise();
+    //filesystem::Initialise();
     //jobsystem::Initialise();
 
-    sys::platform::sdl::Initialise();
+    SDL_Init( SDL_INIT_VIDEO );
     SDL_Window *const psdlWindow = SDL_CreateWindow( "Titanium - SDL + WGPU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1600, 900, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN ); // TODO: do we need SDL_WINDOW_VULKAN/whatever api?
 
     // initialise imgui
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize.x = 1600;
-    io.DisplaySize.y = 900;
     ImGui_ImplSDL2_InitForVulkan( psdlWindow ); // TODO: looking at the ImGui_ImplSDL2_InitFor* funcs, they're all pretty much identical (so doesn't matter which one we call), but sucks that we can't determine this at runtime atm
 
     // init style
     ImGuiStyle *const pImguiStyle = &ImGui::GetStyle();
     [ pImguiStyle ](){
         // classic source vgui-like style
+        // TODO: should be configurable in config files
         pImguiStyle->Colors[ImGuiCol_Text]                   = ImVec4(0.81f, 0.81f, 0.81f, 1.00f);
         pImguiStyle->Colors[ImGuiCol_TextDisabled]           = ImVec4(0.56f, 0.56f, 0.56f, 1.00f);
         pImguiStyle->Colors[ImGuiCol_TextSelectedBg]         = ImVec4(0.12f, 0.37f, 0.75f, 0.50f);

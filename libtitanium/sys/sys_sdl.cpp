@@ -1,7 +1,7 @@
 #include "sys_sdl.hpp"
 
 #include "libtitanium/logger/logger.hpp"
-#include "libtitanium/sys/platform/sdl/stringify.hpp"
+#include "libtitanium/sys/sdl_stringify.hpp"
 
 namespace sys::platform::sdl
 {

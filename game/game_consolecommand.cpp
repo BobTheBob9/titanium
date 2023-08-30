@@ -1,8 +1,7 @@
 #include "game_consolecommand.hpp"
 
-#include "libtitanium/util/data/stringbuf.hpp"
-#include "libtitanium/logger/logger.hpp"
-#include "libtitanium/config/config.hpp"
+#include <libtitanium/logger/logger.hpp>
+#include <libtitanium/config/config.hpp>
 
 #include <string.h>
 #include <ctype.h>

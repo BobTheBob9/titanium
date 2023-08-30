@@ -2,11 +2,11 @@
 
 #include <type_traits>
 
-#include "libtitanium/util/numerics.hpp"
-#include "libtitanium/util/enum_flags.hpp"
-#include "libtitanium/util/data/vector.hpp"
-#include "libtitanium/util/data/stringbuf.hpp"
-#include "libtitanium/util/string.hpp"
+#include <libtitanium/util/numerics.hpp>
+#include <libtitanium/util/enum_flags.hpp>
+#include <libtitanium/util/data/vector.hpp>
+#include <libtitanium/util/data/stringbuf.hpp>
+#include <libtitanium/util/string.hpp>
 
 namespace config
 {

@@ -4,7 +4,6 @@
 #include <type_traits>
 
 #include "libtitanium/util/numerics.hpp"
-#include "libtitanium/util/contract.hpp"
 #include "libtitanium/util/assert.hpp"
 #include "libtitanium/util/data/span.hpp"
 

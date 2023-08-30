@@ -1,20 +1,24 @@
-#include "renderer_api.hpp"
+#include "renderer.hpp"
 
 #include "extern/imgui/imgui.h"
 #include "extern/imgui/imgui_impl_wgpu.h"
 
 #include "libtitanium/util/numerics.hpp"
 #include "libtitanium/util/maths.hpp"
-#include "libtitanium/sys/platform/sdl/sys_sdl.hpp"
+#include "libtitanium/sys/sys_sdl.hpp"
 #include "libtitanium/util/data/staticspan.hpp"
 #include "libtitanium/logger/logger.hpp"
 #include "libtitanium/config/config.hpp"
 #include "libtitanium/renderer/stringify.hpp"
 
 #include <chrono> // temp probably, idk if we wanna use this for time
+#include <webgpu/webgpu.h>
 
 namespace renderer
 {
+    config::Var<bool> * g_pbcvarPreferLowPowerAdapter = config::RegisterVar<bool>( "renderer:device:preferlowpoweradapter", false, config::EFVarUsageFlags::STARTUP );
+    config::Var<bool> * g_pbcvarForceFallbackAdapter = config::RegisterVar<bool>( "renderer:device:forcefallbackadapter", false, config::EFVarUsageFlags::STARTUP );
+
     config::Var<bool> * g_pbcvarShowFps = config::RegisterVar<bool>( "renderer:showfps", false, config::EFVarUsageFlags::NONE );
 
 	void InitialisePhysicalRenderingDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice )
@@ -30,9 +34,28 @@ namespace renderer
         {
             const WGPURequestAdapterOptions wgpuAdapterOptions { 
                 // note: .compatibleSurface could be used here, but we don't have a surface at this point, fortunately it isn't required
-                .powerPreference = WGPUPowerPreference_HighPerformance,
-                .forceFallbackAdapter = false // TODO: make this configurable through config var
+                .powerPreference = g_pbcvarPreferLowPowerAdapter->tValue ? WGPUPowerPreference_LowPower : WGPUPowerPreference_HighPerformance,
+                .forceFallbackAdapter = g_pbcvarForceFallbackAdapter->tValue
             };
+
+            const char * pszLogAdapter = "unknown";
+            if ( wgpuAdapterOptions.forceFallbackAdapter )
+            {
+                pszLogAdapter = "fallback";
+            }
+            else
+            {
+                if ( wgpuAdapterOptions.powerPreference == WGPUPowerPreference_LowPower )
+                {
+                    pszLogAdapter = "low power";
+                }
+                else if ( wgpuAdapterOptions.powerPreference == WGPUPowerPreference_HighPerformance )
+                {
+                    pszLogAdapter = "high performance";
+                }
+            }
+
+            logger::Info( "Requesting %s adapter..." ENDL, pszLogAdapter );
 
 			WGPUAdapter r_wgpuAdapter;
             wgpuInstanceRequestAdapter( 

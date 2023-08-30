@@ -10,3 +10,6 @@
 [submodule "extern/simde-no-tests"]
 	path = extern/simde-no-tests
 	url = https://github.com/simd-everywhere/simde-no-tests
+[submodule "extern/openal-soft"]
+	path = extern/openal-soft
+	url = https://github.com/kcat/openal-soft

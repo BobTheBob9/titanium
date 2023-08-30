@@ -2,9 +2,9 @@
 
 #include <stdio.h>
 
-#include "libtitanium/memory/mem_core.hpp"
-#include "libtitanium/util/data/span.hpp"
-#include "libtitanium/util/data/vector.hpp"
+#include <libtitanium/memory/mem_core.hpp>
+#include <libtitanium/util/data/span.hpp>
+#include <libtitanium/util/data/vector.hpp>
 
 namespace config
 {

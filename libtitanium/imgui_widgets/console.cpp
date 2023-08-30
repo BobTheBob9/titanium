@@ -1,6 +1,5 @@
 #include "widgets.hpp"
 
-#include "libtitanium/logger/logger.hpp"
 #include "libtitanium/config/config.hpp"
 #include "libtitanium/util/data/span.hpp"
 #include "libtitanium/util/data/stringbuf.hpp"
@@ -19,7 +18,7 @@ namespace imguiwidgets
 
             const ImVec2 vWindowSize = ImGui::GetWindowSize();
 
-            ImGui::InputTextMultiline( "##ConsoleLog", "", 0, ImVec2( 0, vWindowSize.y - g_pncvarOutputSize->tValue ), ImGuiInputTextFlags_ReadOnly );
+            ImGui::InputTextMultiline( "##ConsoleLog", util::data::StringBuf<1>(), 0, ImVec2( 0, vWindowSize.y - g_pncvarOutputSize->tValue ), ImGuiInputTextFlags_ReadOnly );
 
             if ( ImGui::InputText( "Input", spszConsoleInput.m_pData, spszConsoleInput.m_nElements, ImGuiInputTextFlags_EnterReturnsTrue ) )
             {
