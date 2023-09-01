@@ -1,7 +1,7 @@
 #pragma once
 
-#include "libtitanium/util/staticinitialise.hpp"
-#include "libtitanium/logger/logger.hpp"
+#include <libtitanium/util/staticinitialise.hpp>
+#include <libtitanium/logger/logger.hpp>
 
 /*
 

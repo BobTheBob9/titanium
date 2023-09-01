@@ -1,17 +1,17 @@
-#include "sys_sdl.hpp"
+#include "platform_sdl.hpp"
 
-#include "libtitanium/logger/logger.hpp"
-#include "libtitanium/sys/sdl_stringify.hpp"
+#include <libtitanium/logger/logger.hpp>
+#include <libtitanium/sys/sdl_stringify.hpp>
 
-namespace sys::platform::sdl
+namespace sys::sdl
 {
-    void Initialise()
+    /*void Initialise()
     {
         SDL_Init( SDL_INIT_VIDEO );
 
-        logger::Info( "sdl runtime version is %s" ENDL, sys::platform::sdl::StringRuntimeVersion().ToConstCStr() );
-        logger::Info( "engine was compiled against sdl version %s" ENDL, sys::platform::sdl::StringCompilationVersion().ToConstCStr() );
-    }
+        logger::Info( "sdl runtime version is %s" ENDL, sys::sdl::StringRuntimeVersion().ToConstCStr() );
+        logger::Info( "engine was compiled against sdl version %s" ENDL, sys::sdl::StringCompilationVersion().ToConstCStr() );
+    }*/
 
     WGPUSurface CreateWGPUSurfaceForWindow( SDL_Window *const psdlWindow, const WGPUInstance wgpuInstance )
     {        
@@ -55,7 +55,7 @@ namespace sys::platform::sdl
             
 #endif // #if _WIN32
 
-        logger::Info( "CreateWebGPUSurfaceForWindow: Windowing backend is %s" ENDL, sys::platform::sdl::SysWMToString( sdlPlatWindowInfo.subsystem ) );
+        logger::Info( "CreateWebGPUSurfaceForWindow: Windowing backend is %s" ENDL, sys::sdl::SysWMToString( sdlPlatWindowInfo.subsystem ) );
         return wgpuInstanceCreateSurface( wgpuInstance, &wgpuSurfaceDesc );
     }
 

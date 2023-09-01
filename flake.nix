@@ -29,7 +29,11 @@
                             pkgs.vulkan-headers
                             pkgs.vulkan-tools
                             pkgs.vulkan-validation-layers
+
                             pkgs.SDL2
+                            pkgs.openalSoft
+                            pkgs.assimp
+                            pkgs.glm
 
                             # dawn dependencies
                             pkgs.xorg.libXrandr
@@ -47,7 +51,7 @@
 
                     # dev tools
                     packages = [
-                        pkgs.lldb
+                        pkgs.gdb # despite using all llvm tools here, i really don't like lldb
                         pkgs.clang-tools_16
                         pkgs.pkg-config
                         pkgs.compdb

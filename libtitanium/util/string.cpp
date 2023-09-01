@@ -1,12 +1,12 @@
 #include "string.hpp"
 
-#include "libtitanium/memory/mem_core.hpp"
-#include "libtitanium/dev/tests.hpp"
-#include "libtitanium/logger/logger.hpp"
-#include "libtitanium/util/maths.hpp"
+#include <libtitanium/memory/mem_core.hpp>
+#include <libtitanium/dev/tests.hpp>
+#include <libtitanium/logger/logger.hpp>
+#include <libtitanium/util/maths.hpp>
 
-#include "extern/simde-no-tests/x86/sse.h"
-#include "extern/simde-no-tests/x86/sse2.h"
+#include <extern/simde-no-tests/x86/sse.h>
+#include <extern/simde-no-tests/x86/sse2.h>
 
 #include <string.h>
 
@@ -64,6 +64,11 @@ namespace util::string
     bool CStringsEqual( const char *const pszFirstString, const char *const pszSecondString )
     {
         return !strcmp( pszFirstString, pszSecondString );
+    }
+
+    bool CStringStartsWith( const char *const pszString, const char *const pszStringToStartWith )
+    {
+        return !strncmp( pszString, pszStringToStartWith, LengthOfCString( pszStringToStartWith ) );
     }
 
     // experimental simd stuff
@@ -187,3 +192,10 @@ namespace util::string
     }
     */
 };
+
+TEST( string )
+{
+    TEST_EXPECT( util::string::CStringStartsWith( "renderer:showfps", "renderer" ) );
+
+    return true;
+}

@@ -57,7 +57,7 @@ namespace config
 
         EFVarUsageFlags efVarFlags;
 
-        char szName[256];
+        char szName[128];
         T tValue;
 
         const char *const ToString() const;
@@ -73,7 +73,7 @@ namespace config
     template <typename T> Var<T> * FindVar( const char *const pszVarName );
     IVarAny * FindVarUntyped( const char *const pszVarName );
 
-    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<IVarAny*> * o_pspcvarVars );
+    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<IVarAny *> * o_pspcvarVars );
 
     void FreeVars();
 };

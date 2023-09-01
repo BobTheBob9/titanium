@@ -3,9 +3,9 @@
 #include <concepts>
 #include <type_traits>
 
-#include "libtitanium/util/numerics.hpp"
-#include "libtitanium/util/assert.hpp"
-#include "libtitanium/util/data/span.hpp"
+#include <libtitanium/util/numerics.hpp>
+#include <libtitanium/util/assert.hpp>
+#include <libtitanium/util/data/span.hpp>
 
 namespace util::data
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libtitanium/util/numerics.hpp"
+#include <libtitanium/util/numerics.hpp>
 
 namespace util::data
 {

@@ -1,15 +1,9 @@
 [submodule "extern/WebGPU-distribution"]
 	path = extern/WebGPU-distribution
 	url = https://github.com/eliemichel/WebGPU-distribution
-[submodule "extern/assimp"]
-	path = extern/assimp
-	url = https://github.com/assimp/assimp
 [submodule "extern/ImGuizmo"]
 	path = extern/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
 [submodule "extern/simde-no-tests"]
 	path = extern/simde-no-tests
 	url = https://github.com/simd-everywhere/simde-no-tests
-[submodule "extern/openal-soft"]
-	path = extern/openal-soft
-	url = https://github.com/kcat/openal-soft

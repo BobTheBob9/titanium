@@ -3,9 +3,9 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
-#include "libtitanium/util/data/stringbuf.hpp"
+#include <libtitanium/util/data/stringbuf.hpp>
 
-namespace sys::platform::sdl
+namespace sys::sdl
 {
     const ::util::data::StringBuf<32> VersionToString( const SDL_version sdlVersion )
     {

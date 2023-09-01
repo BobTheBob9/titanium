@@ -4,9 +4,9 @@
 #include <SDL_syswm.h>
 #include <webgpu/webgpu.h>
 
-#include "libtitanium/util/maths.hpp"
+#include <libtitanium/util/maths.hpp>
 
-namespace sys::platform::sdl
+namespace sys::sdl
 {
     WGPUSurface CreateWGPUSurfaceForWindow( SDL_Window *const psdlWindow, const WGPUInstance wgpuInstance );
     util::maths::Vec2<u32> GetWindowSizeVector( SDL_Window *const psdlWindow );

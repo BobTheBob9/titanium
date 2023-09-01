@@ -3,8 +3,8 @@
 #include <SDL.h>
 #include <webgpu/webgpu.h>
 
-#include "libtitanium/util/maths.hpp"
-#include "libtitanium/util/data/span.hpp"
+#include <libtitanium/util/maths.hpp>
+#include <libtitanium/util/data/span.hpp>
 
 namespace renderer
 {

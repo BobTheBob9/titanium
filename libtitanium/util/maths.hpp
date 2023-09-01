@@ -1,7 +1,7 @@
 #pragma once
 
-#include "libtitanium/util/numerics.hpp"
-#include "libtitanium/util/template_constraints.hpp"
+#include <libtitanium/util/numerics.hpp>
+#include <libtitanium/util/template_constraints.hpp>
 
 namespace util::maths
 {

@@ -2,13 +2,28 @@
 
 #include <libtitanium/logger/logger.hpp>
 #include <libtitanium/config/config.hpp>
+#include <libtitanium/util/data/staticspan.hpp>
 
 #include <string.h>
 #include <ctype.h>
 
-util::data::StringBuf<128> C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, void * pUserData )
+void C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, const util::data::Span<util::data::StringBuf<128>> o_spszAutocompleteItems, void * pCallbackUserData )
 {
-    return util::data::StringBuf<128>();
+    util::data::StaticSpan<config::IVarAny *, 10> scvarUntypedVars {};
+    {
+        util::data::Span<config::IVarAny *> scvarUntypedVarsTemp = scvarUntypedVars.ToSpan(); // temp span to avoid taking address of temp
+        config::FindVarsStartingWith( spszConsoleInput.m_pData, &scvarUntypedVarsTemp );
+    }
+
+    for ( int i = 0; i < scvarUntypedVars.Elements() && scvarUntypedVars.m_tData[ i ]; i++ )
+    {
+        const char *const pszName = scvarUntypedVars.m_tData[i]->V_GetName();
+        if ( !util::string::CStringsEqual( spszConsoleInput.m_pData, pszName ) )
+        {
+            o_spszAutocompleteItems.m_pData[ i ] = scvarUntypedVars.m_tData[i]->V_GetName(); // util::data::StringBuf<128>( "%s = %s", scvarUntypedVars.m_tData[i]->V_GetName(), scvarUntypedVars.m_tData[i]->V_ToString().ToCStr() );
+        }
+
+    }
 }
 
 void C_ConsoleCommandCompletion( const util::data::Span<char> spszConsoleInput, void * pCallbackUserData )

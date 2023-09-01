@@ -1,5 +1,5 @@
 #include <string.h>
-#include "libtitanium/util/maths.hpp"
+#include <libtitanium/util/maths.hpp>
 
 namespace util::data
 {

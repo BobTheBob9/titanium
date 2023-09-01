@@ -3,13 +3,13 @@
 #include "extern/imgui/imgui.h"
 #include "extern/imgui/imgui_impl_wgpu.h"
 
-#include "libtitanium/util/numerics.hpp"
-#include "libtitanium/util/maths.hpp"
-#include "libtitanium/sys/sys_sdl.hpp"
-#include "libtitanium/util/data/staticspan.hpp"
-#include "libtitanium/logger/logger.hpp"
-#include "libtitanium/config/config.hpp"
-#include "libtitanium/renderer/stringify.hpp"
+#include <libtitanium/util/numerics.hpp>
+#include <libtitanium/util/maths.hpp>
+#include <libtitanium/sys/platform_sdl.hpp>
+#include <libtitanium/util/data/staticspan.hpp>
+#include <libtitanium/logger/logger.hpp>
+#include <libtitanium/config/config.hpp>
+#include <libtitanium/renderer/stringify.hpp>
 
 #include <chrono> // temp probably, idk if we wanna use this for time
 #include <webgpu/webgpu.h>
@@ -320,8 +320,8 @@ namespace renderer
         WGPUInstance wgpuInstance = pRendererDevice->m_wgpuInstance;
         WGPUAdapter wgpuAdapter = pRendererDevice->m_wgpuAdapter;
 
-        const ::util::maths::Vec2<u32> vWindowSize = sys::platform::sdl::GetWindowSizeVector( psdlWindow );
-        WGPUSurface wgpuSurface = pRendererState->m_wgpuRenderSurface = sys::platform::sdl::CreateWGPUSurfaceForWindow( psdlWindow, wgpuInstance );
+        const ::util::maths::Vec2<u32> vWindowSize = sys::sdl::GetWindowSizeVector( psdlWindow );
+        WGPUSurface wgpuSurface = pRendererState->m_wgpuRenderSurface = sys::sdl::CreateWGPUSurfaceForWindow( psdlWindow, wgpuInstance );
 
         WGPUTextureFormat wgpuSwapchainFormat;
 #if WEBGPU_BACKEND_WGPU 
@@ -515,13 +515,13 @@ namespace renderer
                                         let flFocalLength = 2.0;
                                         let flNearDist = 0.01;
                                         let flFarDist = 1000.0;
-                                    	let flDivides = 1.0 / ( flFarDist - flNearDist );
+                                        let flDivides = 1.0 / ( flFarDist - flNearDist );
                                         let MProjectFocal = transpose( mat4x4<f32>(
-                                    		    flFocalLength, 0.0,                           0.0,                   0.0,
-                                    		    0.0,           flFocalLength * flAspectRatio, 0.0,                   0.0,
-                                    		    0.0,           0.0,                           flFarDist * flDivides, -flFarDist * flNearDist * flDivides,
-                                    		    0.0,           0.0,                           1.0,                   0.0
-                                    	) );
+                                            flFocalLength, 0.0,                           0.0,                   0.0,
+                                            0.0,           flFocalLength * flAspectRatio, 0.0,                   0.0,
+                                            0.0,           0.0,                           flFarDist * flDivides, -flFarDist * flNearDist * flDivides,
+                                            0.0,           0.0,                           1.0,                   0.0
+                                        ) );
 
                                         var r_out : R_VertexOutput;
                                         r_out.position = MProjectFocal * MViewTransform * MTransformBaseModel * vec4<f32>( vertexPosition, 1.0 );

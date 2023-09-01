@@ -1,7 +1,7 @@
 #include "tests.hpp"
 
-#include "libtitanium/util/data/vector.hpp"
-#include "libtitanium/logger/logger.hpp"
+#include <libtitanium/util/data/vector.hpp>
+#include <libtitanium/logger/logger.hpp>
 
 #if USE_TESTS
 namespace dev::tests

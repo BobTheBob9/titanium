@@ -2,7 +2,7 @@
 
 #include <webgpu/webgpu.h>
 
-#include "libtitanium/util/data/stringbuf.hpp"
+#include <libtitanium/util/data/stringbuf.hpp>
 
 namespace renderer
 {

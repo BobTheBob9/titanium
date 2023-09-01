@@ -8,7 +8,7 @@
 #include <libtitanium/memory/mem_core.hpp>
 
 // systems that need initialising
-#include <libtitanium/sys/sys_sdl.hpp>
+#include <libtitanium/sys/platform_sdl.hpp>
 #include <libtitanium/config/config.hpp>
 #include <libtitanium/filesystem/fs_api.hpp>
 #include <libtitanium/jobsystem/jobs_api.hpp>
@@ -23,6 +23,8 @@
 #include <assimp/postprocess.h>
 
 #include "game/game_consolecommand.hpp"
+
+#include <AL/al.h>
 
 config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
@@ -194,7 +196,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
                         {
                             case SDL_WINDOWEVENT_SIZE_CHANGED:
                             {
-                                renderer::preframe::ResolutionChanged( &renderingDevice, &rendererState, sys::platform::sdl::GetWindowSizeVector( psdlWindow ) );
+                                renderer::preframe::ResolutionChanged( &renderingDevice, &rendererState, sys::sdl::GetWindowSizeVector( psdlWindow ) );
                                 break;
                             }
                         }
@@ -237,7 +239,6 @@ int main( const int nArgs, const char *const *const ppszArgs )
     config::FreeVars(); // TODO: this sucks
 
     util::commandline::Free( &caCommandLine );
-
 
     logger::Info( "%i unfreed allocations" ENDL, memory::GetAllocs() );
 

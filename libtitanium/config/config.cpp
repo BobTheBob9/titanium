@@ -90,6 +90,18 @@ namespace config
         return nullptr;
     }
 
+    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<IVarAny *> * o_pspcvarVars )
+    {
+        int nFoundVars = 0;
+        for ( int i = 0; i < s_vpcvarConfigVarsUntyped.Length() && nFoundVars < o_pspcvarVars->m_nElements; i++ )
+        {
+            if ( util::string::CStringStartsWith( ( *s_vpcvarConfigVarsUntyped.GetAt( i ) )->V_GetName(), pszVarSearchString ) )
+            {
+                o_pspcvarVars->m_pData[ nFoundVars++ ] = *s_vpcvarConfigVarsUntyped.GetAt( i );
+            }
+        }
+    }
+
     // TODO: this sucks, and doesn't free everything
     void FreeVars()
     {

@@ -3,12 +3,12 @@
 #include <concepts>
 #include <string.h>
 
-#include "libtitanium/memory/mem_core.hpp"
-#include "libtitanium/util/numerics.hpp"
-#include "libtitanium/util/data/span.hpp"
-#include "libtitanium/util/assert.hpp"
+#include <libtitanium/memory/mem_core.hpp>
+#include <libtitanium/util/numerics.hpp>
+#include <libtitanium/util/data/span.hpp>
+#include <libtitanium/util/assert.hpp>
 
-#include "libtitanium/dev/tests.hpp"
+#include <libtitanium/dev/tests.hpp>
 
 namespace util::data
 {

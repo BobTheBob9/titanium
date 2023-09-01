@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libtitanium/logger/logger.hpp"
+#include <libtitanium/logger/logger.hpp>
 
 namespace assert
 {
