@@ -24,8 +24,6 @@
 
 #include "game/game_consolecommand.hpp"
 
-#include <AL/al.h>
-
 config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
 

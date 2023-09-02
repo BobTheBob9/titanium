@@ -1,7 +1,5 @@
 #pragma once
 
-#include <config/config.hpp>
-
 #include <libtitanium/util/data/span.hpp>
 #include <libtitanium/util/data/stringbuf.hpp>
 

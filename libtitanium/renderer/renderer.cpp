@@ -3,6 +3,8 @@
 #include "extern/imgui/imgui.h"
 #include "extern/imgui/imgui_impl_wgpu.h"
 
+#include <cstddef>
+#include <glm/ext/matrix_float4x4.hpp>
 #include <libtitanium/util/numerics.hpp>
 #include <libtitanium/util/maths.hpp>
 #include <libtitanium/sys/platform_sdl.hpp>
@@ -14,12 +16,42 @@
 #include <chrono> // temp probably, idk if we wanna use this for time
 #include <webgpu/webgpu.h>
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtx/euler_angles.hpp>
+
+
+// TODO: the renderer is super complex and will only get more complex, it should really be split into multiple files
+// atm, code is a bit unwieldly, hard to navigate and understand at a glance which sucks
+
 namespace renderer
 {
     config::Var<bool> * g_pbcvarPreferLowPowerAdapter = config::RegisterVar<bool>( "renderer:device:preferlowpoweradapter", false, config::EFVarUsageFlags::STARTUP );
     config::Var<bool> * g_pbcvarForceFallbackAdapter = config::RegisterVar<bool>( "renderer:device:forcefallbackadapter", false, config::EFVarUsageFlags::STARTUP );
 
+    config::Var<bool> * g_pbcvarPreferImmediatePresent = config::RegisterVar<bool>( "renderer:preferimmediatepresent", false, config::EFVarUsageFlags::NONE );
+
     config::Var<bool> * g_pbcvarShowFps = config::RegisterVar<bool>( "renderer:showfps", false, config::EFVarUsageFlags::NONE );
+
+    // TODO: temp structs
+    #pragma pack( push, 16 )
+    struct UShaderGlobals
+    {
+        glm::mat4x4 m_mat4fCameraTransform;
+        float m_flTime;
+        u32 pad;
+        ::util::maths::Vec2<u32> m_vWindowSize;
+    };
+    #pragma pack( pop, 16 )
+    static_assert( sizeof( UShaderGlobals ) % 16 == 0 );
+
+    #pragma pack( push, 16 )
+    struct UShaderStandardVars
+    {
+        glm::mat4x4 m_mat4fBaseTransform;
+    };
+    #pragma pack( pop, 16 )
+    static_assert( sizeof( UShaderStandardVars ) % 16 == 0 );
 
 	void InitialisePhysicalRenderingDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice )
     {
@@ -174,28 +206,6 @@ namespace renderer
             }
         }();
     }
-
-    // TODO: temp structs
-    #pragma pack( push, 16 )
-    struct UShaderGlobals
-    {
-        float m_flTime;
-        u32 ok;
-        ::util::maths::Vec2<u32> m_vWindowSize;
-    };
-    #pragma pack( pop, 16 )
-    static_assert( sizeof( UShaderGlobals ) % 16 == 0 );
-
-    #pragma pack( push, 16 )
-    struct UShaderStandardVars
-    {
-        ::util::maths::Vec3<f32> m_vPosition;
-        f32 pad0;
-        ::util::maths::Vec3<f32> m_vRotation;
-        f32 pad1;
-    };
-    #pragma pack( pop, 16 )
-    static_assert( sizeof( UShaderStandardVars ) % 16 == 0 );
     
     void C_WGPUVirtualDeviceHandleUncaughtError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
     {
@@ -205,7 +215,7 @@ namespace renderer
     WGPUSwapChain CreateSwapChainForWindowDimensions( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, const ::util::maths::Vec2<u32> vWindowSize )
     {
         // get supported surface present modes, ideally take the preferred one, but if that's not available, get the default supported
-        WGPUPresentMode wgpuPreferredPresentMode = WGPUPresentMode_Fifo; // TODO: make configurable
+        WGPUPresentMode wgpuPreferredPresentMode = g_pbcvarPreferImmediatePresent->tValue ? WGPUPresentMode_Immediate : WGPUPresentMode_Fifo; // TODO: make configurable
         const WGPUPresentMode wgpuPresentMode = wgpuPreferredPresentMode; 
 
         // TODO: this is nonstandard, need a proper way to do it
@@ -385,7 +395,7 @@ namespace renderer
 
             WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( wgpuVirtualDevice, &wgpuUniformBufferDescriptor );   
 
-            // wrute defaults
+            // write defaults
             UShaderGlobals uDefaultShaderGlobals { .m_vWindowSize = vWindowSize };
             wgpuQueueWriteBuffer( wgpuQueue, wgpuUniformBuffer, 0, &uDefaultShaderGlobals, sizeof( uDefaultShaderGlobals ) ); 
 
@@ -436,14 +446,14 @@ namespace renderer
 
                                     struct UShaderGlobals
                                     {
+                                        mat4fCameraTransform : mat4x4<f32>,
                                         flTime : f32,
                                         vWindowSize : vec2<u32>
                                     };
 
                                     struct UShaderStandardVars
                                     {
-                                        vRootPosition : vec3<f32>,
-                                        vRootRotation : vec3<f32>
+                                        mat4fBaseTransform : mat4x4<f32>
                                     };
 
                                     @group( 0 ) @binding( 0 ) var<uniform> u_globals : UShaderGlobals;
@@ -457,44 +467,13 @@ namespace renderer
 
                                     @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> R_VertexOutput
                                     {
-                                        // offset input vertex position and rotation by the object's position
-                                        let flObjectZC = cos( u_standardInput.vRootRotation.z );
-                                        let flObjectZS = sin( u_standardInput.vRootRotation.z );
-                                        let flObjectYC = cos( u_standardInput.vRootRotation.y );
-                                        let flObjectYS = sin( u_standardInput.vRootRotation.y );
-                                        let flObjectXC = cos( u_standardInput.vRootRotation.x );
-                                        let flObjectXS = sin( u_standardInput.vRootRotation.x );
-                                        let MTransformBaseModel =                          
-                                        transpose( mat4x4<f32>(
-                                            1.0, 0.0, 0.0, u_standardInput.vRootPosition.x,
-                                            0.0, 1.0, 0.0, u_standardInput.vRootPosition.y,
-                                            0.0, 0.0, 1.0, u_standardInput.vRootPosition.z,
-                                            0.0, 0.0, 0.0, 1.0
-                                        ) ) *
-                                        transpose( mat4x4<f32>( 
-                                            flObjectYC * flObjectZC,                                        flObjectYC * flObjectZS,                                        -flObjectYS,             0.0,
-                                            flObjectYS * flObjectXS * flObjectZC - flObjectZS * flObjectXC, flObjectZS * flObjectYS * flObjectXS + flObjectZC * flObjectXC, flObjectXS * flObjectYC, 0.0,
-                                            flObjectYS * flObjectXC * flObjectZC + flObjectZS * flObjectXS, flObjectZS * flObjectYS * flObjectXC - flObjectZC * flObjectYS, flObjectXC * flObjectYC, 0.0,
-                                            0.0,                                                            0.0,                                                            0.0,                     1.0
-                                        ) );
-
-
-                                        let flObjectAngle = u_globals.flTime;
-                                        let flObjectAngleC = cos( flObjectAngle );
-                                        let flObjectAngleS = sin( flObjectAngle );
-
-                                        //let MModelTransform 
-
-                                        // base translation
-
-
                                         let flViewAngle = 3.0 * PI / 4.0; // three 8th of turn (1 turn = 2 pi)
                                         let flViewAngleC = cos( flViewAngle );
                                         let flViewAngleS = sin( flViewAngle );
 
                                         let vFocalPoint = vec3<f32>( 0.0, 0.0, 200.0 );
 
-                                        let MViewTransform = 
+                                        let MViewTransform =
                                         // focal point
                                         transpose( mat4x4<f32> (
                                             1.0, 0.0, 0.0, vFocalPoint.x,
@@ -504,7 +483,7 @@ namespace renderer
                                         ) ) *
 
                                         // rotate the viewpoint in the YZ plane
-                                        transpose( mat4x4<f32> ( 
+                                        transpose( mat4x4<f32> (
                                             1.0, 0.0,           0.0,            0.0,
                                             0.0, flViewAngleC,  flViewAngleS,   0.0,
                                             0.0, -flViewAngleS, flViewAngleC,   0.0,
@@ -524,7 +503,7 @@ namespace renderer
                                         ) );
 
                                         var r_out : R_VertexOutput;
-                                        r_out.position = MProjectFocal * MViewTransform * MTransformBaseModel * vec4<f32>( vertexPosition, 1.0 );
+                                        r_out.position = MProjectFocal * MViewTransform * u_standardInput.mat4fBaseTransform * vec4<f32>( vertexPosition, 1.0 );
                                         r_out.colour = vec3<f32>( 1.0, 1.0, 1.0 ); // r_out.position.xyz * cos( u_globals.flTime );
 
                                         return r_out;
@@ -765,7 +744,7 @@ namespace renderer
             ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
             if ( ImGui::Begin( "Debug Info", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize ) )
             {
-                ImGui::Text( "%.0f FPS", 1 / fsecFrameDiff );
+                ImGui::Text( "%.0f FPS (%fms)", 1 / fsecFrameDiff, fsecFrameDiff * 1000.f );
                 ImGui::Text( "Frame %i", pRendererState->m_nFramesRendered );
             }
             ImGui::End();
@@ -817,9 +796,14 @@ namespace renderer
 
             for ( int i = 0; i < sRenderableObjects.m_nElements; i++ )
             {
-                // TODO: should check if we need to write this (dirty bit), and also write more efficiently (1 call, not 2)
-                wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, sRenderableObjects.m_pData[ i ].m_standardUniforms.m_wgpuBuffer, offsetof( UShaderStandardVars, m_vPosition ), &sRenderableObjects.m_pData[ i ].m_vPosition, sizeof( ::util::maths::Vec3<f32> ) );
-                wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, sRenderableObjects.m_pData[ i ].m_standardUniforms.m_wgpuBuffer, offsetof( UShaderStandardVars, m_vRotation ), &sRenderableObjects.m_pData[ i ].m_vRotation, sizeof( ::util::maths::Vec3<f32> ) );
+                const RenderableObject *const pRenderableObject = &sRenderableObjects.m_pData[ i ];
+
+
+                // TODO: should check if we need to write this (dirty bit)
+                glm::mat4x4 mat4fTransform = glm::eulerAngleXYZ( pRenderableObject->m_vRotation.x, pRenderableObject->m_vRotation.y, pRenderableObject->m_vRotation.z );
+                glm::translate( mat4fTransform, glm::vec3( pRenderableObject->m_vPosition.x, pRenderableObject->m_vPosition.y, pRenderableObject->m_vPosition.z  ) );
+
+                wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, sRenderableObjects.m_pData[ i ].m_standardUniforms.m_wgpuBuffer, offsetof( UShaderStandardVars, m_mat4fBaseTransform ), &mat4fTransform, sizeof( mat4fTransform ) );
 
                 wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 1, sRenderableObjects.m_pData[ i ].m_standardUniforms.m_wgpuBindGroup, 0, nullptr );
 
