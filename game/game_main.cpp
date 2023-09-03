@@ -10,8 +10,8 @@
 // systems that need initialising
 #include <libtitanium/sys/platform_sdl.hpp>
 #include <libtitanium/config/config.hpp>
-#include <libtitanium/filesystem/fs_api.hpp>
-#include <libtitanium/jobsystem/jobs_api.hpp>
+#include <libtitanium/filesystem/filesystem.hpp>
+#include <libtitanium/jobsystem/jobsystem.hpp>
 #include <libtitanium/logger/logger.hpp>
 #include <libtitanium/renderer/renderer.hpp>
 #include <libtitanium/imgui_widgets/widgets.hpp>
@@ -23,6 +23,7 @@
 #include <assimp/postprocess.h>
 
 #include "game_consolecommand.hpp"
+#include "util/maths.hpp"
 
 config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
@@ -122,7 +123,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
     renderer::TitaniumRendererState rendererState {};
     renderer::Initialise( &renderingDevice, &rendererState, psdlWindow );
 
-    renderer::RenderView rendererMainView {};
+    renderer::RenderView rendererMainView { .m_vCameraPosition = util::maths::Vec3<f32>( 0.f, 0.f, 200.f ) };
     renderer::CreateRenderView( &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
 
     #if USE_TESTS
@@ -164,10 +165,11 @@ int main( const int nArgs, const char *const *const ppszArgs )
     };
     CreateRenderableObjectBuffers( &rendererState, &rangerRenderable );
 
+    renderer::GPUModelHandle boxGPUModel = fnLoadAssimpModel( "mp_box.bsp.gltf" );
     renderer::RenderableObject rangerRenderable2 {
         .m_vPosition {},
-        .m_vRotation { .y = 90.f },
-        .m_gpuModel = rangerGPUModel
+        .m_vRotation {},
+        .m_gpuModel = boxGPUModel
     };
     CreateRenderableObjectBuffers( &rendererState, &rangerRenderable2 );
 

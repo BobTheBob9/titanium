@@ -92,6 +92,7 @@ target_sources( libtitanium_renderer INTERFACE
     ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer_device.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer_resource.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer_object.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer_stringify.cpp
 )
 target_link_libraries( libtitanium_renderer INTERFACE libtitanium_util libtitanium_config libtitanium_logger imgui )

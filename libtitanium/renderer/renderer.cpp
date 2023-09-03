@@ -1,8 +1,11 @@
 #include "renderer.hpp"
+#include "renderer_uniforms.hpp"
 
 #include "extern/imgui/imgui.h"
 #include "extern/imgui/imgui_impl_wgpu.h"
 
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/vector_float3.hpp>
 #include <libtitanium/util/numerics.hpp>
 #include <libtitanium/util/maths.hpp>
 #include <libtitanium/sys/platform_sdl.hpp>
@@ -142,25 +145,7 @@ namespace renderer
         return wgpuDeviceCreateBindGroupLayout( pRendererState->m_wgpuVirtualDevice, &wgpuUniformBindGroupLayoutDescriptor );
     }
 
-    #pragma pack( push, 16 )
-    struct UShaderView
-    {
-        // // TODO: this should probably have the current time, but it doesn't seem necessary currently
 
-        glm::mat4x4 m_mat4fCameraTransform;
-        util::maths::Vec2<u32> m_vWindowSize;
-        u64 pad;
-    };
-    #pragma pack( pop, 16 )
-    static_assert( sizeof( UShaderView ) % 16 == 0 );
-
-    #pragma pack( push, 16 )
-    struct UShaderObjectInstance
-    {
-        glm::mat4x4 m_mat4fBaseTransform;
-    };
-    #pragma pack( pop, 16 )
-    static_assert( sizeof( UShaderObjectInstance ) % 16 == 0 );
 
     void Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow )
     {
@@ -255,19 +240,19 @@ namespace renderer
                     .code = R"(
                                 const PI = 3.14159265359;
 
-                                struct UShaderGlobals
+                                struct UShaderView
                                 {
                                     mat4fCameraTransform : mat4x4<f32>,
                                     vWindowSize : vec2<u32>
                                 };
 
-                                struct UShaderStandardVars
+                                struct UShaderObjectInstance
                                 {
                                     mat4fBaseTransform : mat4x4<f32>
                                 };
 
-                                @group( 0 ) @binding( 0 ) var<uniform> u_globals : UShaderGlobals;
-                                @group( 1 ) @binding( 0 ) var<uniform> u_standardInput : UShaderStandardVars;
+                                @group( 0 ) @binding( 0 ) var<uniform> u_view : UShaderView;
+                                @group( 1 ) @binding( 0 ) var<uniform> u_object : UShaderObjectInstance;
 
                                 struct R_VertexOutput
                                 {
@@ -277,51 +262,16 @@ namespace renderer
 
                                 @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> R_VertexOutput
                                 {
-                                    let flViewAngle = 3.0 * PI / 4.0; // three 8th of turn (1 turn = 2 pi)
-                                    let flViewAngleC = cos( flViewAngle );
-                                    let flViewAngleS = sin( flViewAngle );
-
-                                    let vFocalPoint = vec3<f32>( 0.0, 0.0, 200.0 );
-
-                                    let MViewTransform =
-                                    // focal point
-                                    transpose( mat4x4<f32> (
-                                        1.0, 0.0, 0.0, vFocalPoint.x,
-                                        0.0, 1.0, 0.0, vFocalPoint.y,
-                                        0.0, 0.0, 1.0, vFocalPoint.z,
-                                        0.0, 0.0, 0.0, 1.0
-                                    ) ) *
-
-                                    // rotate the viewpoint in the YZ plane
-                                    transpose( mat4x4<f32> (
-                                        1.0, 0.0,           0.0,            0.0,
-                                        0.0, flViewAngleC,  flViewAngleS,   0.0,
-                                        0.0, -flViewAngleS, flViewAngleC,   0.0,
-                                        0.0, 0.0,           0.0,            1.0
-                                    ) );
-
-                                    let flAspectRatio = f32( u_globals.vWindowSize.x ) / f32( u_globals.vWindowSize.y );
-                                    let flFocalLength = 2.0;
-                                    let flNearDist = 0.01;
-                                    let flFarDist = 1000.0;
-                                    let flDivides = 1.0 / ( flFarDist - flNearDist );
-                                    let MProjectFocal = transpose( mat4x4<f32>(
-                                        flFocalLength, 0.0,                           0.0,                   0.0,
-                                        0.0,           flFocalLength * flAspectRatio, 0.0,                   0.0,
-                                        0.0,           0.0,                           flFarDist * flDivides, -flFarDist * flNearDist * flDivides,
-                                        0.0,           0.0,                           1.0,                   0.0
-                                    ) );
-
                                     var r_out : R_VertexOutput;
-                                    r_out.position = MProjectFocal * MViewTransform * u_standardInput.mat4fBaseTransform * vec4<f32>( vertexPosition, 1.0 );
-                                    r_out.colour = vec3<f32>( 1.0, 1.0, 1.0 ); // r_out.position.xyz * cos( u_globals.flTime );
+                                    r_out.position = u_view.mat4fCameraTransform * u_object.mat4fBaseTransform * vec4<f32>( vertexPosition, 1.0 );
+                                    r_out.colour = vec3<f32>( 1.0, 1.0, 1.0 ); // r_out.position.xyz * cos( u_view.flTime );
 
                                     return r_out;
                                 }
 
                                 @fragment fn fs_main( in : R_VertexOutput ) -> @location( 0 ) vec4<f32>
                                 {
-                                    return vec4<f32>( in.position.xyz, 1.0 ); // vec4<f32>( pow( in.colour + ( sin( u_globals.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
+                                    return vec4<f32>( in.position.xyz, 1.0 ); // vec4<f32>( pow( in.colour + ( sin( u_view.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
                                 }
                             )"
                 };
@@ -430,46 +380,12 @@ namespace renderer
             *static_cast<bool *>( bPipelineCompilationFailed ) = true;
         }, &bPipelineCompilationFailed );
 
+        // TODO: should this be a part of the RenderView?
         pRendererState->m_depthTextureAndView = CreateDepthTextureAndViewForWindowSize( pRendererState, vWindowSize );
         logger::Info( "wgpu renderer initialised successfully!" ENDL );
     }
 
-	void CreateRenderView( TitaniumRendererState *const pRendererState, RenderView *const pRenderView,  const util::maths::Vec2<u32> vWindowSize )
-    {
-        WGPUBufferDescriptor wgpuUniformBufferDescriptor {
-            .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform,
-            .size = sizeof( UShaderView )
-        };
 
-        WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuUniformBufferDescriptor );
-
-        // write defaults
-        UShaderView uDefaultShaderGlobals { .m_vWindowSize = vWindowSize };
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, wgpuUniformBuffer, 0, &uDefaultShaderGlobals, sizeof( uDefaultShaderGlobals ) );
-
-        WGPUBindGroupEntry wgpuBinding {
-            .binding = 0,
-            .buffer = wgpuUniformBuffer,
-            .offset = 0,
-            .size = sizeof( UShaderView )
-        };
-
-        WGPUBindGroupDescriptor wgpuBindGroupDescriptor {
-            .layout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderView,
-            .entryCount = 1, // keep same as wgpuBindGroupLayoutDescriptor.entryCount!
-            .entries = &wgpuBinding
-        };
-
-        WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
-
-        pRenderView->m_bGPUDirty = true;
-        pRenderView->m_viewUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
-    }
-
-	void FreeRenderView( RenderView *const pRenderView )
-    {
-
-    }
 
     void preframe::ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize )
     {
@@ -488,42 +404,7 @@ namespace renderer
         ImGui_ImplWGPU_NewFrame();
     }
 
-    void CreateRenderableObjectBuffers( TitaniumRendererState *const pRendererState, RenderableObject *const pRenderableObject )
-    {
-        // TODO: this method of creating buffers kind of sucks, would be nice if there was a way to just map these to c structs at runtime
-        WGPUBufferDescriptor wgpuStandardUniformBufferDescriptor {
-            .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform,
-            .size = sizeof( UShaderObjectInstance )
-        };
 
-        WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuStandardUniformBufferDescriptor );
-
-        WGPUBindGroupEntry wgpuBinding {
-            .binding = 0,
-            .buffer = wgpuUniformBuffer,
-            .offset = 0,
-            .size = sizeof( UShaderObjectInstance )
-        };
-
-        WGPUBindGroupDescriptor wgpuBindGroupDescriptor {
-            .layout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderObjectInstance,
-            .entryCount = 1,
-            .entries = &wgpuBinding
-        };
-
-        WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
-
-        pRenderableObject->m_bGPUDirty = true;
-        pRenderableObject->m_objectUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
-    }
-
-    void FreeRenderableObjectBuffers( RenderableObject *const pRenderableObject )
-    {
-        wgpuBindGroupRelease( pRenderableObject->m_objectUniforms.m_wgpuBindGroup );
-
-        wgpuBufferDestroy( pRenderableObject->m_objectUniforms.m_wgpuBuffer );
-        wgpuBufferRelease( pRenderableObject->m_objectUniforms.m_wgpuBuffer );
-    }
 
     void Frame( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::data::Span<RenderableObject> sRenderableObjects )
     {
@@ -533,6 +414,25 @@ namespace renderer
 #elif WEBGPU_BACKEND_DAWN
         wgpuDeviceTick( pRendererState->m_wgpuVirtualDevice );
 #endif 
+
+        // write view state to view uniform if view state has changed
+        if ( pRenderView->m_bGPUDirty )
+        {
+            glm::mat4x4 mat4fViewTransform = glm::eulerAngleXYZ( pRenderView->m_vCameraRotation.x, pRenderView->m_vCameraRotation.y, pRenderView->m_vCameraRotation.z );
+            mat4fViewTransform = glm::translate( mat4fViewTransform, glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
+            mat4fViewTransform = glm::transpose( mat4fViewTransform );
+
+            constexpr float FOV_90_DEG_IN_RADS = 1.5; // TODO: temp
+            constexpr float NEAR_DIST = 0.01;
+            constexpr float FAR_DIST = 1000.0;
+            glm::mat4x4 mat4fFocalProjection = glm::perspective( FOV_90_DEG_IN_RADS, (float)pRenderView->m_vRenderResolution.x / pRenderView->m_vRenderResolution.y, NEAR_DIST, FAR_DIST );
+            mat4fFocalProjection = glm::transpose( mat4fFocalProjection );
+
+            const glm::mat4x4 mat4fCameraTransform = mat4fFocalProjection * mat4fViewTransform;
+            wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_mat4fCameraTransform ), &mat4fCameraTransform, sizeof( mat4fCameraTransform ) );
+
+            pRenderView->m_bGPUDirty = false;
+        }
 
         static auto programTimeBegin = std::chrono::high_resolution_clock::now();
         static float fsecFrameDiff = 0.0f;

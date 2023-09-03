@@ -128,6 +128,5 @@ namespace renderer
 	/*
 	 *  Renders a frame
 	 */
-	// TODO: should have float flCurrentTime parameter
 	void Frame( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::data::Span<RenderableObject> sRenderableObjects );
 };
