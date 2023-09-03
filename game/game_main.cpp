@@ -22,7 +22,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "game/game_consolecommand.hpp"
+#include "game_consolecommand.hpp"
 
 config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
@@ -122,6 +122,9 @@ int main( const int nArgs, const char *const *const ppszArgs )
     renderer::TitaniumRendererState rendererState {};
     renderer::Initialise( &renderingDevice, &rendererState, psdlWindow );
 
+    renderer::RenderView rendererMainView {};
+    renderer::CreateRenderView( &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
+
     #if USE_TESTS
     if ( g_pbcvarRunTests->tValue ) 
     {
@@ -140,7 +143,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         logger::Info( "Model has %i vertices and %i faces" ENDL, passimpLoadedMesh->mNumVertices, passimpLoadedMesh->mNumFaces );
 
         ::util::data::Span<float> sflVertexes( passimpLoadedMesh->mNumVertices * 3, reinterpret_cast<float *>( passimpLoadedMesh->mVertices ) );
-        ::util::data::Span<int> snIndexes( passimpLoadedMesh->mNumFaces * 3, memory::alloc_nT<int>( passimpLoadedMesh->mNumFaces * 3 ) );
+        ::util::data::Span<u16> snIndexes( passimpLoadedMesh->mNumFaces * 3, memory::alloc_nT<u16>( passimpLoadedMesh->mNumFaces * 3 ) );
         for ( int i = 0; i < passimpLoadedMesh->mNumFaces; i++ )
         {
             assert::Release( passimpLoadedMesh->mFaces[ i ].mNumIndices == 3 );
@@ -177,8 +180,8 @@ int main( const int nArgs, const char *const *const ppszArgs )
     util::data::Span<char> spszConsoleInput( CONSOLE_INPUT_SIZE, memory::alloc_nT<char>( CONSOLE_INPUT_SIZE ) );
     memset( spszConsoleInput.m_pData, 0, CONSOLE_INPUT_SIZE );
 
-    bool bRunEngine = g_pbcvarRunGame->tValue;
-    while ( bRunEngine )
+    bool bRunGame = g_pbcvarRunGame->tValue;
+    while ( bRunGame )
     {
         {
             SDL_Event sdlEvent;
@@ -204,7 +207,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
     
                     case SDL_QUIT:
                     {
-                        bRunEngine = false;
+                        bRunGame = false;
                         break;
                     }
                 }
@@ -223,8 +226,9 @@ int main( const int nArgs, const char *const *const ppszArgs )
         }
 
         sRenderableObjects.m_tData[ 0 ].m_vRotation.z = fmod( rendererState.m_nFramesRendered / 50.f, 360 );
+        sRenderableObjects.m_tData[ 0 ].m_bGPUDirty = true; // we've changed the state of the object, we need to tell the renderer to write the new data to the gpu
 
-        renderer::Frame( &rendererState, util::data::Span<renderer::RenderableObject>( sRenderableObjects.Elements(), sRenderableObjects.m_tData ) );
+        renderer::Frame( &rendererState, &rendererMainView, util::data::Span<renderer::RenderableObject>( sRenderableObjects.Elements(), sRenderableObjects.m_tData ) );
     }
 
     // free all loaded models

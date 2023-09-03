@@ -79,6 +79,7 @@ target_include_directories( libtitanium_sys INTERFACE
 )
 target_sources( libtitanium_sys INTERFACE
     ${CMAKE_SOURCE_DIR}/libtitanium/sys/platform_sdl.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/sys/sdl_stringify.cpp
 )
 target_link_libraries( libtitanium_sys INTERFACE libtitanium_util libtitanium_logger )
 
@@ -89,6 +90,9 @@ target_include_directories( libtitanium_renderer INTERFACE
 )
 target_sources( libtitanium_renderer INTERFACE
     ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer_device.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer_resource.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/renderer/renderer_stringify.cpp
 )
 target_link_libraries( libtitanium_renderer INTERFACE libtitanium_util libtitanium_config libtitanium_logger imgui )
 
@@ -107,7 +111,7 @@ target_link_libraries( libtitanium_imguiwidgets INTERFACE imgui libtitanium_util
 # TODO: VERY TEMP! this should be done in a fancy way of some kind
 add_executable( titanium_bin game/game_main.cpp game/game_consolecommand.cpp )
 target_include_directories( titanium_bin PUBLIC ${CMAKE_SOURCE_DIR}/libtitanium ${SDL2_INCLUDE_DIRS} )
-target_link_libraries( titanium_bin PUBLIC webgpu assimp ${SDL2_LIBRARIES} imgui
+target_link_libraries( titanium_bin PUBLIC webgpu assimp openal ${SDL2_LIBRARIES} imgui
     libtitanium_util
     libtitanium_memory
     libtitanium_dev
