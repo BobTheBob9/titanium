@@ -197,7 +197,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
                         {
                             case SDL_WINDOWEVENT_SIZE_CHANGED:
                             {
-                                renderer::preframe::ResolutionChanged( &renderingDevice, &rendererState, sys::sdl::GetWindowSizeVector( psdlWindow ) );
+                                renderer::preframe::ResolutionChanged( &renderingDevice, &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
                                 break;
                             }
                         }

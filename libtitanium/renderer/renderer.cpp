@@ -471,7 +471,7 @@ namespace renderer
 
     }
 
-    void preframe::ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, const util::maths::Vec2<u32> vWindowSize )
+    void preframe::ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize )
     {
         // swapchains rely on the window's resolution, so need to be recreated on window resize
         wgpuSwapChainRelease( pRendererState->m_wgpuSwapChain ); // destroy old swapchain
@@ -480,7 +480,7 @@ namespace renderer
         FreeDepthTextureAndView( &pRendererState->m_depthTextureAndView );
         pRendererState->m_depthTextureAndView = CreateDepthTextureAndViewForWindowSize( pRendererState, vWindowSize );
 
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRendererState->m_globalUniformBuffer.m_wgpuBuffer, offsetof( UShaderView, m_vWindowSize ), &vWindowSize, sizeof( util::maths::Vec2<u32> ) );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_vWindowSize ), &vWindowSize, sizeof( util::maths::Vec2<u32> ) );
     }
 
     void preframe::ImGUI( TitaniumRendererState *const pRendererState )
@@ -592,7 +592,7 @@ namespace renderer
                 // Select render pipeline
                 // TODO: only support 1 render pipeline/bindgroup atm, should support more at some point!
                 wgpuRenderPassEncoderSetPipeline( wgpuRenderPass, pRendererState->m_wgpuObjectRenderPipeline );
-                wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 0, pRendererState->m_globalUniformBuffer.m_wgpuBindGroup, 0, nullptr );
+                wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 0, pRenderView->m_viewUniforms.m_wgpuBindGroup, 0, nullptr );
 
                 for ( int i = 0; i < sRenderableObjects.m_nElements; i++ )
                 {

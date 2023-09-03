@@ -44,8 +44,6 @@ namespace renderer
 		WGPUBindGroupLayout m_wgpuUniformBindGroupLayout_UShaderObjectInstance;
 		WGPURenderPipeline m_wgpuObjectRenderPipeline;
 
-		BufferAndBindgroup m_globalUniformBuffer;
-		
 		int m_nFramesRendered;
 	};
 
@@ -119,7 +117,7 @@ namespace renderer
 		/*
 		 *  Remakes swap chains etc for a new render resolution
 		 */
-    	void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, const util::maths::Vec2<u32> vWindowSize );
+    	void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize );
 
 		/*
 		 *  Calls the imgui preframe function for the current rendering api's imgui backend
