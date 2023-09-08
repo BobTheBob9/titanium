@@ -2,6 +2,8 @@
 #include "extern/imgui/imgui_impl_sdl2.h"
 #include "extern/imgui/imgui_impl_wgpu.h"
 
+#include <SDL_events.h>
+#include <SDL_mouse.h>
 #include <libtitanium/util/commandline.hpp>
 #include <libtitanium/util/string.hpp>
 #include <libtitanium/util/data/staticspan.hpp>
@@ -18,15 +20,12 @@
 
 #include <libtitanium/dev/tests.hpp>
 
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include "game_consolecommand.hpp"
-#include "util/maths.hpp"
+#include "game_loadassimp.hpp"
 
 config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
+config::Var<bool> * g_pbcvarCaptureMouse = config::RegisterVar<bool>( "game:capturemouse", false, config::EFVarUsageFlags::STARTUP );
 
 config::Var<bool> * g_pbcvarShowImguiDemo = config::RegisterVar<bool>( "dev:imguidemo", false, config::EFVarUsageFlags::NONE );
 
@@ -123,8 +122,8 @@ int main( const int nArgs, const char *const *const ppszArgs )
     renderer::TitaniumRendererState rendererState {};
     renderer::Initialise( &renderingDevice, &rendererState, psdlWindow );
 
-    renderer::RenderView rendererMainView { .m_vCameraPosition = util::maths::Vec3<f32>( 0.f, 0.f, 200.f ) };
-    renderer::CreateRenderView( &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
+    renderer::RenderView rendererMainView { .m_vCameraPosition { .x = 0.f, .y = 0.f, .z = 5.f } };
+    renderer::RenderView_Create( &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
 
     #if USE_TESTS
     if ( g_pbcvarRunTests->tValue ) 
@@ -133,58 +132,32 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
     #endif // #if USE_TESTS
 
-    // TEMP: assimp model load
-    auto fnLoadAssimpModel = [ &rendererState ]( const char *const pszModelName ){
-        const aiScene *const passimpLoadedModel = aiImportFile( pszModelName, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_Triangulate );
-        logger::Info( "%s" ENDL, passimpLoadedModel != nullptr ? "Loaded model! c:" : "Didn't load model :c (we will probably crash now)" );
-
-        assert::Release( passimpLoadedModel->mNumMeshes == 1 );
-        const aiMesh *const passimpLoadedMesh = passimpLoadedModel->mMeshes[ 0 ];
-
-        logger::Info( "Model has %i vertices and %i faces" ENDL, passimpLoadedMesh->mNumVertices, passimpLoadedMesh->mNumFaces );
-
-        ::util::data::Span<float> sflVertexes( passimpLoadedMesh->mNumVertices * 3, reinterpret_cast<float *>( passimpLoadedMesh->mVertices ) );
-        ::util::data::Span<u16> snIndexes( passimpLoadedMesh->mNumFaces * 3, memory::alloc_nT<u16>( passimpLoadedMesh->mNumFaces * 3 ) );
-        for ( int i = 0; i < passimpLoadedMesh->mNumFaces; i++ )
-        {
-            assert::Release( passimpLoadedMesh->mFaces[ i ].mNumIndices == 3 );
-
-            snIndexes.m_pData[ i * 3 ] = passimpLoadedMesh->mFaces[ i ].mIndices[ 0 ];
-            snIndexes.m_pData[ i * 3 + 1 ] = passimpLoadedMesh->mFaces[ i ].mIndices[ 1 ];
-            snIndexes.m_pData[ i * 3 + 2 ] = passimpLoadedMesh->mFaces[ i ].mIndices[ 2 ];
-        }
-
-        return renderer::UploadModel( &rendererState, sflVertexes, snIndexes );
-    };
-
-    renderer::GPUModelHandle rangerGPUModel = fnLoadAssimpModel( "Quakeguy_Ranger_Rigged.obj" );
-    renderer::RenderableObject rangerRenderable {
+    renderer::GPUModelHandle hHelmetModel = Assimp_LoadScene( &rendererState, "test_resource/DamagedHelmet.gltf" );
+    renderer::RenderObject renderobjHelmet {
         .m_vPosition {},
         .m_vRotation {},
-        .m_gpuModel = rangerGPUModel
+        .m_gpuModel = hHelmetModel
     };
-    CreateRenderableObjectBuffers( &rendererState, &rangerRenderable );
+    renderer::RenderObject_Create( &rendererState, &renderobjHelmet );
 
-    renderer::GPUModelHandle boxGPUModel = fnLoadAssimpModel( "mp_box.bsp.gltf" );
-    renderer::RenderableObject rangerRenderable2 {
-        .m_vPosition {},
-        .m_vRotation {},
-        .m_gpuModel = boxGPUModel
-    };
-    CreateRenderableObjectBuffers( &rendererState, &rangerRenderable2 );
-
-    util::data::StaticSpan<renderer::RenderableObject, 1> sRenderableObjects {
-        rangerRenderable,
-        rangerRenderable2
+    util::data::StaticSpan<renderer::RenderObject, 1> sRenderObjects {
+        renderobjHelmet,
     };
 
     constexpr int CONSOLE_INPUT_SIZE = 256;
-    util::data::Span<char> spszConsoleInput( CONSOLE_INPUT_SIZE, memory::alloc_nT<char>( CONSOLE_INPUT_SIZE ) );
-    memset( spszConsoleInput.m_pData, 0, CONSOLE_INPUT_SIZE );
+    util::data::StaticSpan<char, CONSOLE_INPUT_SIZE> spszConsoleInput {};
+
+    if ( g_pbcvarCaptureMouse->tValue )
+    {
+        SDL_SetWindowMouseGrab( psdlWindow, SDL_TRUE );
+        SDL_SetRelativeMouseMode( SDL_TRUE );
+    }
 
     bool bRunGame = g_pbcvarRunGame->tValue;
     while ( bRunGame )
     {
+        util::maths::Vec2<i32> vMouseMove {};
+
         {
             SDL_Event sdlEvent;
             while ( SDL_PollEvent( &sdlEvent ) )
@@ -199,14 +172,24 @@ int main( const int nArgs, const char *const *const ppszArgs )
                         {
                             case SDL_WINDOWEVENT_SIZE_CHANGED:
                             {
-                                renderer::preframe::ResolutionChanged( &renderingDevice, &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
+                                renderer::ResolutionChanged( &renderingDevice, &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
                                 break;
                             }
                         }
     
                         break;
                     }
-    
+
+                    /*case SDL_MOUSEMOTION:
+                    {
+                        util::maths::Vec2<u32> vWindowSize = sys::sdl::GetWindowSizeVector( psdlWindow );
+                        SDL_WarpMouseInWindow( psdlWindow, vWindowSize.x / 2, vWindowSize.y / 2 );
+
+                        vMouseMove = { .x = sdlEvent.motion.x - (int)( vWindowSize.x / 2 ), .y = sdlEvent.motion.y - (int)( vWindowSize.y / 2 ) };
+
+                        break;
+                    }*/
+
                     case SDL_QUIT:
                     {
                         bRunGame = false;
@@ -216,30 +199,91 @@ int main( const int nArgs, const char *const *const ppszArgs )
             }
         }
 
-        renderer::preframe::ImGUI( &rendererState );
+        renderer::Preframe_ImGUI( &rendererState );
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        imguiwidgets::Console( spszConsoleInput, nullptr, C_ConsoleAutocomplete, C_ConsoleCommandCompletion );
+        imguiwidgets::Console( spszConsoleInput.ToSpan(), nullptr, C_ConsoleAutocomplete, C_ConsoleCommandCompletion );
 
         if ( g_pbcvarShowImguiDemo->tValue )
         {
             ImGui::ShowDemoWindow( &g_pbcvarShowImguiDemo->tValue );
         }
 
-        sRenderableObjects.m_tData[ 0 ].m_vRotation.z = fmod( rendererState.m_nFramesRendered / 50.f, 360 );
-        sRenderableObjects.m_tData[ 0 ].m_bGPUDirty = true; // we've changed the state of the object, we need to tell the renderer to write the new data to the gpu
+        if ( ImGui::IsKeyDown( ImGuiKey_UpArrow ) )
+        {
+            vMouseMove.y -= 10;
+        }
 
-        renderer::Frame( &rendererState, &rendererMainView, util::data::Span<renderer::RenderableObject>( sRenderableObjects.Elements(), sRenderableObjects.m_tData ) );
+        if ( ImGui::IsKeyDown( ImGuiKey_DownArrow ) )
+        {
+            vMouseMove.y += 10;
+        }
+
+        if ( ImGui::IsKeyDown( ImGuiKey_RightArrow ) )
+        {
+            vMouseMove.x += 10;
+        }
+
+        if ( ImGui::IsKeyDown( ImGuiKey_LeftArrow ) )
+        {
+            vMouseMove.x -= 10;
+        }
+
+        float vfMouseMoveX = vMouseMove.x;
+        float vfMouseMoveY = vMouseMove.y;
+
+        rendererMainView.m_vCameraRotation.x = fmod( rendererMainView.m_vCameraRotation.x + vfMouseMoveX * .1f, 360.f );
+        rendererMainView.m_vCameraRotation.y = fmod( rendererMainView.m_vCameraRotation.y + vfMouseMoveY * .1f, 360.f );
+
+
+        if ( ImGui::IsKeyDown( ImGuiKey_W ) )
+        {
+            rendererMainView.m_vCameraPosition.z += 15.f;
+            rendererMainView.m_bGPUDirty = true;
+        }
+
+        if ( ImGui::IsKeyDown( ImGuiKey_S ) )
+        {
+            rendererMainView.m_vCameraPosition.z -= 15.f;
+            rendererMainView.m_bGPUDirty = true;
+        }
+
+        //rendererMainView.m_vCameraRotation.z = fmod( rendererState.m_nFramesRendered / 50.f, 360 );
+        if ( vMouseMove.x != 0 || vMouseMove.y != 0 )
+        {
+            rendererMainView.m_bGPUDirty = true;
+        }
+
+        //sRenderObjects.m_tData[ 0 ].m_vRotation.z = fmod( rendererState.m_nFramesRendered / 50.f, 360 );
+        sRenderObjects.m_tData[ 0 ].m_bGPUDirty = true; // we've changed the state of the object, we need to tell the renderer to write the new data to the gpu
+
+        if ( imguiwidgets::BeginDebugOverlay() )
+        {
+            ImGui::Text( "Camera: { %f %f %f } { %f %f %f }", rendererMainView.m_vCameraPosition.x, rendererMainView.m_vCameraPosition.y, rendererMainView.m_vCameraPosition.z,
+                                                                   rendererMainView.m_vCameraRotation.x, rendererMainView.m_vCameraRotation.y, rendererMainView.m_vCameraRotation.z );
+
+            ImGui::Text( "Rendering %i objects:", (int)sRenderObjects.Elements() );
+            for ( int i = 0; i < sRenderObjects.Elements(); i++ )
+            {
+                ImGui::Text( "\tObject %i: { %f %f %f } { %f %f %f }", i, sRenderObjects.m_tData[ i ].m_vPosition.x, sRenderObjects.m_tData[ i ].m_vPosition.y, sRenderObjects.m_tData[ i ].m_vPosition.z,
+                           sRenderObjects.m_tData[ i ].m_vRotation.x, sRenderObjects.m_tData[ i ].m_vRotation.y, sRenderObjects.m_tData[ i ].m_vRotation.z );
+            }
+
+            ImGui::End();
+        }
+
+        renderer::Frame( &rendererState, &rendererMainView, util::data::Span<renderer::RenderObject>( sRenderObjects.Elements(), sRenderObjects.m_tData ) );
     }
 
     // free all loaded models
-    for ( int i = 0; i < sRenderableObjects.Elements(); i++ )
+    for ( int i = 0; i < sRenderObjects.Elements(); i++ )
     {
-        renderer::FreeGPUModel( sRenderableObjects.m_tData[ i ].m_gpuModel );
+        // TODO: causes malloc assert seemingly?
+        //renderer::FreeGPUModel( sRenderObjects.m_tData[ i ].m_gpuModel );
+        renderer::RenderObject_Free( &sRenderObjects.m_tData[ i ] );
     }
 
-    memory::free( spszConsoleInput.m_pData );
     config::FreeVars(); // TODO: this sucks
 
     util::commandline::Free( &caCommandLine );

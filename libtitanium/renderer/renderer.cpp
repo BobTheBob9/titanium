@@ -1,4 +1,5 @@
 #include "renderer.hpp"
+#include "imgui_widgets/widgets.hpp"
 #include "renderer_uniforms.hpp"
 
 #include "extern/imgui/imgui.h"
@@ -6,6 +7,7 @@
 
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/vector_float3.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <libtitanium/util/numerics.hpp>
 #include <libtitanium/util/maths.hpp>
 #include <libtitanium/sys/platform_sdl.hpp>
@@ -15,8 +17,11 @@
 #include <libtitanium/renderer/renderer_stringify.hpp>
 
 #include <chrono> // temp probably, idk if we wanna use this for time
+#include <numbers>
 #include <webgpu/webgpu.h>
 
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_LEFT_HANDED
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -238,8 +243,6 @@ namespace renderer
                 WGPUShaderModuleWGSLDescriptor wgpuShaderCodeDescriptor {
                     .chain { .sType = WGPUSType_ShaderModuleWGSLDescriptor },
                     .code = R"(
-                                const PI = 3.14159265359;
-
                                 struct UShaderView
                                 {
                                     mat4fCameraTransform : mat4x4<f32>,
@@ -254,24 +257,14 @@ namespace renderer
                                 @group( 0 ) @binding( 0 ) var<uniform> u_view : UShaderView;
                                 @group( 1 ) @binding( 0 ) var<uniform> u_object : UShaderObjectInstance;
 
-                                struct R_VertexOutput
+                                @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> @builtin( position ) vec4<f32>
                                 {
-                                    @builtin( position ) position : vec4<f32>,
-                                    @location( 0 ) colour : vec3<f32>
-                                };
-
-                                @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> R_VertexOutput
-                                {
-                                    var r_out : R_VertexOutput;
-                                    r_out.position = u_view.mat4fCameraTransform * u_object.mat4fBaseTransform * vec4<f32>( vertexPosition, 1.0 );
-                                    r_out.colour = vec3<f32>( 1.0, 1.0, 1.0 ); // r_out.position.xyz * cos( u_view.flTime );
-
-                                    return r_out;
+                                    return u_view.mat4fCameraTransform * u_object.mat4fBaseTransform * vec4<f32>( vertexPosition, 1.0 );
                                 }
 
-                                @fragment fn fs_main( in : R_VertexOutput ) -> @location( 0 ) vec4<f32>
+                                @fragment fn fs_main( @builtin( position ) in : vec4<f32> ) -> @location( 0 ) vec4<f32>
                                 {
-                                    return vec4<f32>( in.position.xyz, 1.0 ); // vec4<f32>( pow( in.colour + ( sin( u_view.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
+                                    return vec4<f32>( 1.0, 1.0, 1.0, 1.0 ); // vec4<f32>( pow( in.colour + ( sin( u_view.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
                                 }
                             )"
                 };
@@ -387,7 +380,7 @@ namespace renderer
 
 
 
-    void preframe::ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize )
+    void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize )
     {
         // swapchains rely on the window's resolution, so need to be recreated on window resize
         wgpuSwapChainRelease( pRendererState->m_wgpuSwapChain ); // destroy old swapchain
@@ -399,14 +392,14 @@ namespace renderer
         wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_vWindowSize ), &vWindowSize, sizeof( util::maths::Vec2<u32> ) );
     }
 
-    void preframe::ImGUI( TitaniumRendererState *const pRendererState )
+    void Preframe_ImGUI( TitaniumRendererState *const pRendererState )
     {
         ImGui_ImplWGPU_NewFrame();
     }
 
 
 
-    void Frame( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::data::Span<RenderableObject> sRenderableObjects )
+    void Frame( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::data::Span<RenderObject> sRenderObjects )
     {
 #if WEBGPU_BACKEND_WGPU 
         // TODO: what do i actually need here??
@@ -418,20 +411,7 @@ namespace renderer
         // write view state to view uniform if view state has changed
         if ( pRenderView->m_bGPUDirty )
         {
-            glm::mat4x4 mat4fViewTransform = glm::eulerAngleXYZ( pRenderView->m_vCameraRotation.x, pRenderView->m_vCameraRotation.y, pRenderView->m_vCameraRotation.z );
-            mat4fViewTransform = glm::translate( mat4fViewTransform, glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
-            mat4fViewTransform = glm::transpose( mat4fViewTransform );
-
-            constexpr float FOV_90_DEG_IN_RADS = 1.5; // TODO: temp
-            constexpr float NEAR_DIST = 0.01;
-            constexpr float FAR_DIST = 1000.0;
-            glm::mat4x4 mat4fFocalProjection = glm::perspective( FOV_90_DEG_IN_RADS, (float)pRenderView->m_vRenderResolution.x / pRenderView->m_vRenderResolution.y, NEAR_DIST, FAR_DIST );
-            mat4fFocalProjection = glm::transpose( mat4fFocalProjection );
-
-            const glm::mat4x4 mat4fCameraTransform = mat4fFocalProjection * mat4fViewTransform;
-            wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_mat4fCameraTransform ), &mat4fCameraTransform, sizeof( mat4fCameraTransform ) );
-
-            pRenderView->m_bGPUDirty = false;
+            RenderView_WriteToUniformBuffer( pRendererState, pRenderView );
         }
 
         static auto programTimeBegin = std::chrono::high_resolution_clock::now();
@@ -441,13 +421,12 @@ namespace renderer
 
         if ( g_pbcvarShowFps->tValue )
         {
-            ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
-            if ( ImGui::Begin( "Debug Info", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize ) )
+            if ( imguiwidgets::BeginDebugOverlay() )
             {
                 ImGui::Text( "%.0f FPS (%fms)", 1 / fsecFrameDiff, fsecFrameDiff * 1000.f );
                 ImGui::Text( "Frame %i", pRendererState->m_nFramesRendered );
+                ImGui::End();
             }
-            ImGui::End();
         }
 
         ImGui::Render();
@@ -492,29 +471,22 @@ namespace renderer
                 // Select render pipeline
                 // TODO: only support 1 render pipeline/bindgroup atm, should support more at some point!
                 wgpuRenderPassEncoderSetPipeline( wgpuRenderPass, pRendererState->m_wgpuObjectRenderPipeline );
-                wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 0, pRenderView->m_viewUniforms.m_wgpuBindGroup, 0, nullptr );
+                wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, BINDGROUP_RENDERVIEW, pRenderView->m_viewUniforms.m_wgpuBindGroup, 0, nullptr );
 
-                for ( int i = 0; i < sRenderableObjects.m_nElements; i++ )
+                for ( int i = 0; i < sRenderObjects.m_nElements; i++ )
                 {
                     // write object state to object uniform if object state has changed
-                    RenderableObject *const pRenderableObject = &sRenderableObjects.m_pData[ i ];
-                    if ( pRenderableObject->m_bGPUDirty ) // do we need to update the object's state on the gpu?
+                    RenderObject *const pRenderObject = &sRenderObjects.m_pData[ i ];
+                    if ( pRenderObject->m_bGPUDirty ) // do we need to update the object's state on the gpu?
                     {
-                        // TODO: should code be submitting vec3s, or mat4x4s?
-
-                        glm::mat4x4 mat4fTransform = glm::eulerAngleXYZ( pRenderableObject->m_vRotation.x, pRenderableObject->m_vRotation.y, pRenderableObject->m_vRotation.z );
-                        mat4fTransform = glm::translate( mat4fTransform, glm::vec3( pRenderableObject->m_vPosition.x, pRenderableObject->m_vPosition.y, pRenderableObject->m_vPosition.z  ) );
-                        mat4fTransform = glm::transpose( mat4fTransform );
-                        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, sRenderableObjects.m_pData[ i ].m_objectUniforms.m_wgpuBuffer, offsetof( UShaderObjectInstance, m_mat4fBaseTransform ),  &mat4fTransform, sizeof( mat4fTransform ) );
-
-                        pRenderableObject->m_bGPUDirty = false; // gpu has up-to-date state for the object
+                        RenderObject_WriteToUniformBuffer( pRendererState, pRenderObject );
                     }
 
                     // set current object and render
-                    wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, 1, sRenderableObjects.m_pData[ i ].m_objectUniforms.m_wgpuBindGroup, 0, nullptr );
-                    wgpuRenderPassEncoderSetVertexBuffer( wgpuRenderPass, 0, sRenderableObjects.m_pData[ i ].m_gpuModel.m_wgpuVertexBuffer, 0, sRenderableObjects.m_pData[ i ].m_gpuModel.m_nVertexBufferSize );
-                    wgpuRenderPassEncoderSetIndexBuffer( wgpuRenderPass, sRenderableObjects.m_pData[ i ].m_gpuModel.m_wgpuIndexBuffer, WGPUIndexFormat_Uint16, 0, sRenderableObjects.m_pData[ i     ].m_gpuModel.m_nIndexBufferSize );
-                    wgpuRenderPassEncoderDrawIndexed( wgpuRenderPass, sRenderableObjects.m_pData[ i ].m_gpuModel.m_nIndexBufferCount, 1, 0, 0, 0 );
+                    wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, BINDGROUP_RENDEROBJECT, pRenderObject->m_objectUniforms.m_wgpuBindGroup, 0, nullptr );
+                    wgpuRenderPassEncoderSetVertexBuffer( wgpuRenderPass, 0, pRenderObject->m_gpuModel.m_wgpuVertexBuffer, 0, sRenderObjects.m_pData[ i ].m_gpuModel.m_nVertexBufferSize );
+                    wgpuRenderPassEncoderSetIndexBuffer( wgpuRenderPass, pRenderObject->m_gpuModel.m_wgpuIndexBuffer, WGPUIndexFormat_Uint16, 0, sRenderObjects.m_pData[ i     ].m_gpuModel.m_nIndexBufferSize );
+                    wgpuRenderPassEncoderDrawIndexed( wgpuRenderPass, pRenderObject->m_gpuModel.m_nIndexBufferCount, 1, 0, 0, 0 );
                 }
 
                 // imgui

@@ -92,13 +92,14 @@ namespace renderer
 		BufferAndBindgroup m_viewUniforms;
 	};
 
-	void CreateRenderView( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize );
-	void FreeRenderView( RenderView *const pRenderView );
+	void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize );
+	void RenderView_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView );
+	void RenderView_Free( RenderView *const pRenderView );
 
 	/*
 	 *  An object that can be rendered by the renderer
 	 */
-	struct RenderableObject
+	struct RenderObject
 	{
 		bool m_bGPUDirty;
 
@@ -109,24 +110,22 @@ namespace renderer
 		GPUModelHandle m_gpuModel;
 	};
 
-    void CreateRenderableObjectBuffers( TitaniumRendererState *const pRendererState, RenderableObject *const pRenderableObject );
-    void FreeRenderableObjectBuffers( RenderableObject *const pRenderableObject );
+    void RenderObject_Create( TitaniumRendererState *const pRendererState, RenderObject *const pRenderableObject );
+    void RenderObject_Free( RenderObject *const pRenderableObject );
+    void RenderObject_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject );
 
-	namespace preframe
-	{
-		/*
-		 *  Remakes swap chains etc for a new render resolution
-		 */
-    	void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize );
+	/*
+	 *  Remakes swap chains etc for a new render resolution
+	 */
+	void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize );
 
-		/*
-		 *  Calls the imgui preframe function for the current rendering api's imgui backend
-		 */
-		void ImGUI( TitaniumRendererState *const pRendererState );
-	}
+	/*
+	 *  Calls the imgui preframe function for the current rendering api's imgui backend
+	 */
+	void Preframe_ImGUI( TitaniumRendererState *const pRendererState );
 
 	/*
 	 *  Renders a frame
 	 */
-	void Frame( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::data::Span<RenderableObject> sRenderableObjects );
+	void Frame( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::data::Span<RenderObject> sRenderableObjects );
 };

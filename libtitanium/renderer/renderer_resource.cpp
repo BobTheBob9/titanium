@@ -28,10 +28,9 @@ namespace renderer
 
     void FreeGPUModel( GPUModelHandle gpuModel )
     {
-        wgpuBufferDestroy( gpuModel.m_wgpuVertexBuffer );
         wgpuBufferRelease( gpuModel.m_wgpuVertexBuffer );
-
-        wgpuBufferDestroy( gpuModel.m_wgpuIndexBuffer );
         wgpuBufferRelease( gpuModel.m_wgpuIndexBuffer );
+        wgpuBufferDestroy( gpuModel.m_wgpuVertexBuffer );
+        wgpuBufferDestroy( gpuModel.m_wgpuIndexBuffer );
     }
 }

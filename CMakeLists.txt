@@ -105,12 +105,13 @@ target_include_directories( libtitanium_imguiwidgets INTERFACE
 target_sources( libtitanium_imguiwidgets INTERFACE
     ${CMAKE_SOURCE_DIR}/libtitanium/imgui_widgets/console.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/imgui_widgets/resourceprofiler.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/imgui_widgets/debugoverlay.cpp
 )
 target_link_libraries( libtitanium_imguiwidgets INTERFACE imgui libtitanium_util libtitanium_config )
 
 
 # TODO: VERY TEMP! this should be done in a fancy way of some kind
-add_executable( titanium_bin game/game_main.cpp game/game_consolecommand.cpp )
+add_executable( titanium_bin game/game_main.cpp game/game_consolecommand.cpp game/game_loadassimp.cpp )
 target_include_directories( titanium_bin PUBLIC ${CMAKE_SOURCE_DIR}/libtitanium ${SDL2_INCLUDE_DIRS} )
 target_link_libraries( titanium_bin PUBLIC webgpu assimp openal ${SDL2_LIBRARIES} imgui
     libtitanium_util

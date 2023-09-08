@@ -7,6 +7,9 @@
 
 namespace renderer
 {
+    constexpr int BINDGROUP_RENDERVIEW = 0;
+    constexpr int BINDGROUP_RENDEROBJECT = 1;
+
     /*
      *  Builtin renderer uniforms
      *  TODO: need a way to define uniforms from code also

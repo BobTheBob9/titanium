@@ -1,9 +1,13 @@
 #include "renderer.hpp"
 #include "renderer_uniforms.hpp"
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtx/euler_angles.hpp>
+
 namespace renderer
 {
-    void CreateRenderView( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize )
+    void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize )
     {
         // make buffer
         WGPUBufferDescriptor wgpuUniformBufferDescriptor {
@@ -11,13 +15,6 @@ namespace renderer
             .size = sizeof( UShaderView )
         };
         WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuUniformBufferDescriptor );
-
-        // write defaults
-        // TODO: temp, should just do this on m_bGPUDirty
-        // or not? should probably reevaluate how we initialise gpu objects, but regardless it should be the same across all types of object
-        pRenderView->m_vRenderResolution = vWindowSize;
-        UShaderView uDefaultShaderGlobals { .m_vWindowSize = vWindowSize };
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, wgpuUniformBuffer, 0, &uDefaultShaderGlobals, sizeof( uDefaultShaderGlobals ) );
 
         // make binding to buffer
         WGPUBindGroupEntry wgpuBinding {
@@ -33,18 +30,40 @@ namespace renderer
         };
         WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
 
-        pRenderView->m_bGPUDirty = true;
+        pRenderView->m_vRenderResolution = vWindowSize;
         pRenderView->m_viewUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
+
+        RenderView_WriteToUniformBuffer( pRendererState, pRenderView );
     }
 
-	void FreeRenderView( RenderView *const pRenderView )
+	void RenderView_Free( RenderView *const pRenderView )
     {
        wgpuBufferDestroy( pRenderView->m_viewUniforms.m_wgpuBuffer );
        wgpuBufferRelease( pRenderView->m_viewUniforms.m_wgpuBuffer );
        wgpuBindGroupRelease( pRenderView->m_viewUniforms.m_wgpuBindGroup );
     }
 
-    void CreateRenderableObjectBuffers( TitaniumRendererState *const pRendererState, RenderableObject *const pRenderableObject )
+    /*
+     *  Write all modified variables to the renderview's gpu uniform buffer
+     */
+    void RenderView_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
+    {
+        // TODO: investigate why this doesn't need to be transposed
+        glm::mat4x4 R2 = glm::yawPitchRoll( glm::radians( pRenderView->m_vCameraRotation.x ), glm::radians( pRenderView->m_vCameraRotation.y ), glm::radians( pRenderView->m_vCameraRotation.z ) );
+        glm::mat4x4 T2 = glm::translate( R2, -glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
+        glm::mat4x4 MViewTransform = T2;
+
+        f32 flAspectRatio = f32( pRenderView->m_vRenderResolution.x ) / f32( pRenderView->m_vRenderResolution.y );
+        f32 flNearDist = 0.01;
+        f32 flFarDist = 10000.0;
+        glm::mat4x4 MProjectFocal = glm::perspective( 1.5f, flAspectRatio, flNearDist, flFarDist );
+
+        const glm::mat4x4 mat4fCameraTransform = MProjectFocal * MViewTransform;
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_mat4fCameraTransform ), &mat4fCameraTransform, sizeof( mat4fCameraTransform ) );
+        pRenderView->m_bGPUDirty = false;
+    }
+
+    void RenderObject_Create( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
     {
         // make buffer
         // TODO: this method of creating buffers kind of sucks, would be nice if there was a way to just map these to c structs at runtime
@@ -68,14 +87,22 @@ namespace renderer
         };
         WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
 
-        pRenderableObject->m_bGPUDirty = true;
-        pRenderableObject->m_objectUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
+        pRenderObject->m_objectUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
     }
 
-    void FreeRenderableObjectBuffers( RenderableObject *const pRenderableObject )
+    void RenderObject_Free( RenderObject *const pRenderObject )
     {
-        wgpuBufferDestroy( pRenderableObject->m_objectUniforms.m_wgpuBuffer );
-        wgpuBufferRelease( pRenderableObject->m_objectUniforms.m_wgpuBuffer );
-        wgpuBindGroupRelease( pRenderableObject->m_objectUniforms.m_wgpuBindGroup );
+        wgpuBufferDestroy( pRenderObject->m_objectUniforms.m_wgpuBuffer );
+        wgpuBufferRelease( pRenderObject->m_objectUniforms.m_wgpuBuffer );
+        wgpuBindGroupRelease( pRenderObject->m_objectUniforms.m_wgpuBindGroup );
+    }
+
+    void RenderObject_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
+    {
+        glm::mat4x4 mat4fTransform = glm::yawPitchRoll( pRenderObject->m_vRotation.x, pRenderObject->m_vRotation.y, pRenderObject->m_vRotation.z );
+        mat4fTransform = glm::translate( mat4fTransform, glm::vec3( pRenderObject->m_vPosition.x, pRenderObject->m_vPosition.y, pRenderObject->m_vPosition.z  ) );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderObject->m_objectUniforms.m_wgpuBuffer, offsetof( UShaderObjectInstance, m_mat4fBaseTransform ),  &mat4fTransform, sizeof( mat4fTransform ) );
+
+        pRenderObject->m_bGPUDirty = false; // gpu has up-to-date state for the object
     }
 }
