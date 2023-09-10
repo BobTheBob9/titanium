@@ -22,7 +22,7 @@ namespace dev::tests
 #if USE_TESTS
     using FnTest = bool(*)();
     void AddTest( const char *const pszTestName, const FnTest fnTest );
-    void RunTests();
+    bool RunTests();
 
     // Macro that defines a named test function and adds it to the global tests object
     #define TEST( name ) bool __##name##Test(); namespace { static util::StaticInitialise __##name##TestINITIALISER( [](){ dev::tests::AddTest( #name, __##name##Test ); } ); }; bool __##name##Test()

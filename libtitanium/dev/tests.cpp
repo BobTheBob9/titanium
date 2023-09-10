@@ -25,13 +25,19 @@ namespace dev::tests
         s_vTests.AppendWithAlloc( TestEntry( pszTestName, fnTest ) );
     }
 
-    void RunTests()
+    bool RunTests()
     {
         for ( int i = 0; i < s_vTests.Length(); i++ )
         {
             logger::Info( "Running test %s" ENDL, s_vTests.GetAt( i )->m_pszTestName );
-            s_vTests.GetAt( i )->m_fnTest();
+
+            if ( !s_vTests.GetAt( i )->m_fnTest() )
+            {
+                return false;
+            }
         }
+
+        return true;
     }
 }
 #endif // #if USE_TESTS

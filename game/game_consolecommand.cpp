@@ -9,6 +9,11 @@
 
 void C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, const util::data::Span<util::data::StringBuf<128>> o_spszAutocompleteItems, void * pCallbackUserData )
 {
+    if ( !*spszConsoleInput.m_pData )
+    {
+        return;
+    }
+
     util::data::StaticSpan<config::IVarAny *, 10> scvarUntypedVars {};
     {
         util::data::Span<config::IVarAny *> scvarUntypedVarsTemp = scvarUntypedVars.ToSpan(); // temp span to avoid taking address of temp

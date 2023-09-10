@@ -24,6 +24,7 @@
 #include "game_loadassimp.hpp"
 
 config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
+config::Var<bool> * g_pbcvarExitAfterTests = config::RegisterVar<bool>( "dev:exitaftertests", true, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
 config::Var<bool> * g_pbcvarCaptureMouse = config::RegisterVar<bool>( "game:capturemouse", false, config::EFVarUsageFlags::STARTUP );
 
@@ -48,6 +49,18 @@ int main( const int nArgs, const char *const *const ppszArgs )
             pVarAny->V_SetFromString( argIterator.pszValue );
         }
     }
+
+    #if USE_TESTS
+    if ( g_pbcvarRunTests->tValue )
+    {
+        bool bTestResult = dev::tests::RunTests();
+
+        if ( g_pbcvarExitAfterTests->tValue )
+        {
+            return !bTestResult; // TODO: should probably be nonzero if tests fail
+        }
+    }
+    #endif // #if USE_TESTS
 
     //filesystem::Initialise();
     //jobsystem::Initialise();
@@ -124,13 +137,6 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
     renderer::RenderView rendererMainView { .m_vCameraPosition { .x = 0.f, .y = 0.f, .z = 5.f } };
     renderer::RenderView_Create( &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
-
-    #if USE_TESTS
-    if ( g_pbcvarRunTests->tValue ) 
-    {
-        LOG_CALL( dev::tests::RunTests() );
-    }
-    #endif // #if USE_TESTS
 
     renderer::GPUModelHandle hHelmetModel = Assimp_LoadScene( &rendererState, "test_resource/DamagedHelmet.gltf" );
     renderer::RenderObject renderobjHelmet {
@@ -255,7 +261,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
             rendererMainView.m_bGPUDirty = true;
         }
 
-        //sRenderObjects.m_tData[ 0 ].m_vRotation.z = fmod( rendererState.m_nFramesRendered / 50.f, 360 );
+        sRenderObjects.m_tData[ 0 ].m_vRotation.x = fmod( rendererState.m_nFramesRendered / 50.f, 360 );
         sRenderObjects.m_tData[ 0 ].m_bGPUDirty = true; // we've changed the state of the object, we need to tell the renderer to write the new data to the gpu
 
         if ( imguiwidgets::BeginDebugOverlay() )

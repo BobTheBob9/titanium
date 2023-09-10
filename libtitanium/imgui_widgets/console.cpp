@@ -64,7 +64,7 @@ namespace imguiwidgets
                 for ( int i = 0; i < spszAutocompleteItems.Elements() && *spszAutocompleteItems.m_tData[ i ].m_szStr; i++ )
                 {
                     ImGui::PushID( i );
-                    if ( ImGui::Selectable( spszAutocompleteItems.m_tData[ i ].ToCStr(), i == 2 ) )
+                    if ( ImGui::Selectable( spszAutocompleteItems.m_tData[ i ].ToCStr(), false ) )
                     {
                         strcpy( spszConsoleInput.m_pData, spszAutocompleteItems.m_tData[ 0 ].ToCStr() );
                     }
@@ -73,9 +73,5 @@ namespace imguiwidgets
             }
             ImGui::End();
         }
-
-
-
-
     }
 }
