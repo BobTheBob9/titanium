@@ -7,8 +7,10 @@
 
 namespace renderer
 {
-    config::Var<bool> * g_pbcvarPreferLowPowerAdapter = config::RegisterVar<bool>( "renderer:device:preferlowpoweradapter", false, config::EFVarUsageFlags::STARTUP );
-    config::Var<bool> * g_pbcvarForceFallbackAdapter = config::RegisterVar<bool>( "renderer:device:forcefallbackadapter", false, config::EFVarUsageFlags::STARTUP );
+    static bool s_bPreferLowPowerAdapter = false;
+    static bool s_bForceFallbackAdapter = false;
+    config::Var cvarPreferLowPowerAdapter = config::RegisterVar( "renderer::device::preferlowpoweradapter", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bPreferLowPowerAdapter );
+    config::Var cvarForceFallbackAdapter = config::RegisterVar( "renderer::device::forcefallbackadapter", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bForceFallbackAdapter );
 
     void InitialisePhysicalRenderingDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice )
     {
@@ -23,8 +25,8 @@ namespace renderer
         {
             const WGPURequestAdapterOptions wgpuAdapterOptions {
                 // note: .compatibleSurface could be used here, but we don't have a surface at this point, fortunately it isn't required
-                .powerPreference = g_pbcvarPreferLowPowerAdapter->tValue ? WGPUPowerPreference_LowPower : WGPUPowerPreference_HighPerformance,
-                .forceFallbackAdapter = g_pbcvarForceFallbackAdapter->tValue
+                .powerPreference = s_bPreferLowPowerAdapter ? WGPUPowerPreference_LowPower : WGPUPowerPreference_HighPerformance,
+                .forceFallbackAdapter = s_bPreferLowPowerAdapter
             };
 
             const char * pszLogAdapter = "unknown";

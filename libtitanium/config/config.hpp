@@ -40,40 +40,32 @@ namespace config
     };
 
     // interface for querying untyped config vars
-    // NOTE: generally we don't like inheritance, but in this case i'd say it's reasonable
-    class IVarAny
+    struct Var
     {
-    public:
-        virtual const char *const V_GetName() const = 0;
+        char szName[ 128 ];
 
-        virtual void V_SetFromString( const char *const pszValue ) = 0;
-        virtual util::data::StringBuf<128> V_ToString() const = 0;
+        struct SetFuncs
+        {
+            using FnVarToString = void(*)( const void *const pCvarPointer, util::data::Span<char> o_spszOutputBuffer );
+            // TODO: should this even include pCvarPointer?
+            using FnVarSuggestValues = void(*)( const void *const pCvarPointer, const char *const pszIncompleteValue, util::data::Span<util::data::StringBuf<32>> o_sspszOutputBuffer );
+            using FnVarSetFromString = void(*)( void *const pCvarPointer, const char *const pszValue );
+
+            FnVarToString fnToString;
+            FnVarSuggestValues fnSuggestValues;
+            FnVarSetFromString fnSetFromString;
+        } setFuncs;
+
+        void * pValue;
     };
 
-    template <typename T>
-    struct Var : public IVarAny
-    {
-        static util::data::Vector<Var<T> *> s_vpcvarVarsForType;
+    void VarBool_ToString( const void *const pCvarPointer, util::data::Span<char> o_spszOutputBuffer );
+    void VarBool_SuggestValues( const void *const pCvarPointer, const char *const pszIncompleteValue, util::data::Span<util::data::StringBuf<32>> o_sspszOutputBuffer );
+    void VarBool_SetFromString( void *const pCvarPointer, const char *const pszValue );
+    constexpr Var::SetFuncs VARFUNCS_BOOL = { .fnToString = VarBool_ToString, .fnSuggestValues = VarBool_SuggestValues, .fnSetFromString = VarBool_SetFromString };
 
-        EFVarUsageFlags efVarFlags;
-
-        char szName[128];
-        T tValue;
-
-        const char *const ToString() const;
-        EVarSetResult Set( const T tValue, const EFVarSetFlags efVarSetFlags );
-
-        const char *const V_GetName() const override final;
-        void V_SetFromString( const char *const pszValue ) override final;
-        util::data::StringBuf<128> V_ToString() const override final;
-    };
-
-    template <typename T> Var<T> * RegisterVar( const char *const pszVarName, const T tDefaultValue, const EFVarUsageFlags efVarFlags );
-
-    template <typename T> Var<T> * FindVar( const char *const pszVarName );
-    IVarAny * FindVarUntyped( const char *const pszVarName );
-
-    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<IVarAny *> * o_pspcvarVars );
-
-    void FreeVars();
+    Var RegisterVar( const char *const pszName, const EFVarUsageFlags efUsage, Var::SetFuncs setFuncs, void *const pValue );
+    Var * FindVar( const char *const pszVarName );
+    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<Var *> * o_pspcvarVars );
+    void StaticFree();
 };

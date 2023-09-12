@@ -76,6 +76,14 @@ namespace renderer
 	GPUModelHandle UploadModel( TitaniumRendererState *const pRendererState, const util::data::Span<float> sflVertices, const util::data::Span<u16> snIndexes );
 	void FreeGPUModel( GPUModelHandle gpuModel );
 
+	struct GPUTextureHandle
+	{
+
+	};
+
+	GPUTextureHandle UploadTexture();
+	void FreeGPUTexture( GPUTextureHandle gpuTexture );
+
 	/*
 	 *	The code-controlled view through which the scene is rendered
 	 */

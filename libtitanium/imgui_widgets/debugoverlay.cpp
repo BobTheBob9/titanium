@@ -4,11 +4,12 @@
 
 namespace imguiwidgets
 {
-    config::Var<bool> * g_pbcvarRenderDebugOverlays = config::RegisterVar<bool>( "dev:debugoverlays", true, config::EFVarUsageFlags::NONE );
+    static bool s_bShowDebugOverlays = true;
+    config::Var cvarShowDebugOverlays = config::RegisterVar( "dev::debugoverlays", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bShowDebugOverlays );
 
     bool BeginDebugOverlay()
     {
-        if ( g_pbcvarRenderDebugOverlays->tValue )
+        if ( s_bShowDebugOverlays )
         {
             ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
             ImGui::Begin( "Debug Overlay", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize );

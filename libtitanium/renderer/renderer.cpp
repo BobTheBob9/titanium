@@ -32,8 +32,10 @@
 
 namespace renderer
 {
-    config::Var<bool> * g_pbcvarPreferImmediatePresent = config::RegisterVar<bool>( "renderer:preferimmediatepresent", false, config::EFVarUsageFlags::NONE );
-    config::Var<bool> * g_pbcvarShowFps = config::RegisterVar<bool>( "renderer:showfps", false, config::EFVarUsageFlags::NONE );
+    static bool s_bPreferImmmediatePresent = false;
+    static bool s_bShowFps = false;
+    config::Var cvarPreferImmediatePresent = config::RegisterVar( "renderer::preferimmediatepresent", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bPreferImmmediatePresent );
+    config::Var cvarShowFps = config::RegisterVar( "renderer::showfps", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bShowFps );
     
     void C_WGPUVirtualDeviceHandleUncaughtError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
     {
@@ -43,7 +45,7 @@ namespace renderer
     WGPUSwapChain CreateSwapChainForWindowDimensions( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, const util::maths::Vec2<u32> vWindowSize )
     {
         // get supported surface present modes, ideally take the preferred one, but if that's not available, get the default supported
-        WGPUPresentMode wgpuPreferredPresentMode = g_pbcvarPreferImmediatePresent->tValue ? WGPUPresentMode_Immediate : WGPUPresentMode_Fifo; // TODO: make configurable
+        WGPUPresentMode wgpuPreferredPresentMode = s_bPreferImmmediatePresent ? WGPUPresentMode_Immediate : WGPUPresentMode_Fifo; // TODO: make configurable
         const WGPUPresentMode wgpuPresentMode = wgpuPreferredPresentMode; 
 
         // TODO: this is nonstandard, need a proper way to do it
@@ -257,6 +259,8 @@ namespace renderer
                                 @group( 0 ) @binding( 0 ) var<uniform> u_view : UShaderView;
                                 @group( 1 ) @binding( 0 ) var<uniform> u_object : UShaderObjectInstance;
 
+                                //@group( 2 ) @binding( 0 ) var t_baseColour : texture_2d<f32>;
+
                                 @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> @builtin( position ) vec4<f32>
                                 {
                                     return u_view.mat4fCameraTransform * u_object.mat4fBaseTransform * vec4<f32>( vertexPosition, 1.0 );
@@ -419,7 +423,7 @@ namespace renderer
 
         auto timeBegin = std::chrono::high_resolution_clock::now();
 
-        if ( g_pbcvarShowFps->tValue )
+        if ( s_bShowFps )
         {
             if ( imguiwidgets::BeginDebugOverlay() )
             {

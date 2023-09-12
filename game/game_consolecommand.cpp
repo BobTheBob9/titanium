@@ -14,18 +14,18 @@ void C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, const
         return;
     }
 
-    util::data::StaticSpan<config::IVarAny *, 10> scvarUntypedVars {};
+    util::data::StaticSpan<config::Var *, 10> scvarUntypedVars {};
     {
-        util::data::Span<config::IVarAny *> scvarUntypedVarsTemp = scvarUntypedVars.ToSpan(); // temp span to avoid taking address of temp
+        util::data::Span<config::Var *> scvarUntypedVarsTemp = scvarUntypedVars.ToSpan(); // temp span to avoid taking address of temp
         config::FindVarsStartingWith( spszConsoleInput.m_pData, &scvarUntypedVarsTemp );
     }
 
     for ( int i = 0; i < scvarUntypedVars.Elements() && scvarUntypedVars.m_tData[ i ]; i++ )
     {
-        const char *const pszName = scvarUntypedVars.m_tData[i]->V_GetName();
+        const char *const pszName = scvarUntypedVars.m_tData[i]->szName;
         if ( !util::string::CStringsEqual( spszConsoleInput.m_pData, pszName ) )
         {
-            o_spszAutocompleteItems.m_pData[ i ] = scvarUntypedVars.m_tData[i]->V_GetName(); // util::data::StringBuf<128>( "%s = %s", scvarUntypedVars.m_tData[i]->V_GetName(), scvarUntypedVars.m_tData[i]->V_ToString().ToCStr() );
+            o_spszAutocompleteItems.m_pData[ i ] = pszName; // util::data::StringBuf<128>( "%s = %s", scvarUntypedVars.m_tData[i]->V_GetName(), scvarUntypedVars.m_tData[i]->V_ToString().ToCStr() );
         }
 
     }
@@ -77,15 +77,17 @@ void C_ConsoleCommandCompletion( const util::data::Span<char> spszConsoleInput, 
         }
     }
 
-    config::IVarAny *const pVarAny = config::FindVarUntyped( szCurrentVar.ToConstCStr() );
-    if ( pVarAny )
+    config::Var *const pVar = config::FindVar( szCurrentVar.ToConstCStr() );
+    if ( pVar )
     {
         if ( bShouldSetNext )
         {
-            pVarAny->V_SetFromString( szCurrentValue.ToConstCStr() );
+            pVar->setFuncs.fnSetFromString( pVar->pValue, szCurrentValue.ToConstCStr() );
         }
 
-        logger::Info( "%s = %s" ENDL, pVarAny->V_GetName(), pVarAny->V_ToString().ToConstCStr() );
+        util::data::StaticSpan<char, 128> sszValue;
+        pVar->setFuncs.fnToString( pVar->pValue, sszValue.ToSpan() );
+        logger::Info( "%s = %s" ENDL, szCurrentVar.ToConstCStr(), sszValue.m_tData );
     }
     else
     {

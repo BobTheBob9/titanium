@@ -23,12 +23,18 @@
 #include "game_consolecommand.hpp"
 #include "game_loadassimp.hpp"
 
-config::Var<bool> * g_pbcvarRunTests = config::RegisterVar<bool>( "dev:runtests", false, config::EFVarUsageFlags::STARTUP );
-config::Var<bool> * g_pbcvarExitAfterTests = config::RegisterVar<bool>( "dev:exitaftertests", true, config::EFVarUsageFlags::STARTUP );
-config::Var<bool> * g_pbcvarRunGame = config::RegisterVar<bool>( "game:startloop", true, config::EFVarUsageFlags::STARTUP );
-config::Var<bool> * g_pbcvarCaptureMouse = config::RegisterVar<bool>( "game:capturemouse", false, config::EFVarUsageFlags::STARTUP );
+static bool s_bRunTests = false;
+static bool s_bExitAfterTests = true;
+config::Var cvarRunTests = config::RegisterVar( "dev::runtests", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bRunTests );
+config::Var cvarExitAfterTests = config::RegisterVar( "dev::exitaftertests", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bExitAfterTests );
 
-config::Var<bool> * g_pbcvarShowImguiDemo = config::RegisterVar<bool>( "dev:imguidemo", false, config::EFVarUsageFlags::NONE );
+static bool s_bRunGameLoop = true;
+static bool s_bCaptureMouse = false;
+config::Var cvarRunGameLoop = config::RegisterVar( "game::runloop", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bRunGameLoop );
+config::Var cvarCaptureMouse = config::RegisterVar( "game::capturemouse", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bCaptureMouse );
+
+static bool s_bShowImguiDemo = false;
+config::Var cvarShowImguiDemo = config::RegisterVar( "dev::imguidemo", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bShowImguiDemo );
 
 int main( const int nArgs, const char *const *const ppszArgs )
 {
@@ -43,21 +49,24 @@ int main( const int nArgs, const char *const *const ppszArgs )
     util::commandline::R_FindArgumentPair argIterator {};
     while ( ( argIterator = util::commandline::GetNextArgumentPairByWildcard( &caCommandLine, "+", 1, argIterator.pszValue ) ).bFound )
     {
-        config::IVarAny *const pVarAny = config::FindVarUntyped( argIterator.pszKey + 1 );
-        if ( pVarAny )
+        config::Var *const pVar = config::FindVar( argIterator.pszKey + 1 );
+        if ( pVar )
         {
-            pVarAny->V_SetFromString( argIterator.pszValue );
+            pVar->setFuncs.fnSetFromString( pVar->pValue, argIterator.pszValue );
         }
     }
 
     #if USE_TESTS
-    if ( g_pbcvarRunTests->tValue )
+    if ( s_bRunTests )
     {
+        logger::Info( "dev::runtests == true, running tests..." ENDL );
+
         bool bTestResult = dev::tests::RunTests();
 
-        if ( g_pbcvarExitAfterTests->tValue )
+        if ( s_bExitAfterTests )
         {
-            return !bTestResult; // TODO: should probably be nonzero if tests fail
+            logger::Info( "tests are complete and dev::exitaftertests == true, exiting!" ENDL );
+            return !bTestResult;
         }
     }
     #endif // #if USE_TESTS
@@ -153,13 +162,13 @@ int main( const int nArgs, const char *const *const ppszArgs )
     constexpr int CONSOLE_INPUT_SIZE = 256;
     util::data::StaticSpan<char, CONSOLE_INPUT_SIZE> spszConsoleInput {};
 
-    if ( g_pbcvarCaptureMouse->tValue )
+    if ( s_bCaptureMouse )
     {
         SDL_SetWindowMouseGrab( psdlWindow, SDL_TRUE );
         SDL_SetRelativeMouseMode( SDL_TRUE );
     }
 
-    bool bRunGame = g_pbcvarRunGame->tValue;
+    bool bRunGame = s_bRunGameLoop;
     while ( bRunGame )
     {
         util::maths::Vec2<i32> vMouseMove {};
@@ -211,9 +220,9 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         imguiwidgets::Console( spszConsoleInput.ToSpan(), nullptr, C_ConsoleAutocomplete, C_ConsoleCommandCompletion );
 
-        if ( g_pbcvarShowImguiDemo->tValue )
+        if ( s_bShowImguiDemo )
         {
-            ImGui::ShowDemoWindow( &g_pbcvarShowImguiDemo->tValue );
+            ImGui::ShowDemoWindow( &s_bShowImguiDemo );
         }
 
         if ( ImGui::IsKeyDown( ImGuiKey_UpArrow ) )
@@ -290,7 +299,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         renderer::RenderObject_Free( &sRenderObjects.m_tData[ i ] );
     }
 
-    config::FreeVars(); // TODO: this sucks
+    config::StaticFree(); // TODO: this sucks
 
     util::commandline::Free( &caCommandLine );
 

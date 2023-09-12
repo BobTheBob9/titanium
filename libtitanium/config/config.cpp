@@ -1,4 +1,7 @@
 #include "config.hpp"
+#include "util/data/staticspan.hpp"
+#include "util/data/stringbuf.hpp"
+#include "util/string.hpp"
 
 #include <stdio.h>
 
@@ -11,103 +14,79 @@ namespace config
     ENUM_FLAGS( EFVarSetFlags );
     ENUM_FLAGS( EFVarUsageFlags );
 
-    // TODO: should be a hashmap or something. This is slow to lookup through
-    static util::data::Vector<IVarAny *> s_vpcvarConfigVarsUntyped;
-    template <typename T> util::data::Vector<Var<T> *> Var<T>::s_vpcvarVarsForType;
+    static util::data::Vector<Var> s_vcvarVars;
 
-    // explicitly declare all types available to the convar templates here, doing this lets us define their implementations in this .cpp file rather than config.hpp
-    template Var<bool> * RegisterVar( const char *const pszVarName, const bool tDefaultValue, const EFVarUsageFlags efVarFlags );
-    template Var<i32> * RegisterVar( const char *const pszVarName, const i32 tDefaultValue, const EFVarUsageFlags efVarFlags );
-
-    template <typename T> Var<T> * RegisterVar( const char *const pszVarName, const T tDefaultValue, const EFVarUsageFlags efVarFlags )
+    void VarBool_ToString( const void *const pCvarPointer, util::data::Span<char> o_spszOutputBuffer )
     {
-        // TODO: this sucks and is bad, need to reexamine whether we actually need inheritance here
-        // need to manually initialise anything with a vtable (not sure why placement new is needed? idk why *pcvarNewVar = Var<T>() doesnt just work for this)
-        Var<T> * pcvarNewVar = new( memory::alloc_nT<Var<T>>( 1 ) ) Var<T>;
-        pcvarNewVar->efVarFlags = efVarFlags;
-        util::string::CopyTo( pszVarName, util::data::Span<char>( sizeof( pcvarNewVar->szName ), pcvarNewVar->szName ) );
-        pcvarNewVar->Set( tDefaultValue, EFVarSetFlags::SKIP_ALL_CHECKS );
-
-        Var<T>::s_vpcvarVarsForType.AppendWithAlloc( pcvarNewVar );
-        s_vpcvarConfigVarsUntyped.AppendWithAlloc( pcvarNewVar );
-
-        return pcvarNewVar;
+        util::string::CopyTo( *static_cast<const bool *const>( pCvarPointer ) ? "true" : "false", o_spszOutputBuffer );
     }
 
-    template <typename T> const char *const Var<T>::V_GetName() const
+    void VarBool_SuggestValues( const void *const pCvarPointer, const char *const pszIncompleteValue, util::data::Span<util::data::StringBuf<32>> o_sspszOutputBuffer )
     {
-        return szName;
-    }
+        constexpr const char *const BOOL_VALUES[] { "true", "false" };
 
-
-    template <> EVarSetResult Var<bool>::Set( const bool tValue, const EFVarSetFlags efVarSetFlags ) 
-    {
-        this->tValue = tValue;
-        return EVarSetResult::SUCCESS;
-    }
-
-    template <> void Var<bool>::V_SetFromString( const char *const pszValue )
-    {
-        this->Set( util::string::CStringsEqual( pszValue, "true" ) || util::string::CStringsEqual( pszValue, "1" ), EFVarSetFlags::NONE );
-    }
-
-    template <> util::data::StringBuf<128> Var<bool>::V_ToString() const
-    {
-        return this->tValue ? "true" : "false";
-    }
-
-
-    template <> EVarSetResult Var<i32>::Set( const i32 tValue, const EFVarSetFlags efVarSetFlags )
-    {
-        this->tValue = tValue;
-        return EVarSetResult::SUCCESS;
-    }
-
-    template <> void Var<i32>::V_SetFromString( const char *const pszValue )
-    {
-        this->tValue = strtol( pszValue, nullptr, 10 );
-    }
-
-    template <> util::data::StringBuf<128> Var<i32>::V_ToString() const
-    {
-        util::data::StringBuf<128> r_sBuf;
-        sprintf( r_sBuf.ToCStr(), "%i", this->tValue );
-
-        return r_sBuf;
-    }
-
-
-    IVarAny * FindVarUntyped( const char *const pszVarName )
-    {
-        for ( int i = 0; i < s_vpcvarConfigVarsUntyped.Length(); i++ )
+        int nOutputIndex = 0;
+        for ( int i = 0; i < sizeof( BOOL_VALUES ) / sizeof( char * ) && nOutputIndex < o_sspszOutputBuffer.m_nElements; i++ )
         {
-            if ( util::string::CStringsEqual( pszVarName, ( *s_vpcvarConfigVarsUntyped.GetAt( i ) )->V_GetName() ) )
+            if ( util::string::CStringStartsWith( BOOL_VALUES[ i ], pszIncompleteValue ) )
             {
-                return *s_vpcvarConfigVarsUntyped.GetAt( i );
+                o_sspszOutputBuffer.m_pData[ nOutputIndex++ ] = BOOL_VALUES[ i ];
+            }
+        }
+    }
+
+    void VarBool_SetFromString( void *const pCvarPointer, const char *const pszValue )
+    {
+        util::data::StringBuf<32> pszLowercaseValue = pszValue;
+        util::string::ToLowercase( pszLowercaseValue.m_szStr );
+
+        *static_cast<bool* const>( pCvarPointer ) = util::string::CStringsEqual( pszLowercaseValue, "true" ) || atoi( pszLowercaseValue ) > 0;
+    }
+
+
+
+    Var RegisterVar( const char *const pszName, const EFVarUsageFlags efUsage, Var::SetFuncs setFuncs, void *const pValue )
+    {
+        Var cvar {
+            .szName {},
+            .setFuncs = setFuncs,
+            .pValue = pValue
+        };
+
+        util::string::CopyTo( pszName, util::data::Span<char>( sizeof( cvar.szName ), cvar.szName ) );
+
+        s_vcvarVars.AppendWithAlloc( cvar );
+        return cvar;
+    }
+
+    Var * FindVar( const char *const pszVarName )
+    {
+        for ( int i = 0; i < s_vcvarVars.Length(); i++ )
+        {
+            if ( util::string::CStringsEqual( pszVarName, s_vcvarVars.GetAt( i )->szName ) )
+            {
+                return s_vcvarVars.GetAt( i );
             }
         }
 
         return nullptr;
     }
 
-    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<IVarAny *> * o_pspcvarVars )
+    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<Var *> * o_pspcvarVars )
     {
         int nFoundVars = 0;
-        for ( int i = 0; i < s_vpcvarConfigVarsUntyped.Length() && nFoundVars < o_pspcvarVars->m_nElements; i++ )
+        for ( int i = 0; i < s_vcvarVars.Length() && nFoundVars < o_pspcvarVars->m_nElements; i++ )
         {
-            if ( util::string::CStringStartsWith( ( *s_vpcvarConfigVarsUntyped.GetAt( i ) )->V_GetName(), pszVarSearchString ) )
+            if ( util::string::CStringStartsWith( s_vcvarVars.GetAt( i )->szName, pszVarSearchString ) )
             {
-                o_pspcvarVars->m_pData[ nFoundVars++ ] = *s_vpcvarConfigVarsUntyped.GetAt( i );
+                o_pspcvarVars->m_pData[ nFoundVars++ ] = s_vcvarVars.GetAt( i );
             }
         }
     }
 
     // TODO: this sucks, and doesn't free everything
-    void FreeVars()
+    void StaticFree()
     {
-        for ( int i = 0; i < s_vpcvarConfigVarsUntyped.Length(); i++ )
-        {
-            memory::free( *s_vpcvarConfigVarsUntyped.GetAt( i ) );
-        }
+        s_vcvarVars.SetAllocated( 0 );
     }
 };
