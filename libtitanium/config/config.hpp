@@ -43,6 +43,7 @@ namespace config
     struct Var
     {
         char szName[ 128 ];
+        EFVarUsageFlags efUsageFlags;
 
         struct SetFuncs
         {

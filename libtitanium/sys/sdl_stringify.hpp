@@ -10,5 +10,5 @@ namespace sys::sdl
     const ::util::data::StringBuf<32> VersionToString( const SDL_version sdlVersion );
     const ::util::data::StringBuf<32> StringRuntimeVersion();
     const ::util::data::StringBuf<32> StringCompilationVersion();
-    const char *const SysWMToString( const SDL_SYSWM_TYPE esdlWMType );
+    const char * SysWMToString( const SDL_SYSWM_TYPE esdlWMType );
 }

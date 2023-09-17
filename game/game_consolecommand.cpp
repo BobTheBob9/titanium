@@ -9,6 +9,8 @@
 
 void C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, const util::data::Span<util::data::StringBuf<128>> o_spszAutocompleteItems, void * pCallbackUserData )
 {
+    (void)pCallbackUserData;
+
     if ( !*spszConsoleInput.m_pData )
     {
         return;
@@ -20,7 +22,7 @@ void C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, const
         config::FindVarsStartingWith( spszConsoleInput.m_pData, &scvarUntypedVarsTemp );
     }
 
-    for ( int i = 0; i < scvarUntypedVars.Elements() && scvarUntypedVars.m_tData[ i ]; i++ )
+    for ( uint i = 0; i < scvarUntypedVars.Elements() && scvarUntypedVars.m_tData[ i ]; i++ )
     {
         const char *const pszName = scvarUntypedVars.m_tData[i]->szName;
         if ( !util::string::CStringsEqual( spszConsoleInput.m_pData, pszName ) )
@@ -33,6 +35,8 @@ void C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, const
 
 void C_ConsoleCommandCompletion( const util::data::Span<char> spszConsoleInput, void * pCallbackUserData )
 {
+    (void)pCallbackUserData;
+
     logger::Info( "> %s" ENDL, spszConsoleInput.m_pData );
 
     util::data::StringBuf<128> szCurrentVar;
@@ -44,7 +48,7 @@ void C_ConsoleCommandCompletion( const util::data::Span<char> spszConsoleInput, 
     bool bShouldSetNext = false;
 
     // parse console input
-    for ( int i = 0; i < spszConsoleInput.m_nElements && spszConsoleInput.m_pData[ i ]; i++ )
+    for ( uint i = 0; i < spszConsoleInput.m_nElements && spszConsoleInput.m_pData[ i ]; i++ )
     {
         const char cCurrentChar = spszConsoleInput.m_pData[ i ];
         if ( !isspace( cCurrentChar ) )

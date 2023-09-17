@@ -68,6 +68,6 @@ namespace renderer
 
 	void FreeGPUTexture( GPUTextureHandle gpuTexture )
     {
-
+        (void)gpuTexture;
     }
 }

@@ -4,6 +4,8 @@
 
 namespace assert
 {
+    // TODO: this whole file is eh, should rework
+
     /*
     
     Throw an error if condition is not met, even in release!
@@ -26,7 +28,10 @@ namespace assert
     */
     inline void Debug( const bool bCondition, const char * const pMessageFormat = nullptr, ... )
     {
-        // TODO: error
-        if ( !bCondition ) [[ unlikely ]] {}
+        // TODO: temp
+        if ( !bCondition ) [[ unlikely ]]
+        {
+            logger::Info( "assertion failed %s" ENDL, pMessageFormat );
+        }
     }
 };

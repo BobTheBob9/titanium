@@ -10,6 +10,9 @@ namespace memory
 
     void* alloc(const size_t nBytes, const MemPool *const pMemPool, const std::source_location location)
     {
+        (void)pMemPool;
+        (void)location;
+
         // TODO: mempool and logging logic
         s_nAllocs++;
         return ::malloc( nBytes );
@@ -17,6 +20,9 @@ namespace memory
 
     void free(void* pMemoryToFree, const MemPool *const pMemPool, const std::source_location location)
     {
+        (void)pMemPool;
+        (void)location;
+
         // TODO: mempool and logging logic
         s_nAllocs--;
         ::free( pMemoryToFree );
@@ -24,6 +30,9 @@ namespace memory
 
     void* realloc( void *const pMemoryToRealloc, const size_t nNewSize, const MemPool *const pMemPool, const std::source_location location )
     {
+        (void)pMemPool;
+        (void)location;
+
         // TODO: mempool and logging logic
         return ::realloc( pMemoryToRealloc, nNewSize );
     }

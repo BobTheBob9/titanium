@@ -23,10 +23,12 @@ namespace config
 
     void VarBool_SuggestValues( const void *const pCvarPointer, const char *const pszIncompleteValue, util::data::Span<util::data::StringBuf<32>> o_sspszOutputBuffer )
     {
+        (void)pCvarPointer;
+
         constexpr const char *const BOOL_VALUES[] { "true", "false" };
 
-        int nOutputIndex = 0;
-        for ( int i = 0; i < sizeof( BOOL_VALUES ) / sizeof( char * ) && nOutputIndex < o_sspszOutputBuffer.m_nElements; i++ )
+        uint nOutputIndex = 0;
+        for ( uint i = 0; i < sizeof( BOOL_VALUES ) / sizeof( char * ) && nOutputIndex < o_sspszOutputBuffer.m_nElements; i++ )
         {
             if ( util::string::CStringStartsWith( BOOL_VALUES[ i ], pszIncompleteValue ) )
             {
@@ -49,6 +51,7 @@ namespace config
     {
         Var cvar {
             .szName {},
+            .efUsageFlags = efUsage,
             .setFuncs = setFuncs,
             .pValue = pValue
         };
@@ -61,7 +64,7 @@ namespace config
 
     Var * FindVar( const char *const pszVarName )
     {
-        for ( int i = 0; i < s_vcvarVars.Length(); i++ )
+        for ( uint i = 0; i < s_vcvarVars.Length(); i++ )
         {
             if ( util::string::CStringsEqual( pszVarName, s_vcvarVars.GetAt( i )->szName ) )
             {
@@ -74,8 +77,8 @@ namespace config
 
     void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<Var *> * o_pspcvarVars )
     {
-        int nFoundVars = 0;
-        for ( int i = 0; i < s_vcvarVars.Length() && nFoundVars < o_pspcvarVars->m_nElements; i++ )
+        uint nFoundVars = 0;
+        for ( uint i = 0; i < s_vcvarVars.Length() && nFoundVars < o_pspcvarVars->m_nElements; i++ )
         {
             if ( util::string::CStringStartsWith( s_vcvarVars.GetAt( i )->szName, pszVarSearchString ) )
             {

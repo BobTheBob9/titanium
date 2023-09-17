@@ -141,7 +141,7 @@ namespace renderer
 	/*
 	 *  Calls the imgui preframe function for the current rendering api's imgui backend
 	 */
-	void Preframe_ImGUI( TitaniumRendererState *const pRendererState );
+	void Preframe_ImGUI();
 
 	/*
 	 *  Renders a frame

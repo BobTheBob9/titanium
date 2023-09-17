@@ -226,7 +226,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
             }
         }
 
-        renderer::Preframe_ImGUI( &rendererState );
+        renderer::Preframe_ImGUI();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
@@ -291,7 +291,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
                                                                    rendererMainView.m_vCameraRotation.x, rendererMainView.m_vCameraRotation.y, rendererMainView.m_vCameraRotation.z );
 
             ImGui::Text( "Rendering %i objects:", (int)sRenderObjects.Elements() );
-            for ( int i = 0; i < sRenderObjects.Elements(); i++ )
+            for ( uint i = 0; i < sRenderObjects.Elements(); i++ )
             {
                 ImGui::Text( "\tObject %i: { %f %f %f } { %f %f %f }", i, sRenderObjects.m_tData[ i ].m_vPosition.x, sRenderObjects.m_tData[ i ].m_vPosition.y, sRenderObjects.m_tData[ i ].m_vPosition.z,
                            sRenderObjects.m_tData[ i ].m_vRotation.x, sRenderObjects.m_tData[ i ].m_vRotation.y, sRenderObjects.m_tData[ i ].m_vRotation.z );
@@ -304,7 +304,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
 
     // free all loaded models
-    for ( int i = 0; i < sRenderObjects.Elements(); i++ )
+    for ( uint i = 0; i < sRenderObjects.Elements(); i++ )
     {
         // TODO: causes malloc assert seemingly?
         //renderer::FreeGPUModel( sRenderObjects.m_tData[ i ].m_gpuModel );

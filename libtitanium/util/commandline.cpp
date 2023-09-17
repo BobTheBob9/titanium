@@ -46,12 +46,14 @@ namespace util::commandline
      */
     void CreateFromBufferDestructive( CommandArgs *const pcaCommandArgs )
     {
-
+        (void)pcaCommandArgs;
+        // TODO: this
     }
 
     void CreateFromBufferWithAlloc( CommandArgs *const pcaCommandArgs )
     {
-
+        (void)pcaCommandArgs;
+        // TODO: this
     }
 
     /*

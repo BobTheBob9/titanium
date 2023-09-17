@@ -27,7 +27,7 @@ namespace dev::tests
 
     bool RunTests()
     {
-        for ( int i = 0; i < s_vTests.Length(); i++ )
+        for ( uint i = 0; i < s_vTests.Length(); i++ )
         {
             logger::Info( "Running test %s" ENDL, s_vTests.GetAt( i )->m_pszTestName );
 

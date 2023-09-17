@@ -61,7 +61,7 @@ namespace imguiwidgets
             ImGui::SetNextWindowPos( vAutocompletePos );
             ImGui::Begin( "ConsoleAutocomplete", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoSavedSettings );
             {
-                for ( int i = 0; i < spszAutocompleteItems.Elements() && *spszAutocompleteItems.m_tData[ i ].m_szStr; i++ )
+                for ( uint i = 0; i < spszAutocompleteItems.Elements() && *spszAutocompleteItems.m_tData[ i ].m_szStr; i++ )
                 {
                     ImGui::PushID( i );
                     if ( ImGui::Selectable( spszAutocompleteItems.m_tData[ i ].ToCStr(), false ) )

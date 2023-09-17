@@ -41,7 +41,7 @@ bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, co
     logger::Info( "\tModel has %i vertices and %i faces" ENDL, passimpLoadedMesh->mNumVertices, passimpLoadedMesh->mNumFaces );
 
     ::util::data::Span<renderer::ModelVertexAttributes> sflVertexes( passimpLoadedMesh->mNumVertices, memory::alloc_nT<renderer::ModelVertexAttributes>( passimpLoadedMesh->mNumVertices ) );
-    for ( int i = 0; i < passimpLoadedMesh->mNumVertices; i++ )
+    for ( uint i = 0; i < passimpLoadedMesh->mNumVertices; i++ )
     {
         sflVertexes.m_pData[ i ] = {
             .vPosition { .x = passimpLoadedMesh->mVertices[ i ].x, .y = passimpLoadedMesh->mVertices[ i ].y, .z = passimpLoadedMesh->mVertices[ i ].z },
@@ -50,7 +50,7 @@ bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, co
     }
 
     ::util::data::Span<u16> snIndexes( passimpLoadedMesh->mNumFaces * 3, memory::alloc_nT<u16>( passimpLoadedMesh->mNumFaces * 3 ) );
-    for ( int i = 0; i < passimpLoadedMesh->mNumFaces; i++ )
+    for ( uint i = 0; i < passimpLoadedMesh->mNumFaces; i++ )
     {
         if ( passimpLoadedMesh->mFaces[ i ].mNumIndices != 3 ) [[unlikely]]
         {
@@ -67,7 +67,7 @@ bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, co
     memory::free( sflVertexes.m_pData );
     memory::free( snIndexes.m_pData );
 
-    for ( int i = 0; i < passimpLoadedScene->mNumMaterials; i++ )
+    for ( uint i = 0; i < passimpLoadedScene->mNumMaterials; i++ )
     {
         int nTextureIndex = 0;
         aiString path;

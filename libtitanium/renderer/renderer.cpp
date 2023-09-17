@@ -38,6 +38,7 @@ namespace renderer
     
     void C_WGPUVirtualDeviceHandleUncaughtError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
     {
+        (void)pUserdata;
         logger::Info( "%s: type: %s, %s" ENDL, __FUNCTION__, WGPUErrorTypeToString( ewgpuErrorType ), pszMessage );
     }
 
@@ -452,7 +453,7 @@ namespace renderer
         pRendererState->m_depthTextureAndView = CreateDepthTextureAndViewForWindowSize( pRendererState, vWindowSize );
     }
 
-    void Preframe_ImGUI( TitaniumRendererState *const pRendererState )
+    void Preframe_ImGUI()
     {
         ImGui_ImplWGPU_NewFrame();
     }
@@ -532,7 +533,7 @@ namespace renderer
                 wgpuRenderPassEncoderSetPipeline( wgpuRenderPass, pRendererState->m_wgpuObjectRenderPipeline );
                 wgpuRenderPassEncoderSetBindGroup( wgpuRenderPass, BINDGROUP_RENDERVIEW, pRenderView->m_viewUniforms.m_wgpuBindGroup, 0, nullptr );
 
-                for ( int i = 0; i < sRenderObjects.m_nElements; i++ )
+                for ( uint i = 0; i < sRenderObjects.m_nElements; i++ )
                 {
                     // write object state to object uniform if object state has changed
                     RenderObject *const pRenderObject = &sRenderObjects.m_pData[ i ];

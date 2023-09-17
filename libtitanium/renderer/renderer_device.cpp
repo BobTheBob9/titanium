@@ -157,7 +157,7 @@ namespace renderer
             {
                 logger::Info( "Adapter has features: " ENDL );
 
-                for ( int i = 0; i < nFeatures; i++ )
+                for ( uint i = 0; i < nFeatures; i++ )
                 {
                     // TODO: track down why we're getting invalid enum values in this
                     logger::Info( "\t%s" ENDL, WGPUFeatureNameToString( swgpuAdapterFeatures.m_tData[ i ] ) );

@@ -16,7 +16,7 @@ namespace util::data
         // i don't like manually doing this, having some kind of macro would be nice
         va_list vargs;
         va_start( vargs, pszFmt );
-        const int nCharsWritten = vsnprintf( m_szStr, TMaxSize, pszFmt, vargs );
+        (void)vsnprintf( m_szStr, TMaxSize, pszFmt, vargs );
         va_end( vargs );
     }
 

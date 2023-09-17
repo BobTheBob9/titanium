@@ -23,7 +23,7 @@ namespace sys::sdl
         return VersionToString( sdlCompiledVersion );
     }
 
-    const char *const SysWMToString( const SDL_SYSWM_TYPE esdlWMType )
+    const char * SysWMToString( const SDL_SYSWM_TYPE esdlWMType )
     {
         switch ( esdlWMType )
         {
