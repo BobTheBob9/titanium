@@ -154,7 +154,7 @@ namespace renderer
 
 
 
-    void Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow )
+    bool Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow )
     {
         logger::Info( "Initialising wgpu renderer..." ENDL );
 
@@ -195,8 +195,17 @@ namespace renderer
 
         wgpuDeviceSetUncapturedErrorCallback( wgpuVirtualDevice, C_WGPUVirtualDeviceHandleUncaughtError, &wgpuVirtualDevice );
 
-        WGPUQueue wgpuQueue = pRendererState->m_wgpuQueue = wgpuDeviceGetQueue( wgpuVirtualDevice );
+        pRendererState->m_wgpuQueue = wgpuDeviceGetQueue( wgpuVirtualDevice );
         pRendererState->m_wgpuSwapChain = CreateSwapChainForWindowDimensions( pRendererDevice, pRendererState, vWindowSize );
+
+        WGPUSamplerDescriptor wgpuSamplerDesc {
+            .magFilter = WGPUFilterMode_Linear,
+            .minFilter = WGPUFilterMode_Linear,
+            .mipmapFilter = WGPUMipmapFilterMode_Linear,
+            .lodMaxClamp = 8.f,
+            .maxAnisotropy = 1,
+        };
+        pRendererState->m_wgpuTextureSampler = wgpuDeviceCreateSampler( wgpuVirtualDevice, &wgpuSamplerDesc );
 
         ImGui_ImplWGPU_Init( wgpuVirtualDevice, 1, wgpuSwapchainFormat, WGPUTextureFormat_Depth24Plus );
 
@@ -210,12 +219,11 @@ namespace renderer
         // create error scope for pipeline creation so we can react to it
         wgpuDevicePushErrorScope( wgpuVirtualDevice, WGPUErrorFilter_Validation );
 
-        // create builtin uniform bindgroup layouts, this defines the way uniforms are laid out in the render pipeline
-        WGPUBindGroupLayout wgpuUniformBindGroupLayout_UShaderView = pRendererState->m_wgpuUniformBindGroupLayout_UShaderView = CreateBindGroupLayout( pRendererState, util::data::StaticSpan<WGPUBindGroupLayoutEntry, 1> {
+        // create builtin bindgroup layouts, this defines the way uniforms and textures are laid out in the render pipeline
+        WGPUBindGroupLayout wgpuRenderViewBindGroupLayout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderView = CreateBindGroupLayout( pRendererState, util::data::StaticSpan<WGPUBindGroupLayoutEntry, 1> {
             {
                 .binding = 0,
                 .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
-
                 .buffer {
                     .type = WGPUBufferBindingType_Uniform,
                     .minBindingSize = sizeof( UShaderView )
@@ -223,7 +231,8 @@ namespace renderer
             }
         }.ToConstSpan() );
 
-        WGPUBindGroupLayout wgpuUniformBindGroupLayout_UShaderObjectInstance = pRendererState->m_wgpuUniformBindGroupLayout_UShaderObjectInstance = CreateBindGroupLayout( pRendererState, util::data::StaticSpan<WGPUBindGroupLayoutEntry, 1> {
+        WGPUBindGroupLayout wgpuObjectBindGroupLayout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderObjectInstance = CreateBindGroupLayout( pRendererState, util::data::StaticSpan<WGPUBindGroupLayoutEntry, 3> {
+            // object uniforms
             {
                 .binding = 0,
                 .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
@@ -232,11 +241,26 @@ namespace renderer
                     .type = WGPUBufferBindingType_Uniform,
                     .minBindingSize = sizeof( UShaderObjectInstance )
                 }
+            },
+
+            // texture and texture sampler
+            {
+                .binding = 1,
+                .visibility = WGPUShaderStage_Fragment,
+                .texture {
+                    .sampleType = WGPUTextureSampleType_Float,
+                    .viewDimension = WGPUTextureViewDimension_2D
+                }
+            },
+            {
+                .binding = 2,
+                .visibility = WGPUShaderStage_Fragment,
+                .sampler { .type = WGPUSamplerBindingType_Filtering }
             }
         }.ToConstSpan() );
 
         // Create base render pipeline, with a basic shader that uses the global uniform buffer, and the per-object uniform buffer
-        pRendererState->m_wgpuObjectRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat, wgpuUniformBindGroupLayout_UShaderView, wgpuUniformBindGroupLayout_UShaderObjectInstance ]()
+        pRendererState->m_wgpuObjectRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat, wgpuRenderViewBindGroupLayout, wgpuObjectBindGroupLayout ]()
         {
             // Create shader module
             WGPUShaderModule wgpuShaderModule = [ wgpuVirtualDevice ]()
@@ -247,8 +271,7 @@ namespace renderer
                     .code = R"(
                                 struct UShaderView
                                 {
-                                    mat4fCameraTransform : mat4x4<f32>,
-                                    vWindowSize : vec2<u32>
+                                    mat4fCameraTransform : mat4x4<f32>
                                 };
 
                                 struct UShaderObjectInstance
@@ -257,18 +280,35 @@ namespace renderer
                                 };
 
                                 @group( 0 ) @binding( 0 ) var<uniform> u_view : UShaderView;
+
                                 @group( 1 ) @binding( 0 ) var<uniform> u_object : UShaderObjectInstance;
+                                @group( 1 ) @binding( 1 ) var t_baseColour : texture_2d<f32>;
+                                @group( 1 ) @binding( 2 ) var t_sampler : sampler;
 
-                                //@group( 2 ) @binding( 0 ) var t_baseColour : texture_2d<f32>;
-
-                                @vertex fn vs_main( @location( 0 ) vertexPosition : vec3<f32> ) -> @builtin( position ) vec4<f32>
+                                struct I_VertexShader
                                 {
-                                    return u_view.mat4fCameraTransform * u_object.mat4fBaseTransform * vec4<f32>( vertexPosition, 1.0 );
+                                    @location( 0 ) position : vec3<f32>,
+                                    @location( 1 ) uv : vec2<f32>
+                                };
+
+                                struct R_VertexShader
+                                {
+                                    @builtin( position ) position : vec4<f32>,
+                                    @location( 0 ) uv : vec2<f32>
+                                };
+
+                                @vertex fn vs_main( in : I_VertexShader ) -> R_VertexShader
+                                {
+                                    var r_vertex : R_VertexShader;
+                                    r_vertex.position = u_view.mat4fCameraTransform * u_object.mat4fBaseTransform * vec4<f32>( in.position, 1.0 );
+                                    r_vertex.uv = in.uv;
+
+                                    return r_vertex;
                                 }
 
-                                @fragment fn fs_main( @builtin( position ) in : vec4<f32> ) -> @location( 0 ) vec4<f32>
+                                @fragment fn fs_main( in : R_VertexShader ) -> @location( 0 ) vec4<f32>
                                 {
-                                    return vec4<f32>( 1.0, 1.0, 1.0, 1.0 ); // vec4<f32>( pow( in.colour + ( sin( u_view.flTime ) * 0.4 ), vec3<f32>( 2.2 ) ), 1.0 );
+                                    return vec4<f32>( textureSample( t_baseColour, t_sampler, in.uv ).rgb, 1.0 );
                                 }
                             )"
                 };
@@ -280,28 +320,34 @@ namespace renderer
                 return wgpuDeviceCreateShaderModule( wgpuVirtualDevice, &wgpuShaderDescriptor );
             }();
 
-            util::data::StaticSpan<WGPUBindGroupLayout, 2> swgpuUniformBindGroupLayouts {
-                wgpuUniformBindGroupLayout_UShaderView,
-                wgpuUniformBindGroupLayout_UShaderObjectInstance
+            util::data::StaticSpan<WGPUBindGroupLayout, 2> swgpuPipelineBindGroupLayouts {
+                wgpuRenderViewBindGroupLayout,
+                wgpuObjectBindGroupLayout,
             };
 
             // create pipeline layout
             WGPUPipelineLayoutDescriptor wgpuPipelineLayoutDescriptor {
-                .bindGroupLayoutCount = static_cast<u32>( swgpuUniformBindGroupLayouts.Elements() ),
-                .bindGroupLayouts = swgpuUniformBindGroupLayouts.m_tData
+                .bindGroupLayoutCount = static_cast<u32>( swgpuPipelineBindGroupLayouts.Elements() ),
+                .bindGroupLayouts = swgpuPipelineBindGroupLayouts.m_tData
             };
             WGPUPipelineLayout wgpuPipelineLayout =  wgpuDeviceCreatePipelineLayout( wgpuVirtualDevice, &wgpuPipelineLayoutDescriptor );
 
-            util::data::StaticSpan<WGPUVertexAttribute, 1> sVertexAttributes {
+            util::data::StaticSpan<WGPUVertexAttribute, 2> sVertexAttributes {
                 // position attribute
                 {
                     .format = WGPUVertexFormat_Float32x3,
                     .offset = 0,
                     .shaderLocation = 0
                 },
+                // uv attribute
+                {
+                    .format = WGPUVertexFormat_Float32x2,
+                    .offset = sizeof( f32 ) * 3,
+                    .shaderLocation = 1
+                }
             };
             WGPUVertexBufferLayout wgpuVertexBufferLayout {
-                .arrayStride = sizeof( float ) * 3,
+                .arrayStride = sizeof( f32 ) * 5,
                 .stepMode = WGPUVertexStepMode_Vertex,
                 .attributeCount = static_cast<u32>( sVertexAttributes.Elements() ),
                 .attributes = sVertexAttributes.m_tData
@@ -373,27 +419,38 @@ namespace renderer
 
         bool bPipelineCompilationFailed = false;
         wgpuDevicePopErrorScope( wgpuVirtualDevice, []( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const bPipelineCompilationFailed ){ 
+            (void)ewgpuErrorType;
+
             logger::Info( "Pipeline creation failed with message: %s" ENDL, pszMessage );
             *static_cast<bool *>( bPipelineCompilationFailed ) = true;
         }, &bPipelineCompilationFailed );
 
         // TODO: should this be a part of the RenderView?
         pRendererState->m_depthTextureAndView = CreateDepthTextureAndViewForWindowSize( pRendererState, vWindowSize );
-        logger::Info( "wgpu renderer initialised successfully!" ENDL );
+        if ( !bPipelineCompilationFailed )
+        {
+            logger::Info( "wgpu renderer initialised successfully!" ENDL );
+        }
+
+        return !bPipelineCompilationFailed;
     }
 
 
 
+    // TODO: the fact that this takes a renderview is weird (cont)
+    // i think in an ideal world, we would have a separate concept of a render target with a given size, and a view which controls camera transforms and stuff
+    // though, in practice i don't see a situation where code would ever really reuse a single view with multiple targets, so maybe views own targets? idk
     void ResolutionChanged( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize )
     {
+        pRenderView->m_vRenderResolution = vWindowSize;
+        pRenderView->m_bGPUDirty = true;
+
         // swapchains rely on the window's resolution, so need to be recreated on window resize
         wgpuSwapChainRelease( pRendererState->m_wgpuSwapChain ); // destroy old swapchain
         pRendererState->m_wgpuSwapChain = CreateSwapChainForWindowDimensions( pRendererDevice, pRendererState, vWindowSize );
 
         FreeDepthTextureAndView( &pRendererState->m_depthTextureAndView );
         pRendererState->m_depthTextureAndView = CreateDepthTextureAndViewForWindowSize( pRendererState, vWindowSize );
-
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_vWindowSize ), &vWindowSize, sizeof( util::maths::Vec2<u32> ) );
     }
 
     void Preframe_ImGUI( TitaniumRendererState *const pRendererState )
@@ -418,7 +475,6 @@ namespace renderer
             RenderView_WriteToUniformBuffer( pRendererState, pRenderView );
         }
 
-        static auto programTimeBegin = std::chrono::high_resolution_clock::now();
         static float fsecFrameDiff = 0.0f;
 
         auto timeBegin = std::chrono::high_resolution_clock::now();

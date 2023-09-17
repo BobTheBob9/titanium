@@ -1,481 +1,481 @@
 [
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/game/game_main.cpp.o -c /home/bobthebob/repos/titanium/game/game_main.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/game/game_main.cpp.o -c /home/bobthebob/repos/titanium/game/game_main.cpp",
   "file": "/home/bobthebob/repos/titanium/game/game_main.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/game/game_consolecommand.cpp.o -c /home/bobthebob/repos/titanium/game/game_consolecommand.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/game/game_consolecommand.cpp.o -c /home/bobthebob/repos/titanium/game/game_consolecommand.cpp",
   "file": "/home/bobthebob/repos/titanium/game/game_consolecommand.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/game/game_loadassimp.cpp.o -c /home/bobthebob/repos/titanium/game/game_loadassimp.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/game/game_loadassimp.cpp.o -c /home/bobthebob/repos/titanium/game/game_loadassimp.cpp",
   "file": "/home/bobthebob/repos/titanium/game/game_loadassimp.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui.cpp",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_demo.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_demo.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_demo.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_demo.cpp",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_demo.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_draw.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_draw.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_draw.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_draw.cpp",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_draw.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_impl_sdl2.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_impl_sdl2.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_impl_sdl2.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_impl_sdl2.cpp",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_impl_sdl2.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_impl_wgpu.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_impl_wgpu.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_impl_wgpu.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_impl_wgpu.cpp",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_impl_wgpu.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_tables.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_tables.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_tables.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_tables.cpp",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_tables.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_widgets.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_widgets.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/extern/imgui/imgui_widgets.cpp.o -c /home/bobthebob/repos/titanium/extern/imgui/imgui_widgets.cpp",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_widgets.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/util/commandline.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/util/commandline.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/util/commandline.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/util/commandline.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/commandline.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/util/string.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/util/string.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/util/string.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/util/string.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/string.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/util/data/vector_tests.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/util/data/vector_tests.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/util/data/vector_tests.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/util/data/vector_tests.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/vector_tests.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/memory/mem_core.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/memory/mem_core.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/memory/mem_core.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/memory/mem_core.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/memory/mem_core.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/logger/logger.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/logger/logger.cpp",
-  "file": "/home/bobthebob/repos/titanium/libtitanium/logger/logger.cpp"
-},
-
-{
-  "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/dev/tests.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/dev/tests.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/dev/tests.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/dev/tests.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/dev/tests.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/config/config.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/config/config.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/logger/logger.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/logger/logger.cpp",
+  "file": "/home/bobthebob/repos/titanium/libtitanium/logger/logger.cpp"
+},
+
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/config/config.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/config/config.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/config/config.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/sys/platform_sdl.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/sys/platform_sdl.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/sys/platform_sdl.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/sys/platform_sdl.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/sys/platform_sdl.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/sys/sdl_stringify.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/sys/sdl_stringify.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/sys/sdl_stringify.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/sys/sdl_stringify.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/sys/sdl_stringify.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/renderer/renderer.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer_device.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_device.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer_device.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_device.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/renderer/renderer_device.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer_resource.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_resource.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer_resource.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_resource.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/renderer/renderer_resource.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer_object.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_object.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer_object.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_object.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/renderer/renderer_object.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer_stringify.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_stringify.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/renderer/renderer_stringify.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_stringify.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/renderer/renderer_stringify.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/imgui_widgets/console.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/imgui_widgets/console.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/imgui_widgets/console.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/imgui_widgets/console.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/imgui_widgets/console.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/imgui_widgets/resourceprofiler.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/imgui_widgets/resourceprofiler.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/imgui_widgets/resourceprofiler.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/imgui_widgets/resourceprofiler.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/imgui_widgets/resourceprofiler.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/imgui_widgets/debugoverlay.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/imgui_widgets/debugoverlay.cpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/imgui_widgets/debugoverlay.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/imgui_widgets/debugoverlay.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/imgui_widgets/debugoverlay.cpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imgui.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imgui.h",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imconfig.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imconfig.h",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imconfig.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imgui_impl_sdl2.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imgui_impl_sdl2.h",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_impl_sdl2.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imgui_impl_wgpu.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imgui_impl_wgpu.h",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_impl_wgpu.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/commandline.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/commandline.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/commandline.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/numerics.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/numerics.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/numerics.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/assert.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/assert.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/assert.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/logger/logger.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/logger/logger.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/logger/logger.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/maths.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/maths.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/maths.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/template_constraints.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/template_constraints.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/template_constraints.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/span.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/span.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/span.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/span_impl.inl",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/span_impl.inl",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/span_impl.inl"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/string.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/string.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/string.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/staticspan.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/staticspan.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/staticspan.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/staticspan_impl.inl",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/staticspan_impl.inl",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/staticspan_impl.inl"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/memory/mem_core.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/memory/mem_core.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/memory/mem_core.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/sys/platform_sdl.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/sys/platform_sdl.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/sys/platform_sdl.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/config/config.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/config/config.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/config/config.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/enum_flags.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/enum_flags.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/enum_flags.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/vector.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/vector.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/vector.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/dev/tests.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/dev/tests.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/dev/tests.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/staticinitialise.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/staticinitialise.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/staticinitialise.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/vector_impl.inl",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/vector_impl.inl",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/vector_impl.inl"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/stringbuf.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/stringbuf.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/stringbuf.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/stringbuf_impl.inl",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/data/stringbuf_impl.inl",
   "file": "/home/bobthebob/repos/titanium/libtitanium/util/data/stringbuf_impl.inl"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/filesystem/filesystem.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/filesystem/filesystem.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/filesystem/filesystem.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/jobsystem/jobsystem.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/jobsystem/jobsystem.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/jobsystem/jobsystem.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/renderer/renderer.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/imgui_widgets/widgets.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/imgui_widgets/widgets.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/imgui_widgets/widgets.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/game/game_consolecommand.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/game/game_consolecommand.hpp",
   "file": "/home/bobthebob/repos/titanium/game/game_consolecommand.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/game/game_loadassimp.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/game/game_loadassimp.hpp",
   "file": "/home/bobthebob/repos/titanium/game/game_loadassimp.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imgui_internal.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imgui_internal.h",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imgui_internal.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imstb_textedit.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imstb_textedit.h",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imstb_textedit.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imstb_rectpack.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imstb_rectpack.h",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imstb_rectpack.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imstb_truetype.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/imgui/imstb_truetype.h",
   "file": "/home/bobthebob/repos/titanium/extern/imgui/imstb_truetype.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/x86/sse.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/x86/sse.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/x86/sse.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/x86/mmx.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/x86/mmx.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/x86/mmx.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-common.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-common.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-common.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/hedley.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/hedley.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/hedley.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-detect-clang.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-detect-clang.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-detect-clang.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-arch.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-arch.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-arch.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-features.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-features.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-features.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-diagnostic.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-diagnostic.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-diagnostic.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-math.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-math.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-math.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-constify.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-constify.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-constify.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-align.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-align.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-align.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/check.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/check.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/check.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/debug-trap.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/debug-trap.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/debug-trap.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-f16.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/simde-f16.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/simde-f16.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/x86/sse2.h",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/extern/simde-no-tests/x86/sse2.h",
   "file": "/home/bobthebob/repos/titanium/extern/simde-no-tests/x86/sse2.h"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/sys/sdl_stringify.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/sys/sdl_stringify.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/sys/sdl_stringify.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_uniforms.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_uniforms.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/renderer/renderer_uniforms.hpp"
 },
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
-  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_stringify.hpp",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/renderer/renderer_stringify.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/renderer/renderer_stringify.hpp"
 }
 ]

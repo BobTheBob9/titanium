@@ -2,7 +2,7 @@
 
 namespace renderer
 {
-    const char *const WGPURequestAdapterStatusToString( const WGPURequestAdapterStatus ewgpuRequestAdapterStatus )
+    const char * WGPURequestAdapterStatusToString( const WGPURequestAdapterStatus ewgpuRequestAdapterStatus )
     {
         switch ( ewgpuRequestAdapterStatus )
         {
@@ -29,7 +29,7 @@ namespace renderer
         }
     }
 
-    const char *const WGPURequestDeviceStatusToString( const WGPURequestDeviceStatus ewgpuRequestDeviceStatus )
+    const char * WGPURequestDeviceStatusToString( const WGPURequestDeviceStatus ewgpuRequestDeviceStatus )
     {
         switch ( ewgpuRequestDeviceStatus )
         {
@@ -51,7 +51,7 @@ namespace renderer
         }
     }
 
-    const char *const WGPUAdapterTypeToString( const WGPUAdapterType ewgpuAdapterType )
+    const char * WGPUAdapterTypeToString( const WGPUAdapterType ewgpuAdapterType )
     {
         switch ( ewgpuAdapterType )
         {
@@ -78,7 +78,7 @@ namespace renderer
         }
     }
 
-    const char *const WGPUBackendTypeToString( const WGPUBackendType ewgpuBackendType )
+    const char * WGPUBackendTypeToString( const WGPUBackendType ewgpuBackendType )
     {
         switch ( ewgpuBackendType )
         {
@@ -128,7 +128,7 @@ namespace renderer
         }
     }
 
-    const char *const WGPUFeatureNameToString( const WGPUFeatureName ewgpuFeatureName )
+    const char * WGPUFeatureNameToString( const WGPUFeatureName ewgpuFeatureName )
     {
         switch ( ewgpuFeatureName )
         {
@@ -196,7 +196,7 @@ namespace renderer
         }
     }
 
-    const char *const WGPUErrorTypeToString( const WGPUErrorType ewgpuErrorType )
+    const char * WGPUErrorTypeToString( const WGPUErrorType ewgpuErrorType )
     {
         switch ( ewgpuErrorType )
         {
@@ -233,7 +233,7 @@ namespace renderer
         }
     }
 
-    const char *const WGPUPresentModeToString( const WGPUPresentMode ewgpuPresentMode )
+    const char * WGPUPresentModeToString( const WGPUPresentMode ewgpuPresentMode )
     {
         switch ( ewgpuPresentMode )
         {

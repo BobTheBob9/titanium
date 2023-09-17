@@ -2,4 +2,4 @@
 
 #include <libtitanium/renderer/renderer.hpp>
 
-renderer::GPUModelHandle Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, const char *const pszModelName );
+bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, const char *const pszModelName, renderer::GPUModelHandle * o_gpuLoadedModel, util::data::Span<renderer::GPUTextureHandle> o_sgpuLoadedTextures );

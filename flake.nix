@@ -33,6 +33,7 @@
                             pkgs.SDL2
                             pkgs.openalSoft
                             pkgs.assimp
+                            pkgs.stb
                             pkgs.glm
 
                             # dawn dependencies

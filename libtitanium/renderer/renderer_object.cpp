@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "renderer_uniforms.hpp"
+#include "util/data/staticspan.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
@@ -7,7 +8,7 @@
 
 namespace renderer
 {
-    void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize )
+    void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
         // make buffer
         WGPUBufferDescriptor wgpuUniformBufferDescriptor {
@@ -30,9 +31,7 @@ namespace renderer
         };
         WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
 
-        pRenderView->m_vRenderResolution = vWindowSize;
         pRenderView->m_viewUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
-
         RenderView_WriteToUniformBuffer( pRendererState, pRenderView );
     }
 
@@ -74,20 +73,31 @@ namespace renderer
         WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuStandardUniformBufferDescriptor );
 
         // make binding to buffer
-        WGPUBindGroupEntry wgpuBinding {
-            .binding = 0,
-            .buffer = wgpuUniformBuffer,
-            .offset = 0,
-            .size = sizeof( UShaderObjectInstance )
+        util::data::StaticSpan<WGPUBindGroupEntry, 3> wgpuObjectBindings {
+            {
+                .binding = 0,
+                .buffer = wgpuUniformBuffer,
+                .size = sizeof( UShaderObjectInstance )
+            },
+            {
+                .binding = 1,
+                .textureView = pRenderObject->m_gpuTexture.m_wgpuTextureView
+            },
+            {
+                .binding = 2,
+                .sampler = pRendererState->m_wgpuTextureSampler
+            }
         };
+
         WGPUBindGroupDescriptor wgpuBindGroupDescriptor {
             .layout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderObjectInstance,
-            .entryCount = 1,
-            .entries = &wgpuBinding
+            .entryCount = static_cast<u32>( wgpuObjectBindings.Elements() ),
+            .entries = wgpuObjectBindings.m_tData
         };
         WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
 
         pRenderObject->m_objectUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
+        RenderObject_WriteToUniformBuffer( pRendererState, pRenderObject );
     }
 
     void RenderObject_Free( RenderObject *const pRenderObject )

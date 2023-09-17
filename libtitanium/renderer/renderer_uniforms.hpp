@@ -21,8 +21,6 @@ namespace renderer
         // TODO: this should probably have the current time, but it doesn't seem necessary currently
 
         glm::mat4x4 m_mat4fCameraTransform;
-        util::maths::Vec2<u32> m_vWindowSize;
-        u64 pad;
     };
     #pragma pack( pop )
     static_assert( sizeof( UShaderView ) % 16 == 0 );

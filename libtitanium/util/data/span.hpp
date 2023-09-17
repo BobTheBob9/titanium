@@ -11,7 +11,7 @@ namespace util::data
     Wrapper around c-style arrays with an included length field
     
     */
-    template <typename T, std::unsigned_integral TSize = u32> 
+    template <typename T, std::unsigned_integral TSize = u32>
     struct Span
     {
         TSize m_nElements;

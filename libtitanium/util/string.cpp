@@ -196,6 +196,5 @@ namespace util::string
 TEST( string )
 {
     TEST_EXPECT( util::string::CStringStartsWith( "renderer:showfps", "renderer" ) );
-
     return true;
 }

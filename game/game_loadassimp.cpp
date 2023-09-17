@@ -1,6 +1,9 @@
 #include "game_loadassimp.hpp"
+#include "renderer/renderer.hpp"
 
 #include <assimp/material.h>
+#include <assimp/types.h>
+#include <cstdio>
 #include <libtitanium/memory/mem_core.hpp>
 #include <libtitanium/util/data/span.hpp>
 #include <libtitanium/util/assert.hpp>
@@ -9,31 +12,88 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <webgpu/webgpu.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
 
 /*
  *  Load a complete model using the assimp library
+ *  TODO: needs to support loading multiple models
  */
-renderer::GPUModelHandle Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, const char *const pszModelName )
+bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, const char *const pszModelName, renderer::GPUModelHandle * o_gpuLoadedModel, util::data::Span<renderer::GPUTextureHandle> o_sgpuLoadedTextures )
 {
-    const aiScene *const passimpLoadedModel = aiImportFile( pszModelName, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_Triangulate );
-    logger::Info( "%s" ENDL, passimpLoadedModel != nullptr ? "Loaded model! c:" : "Didn't load model :c (we will probably crash now)" );
+    logger::Info( "Loading assimp scene model %s" ENDL, pszModelName );
+    const aiScene *const passimpLoadedScene = aiImportFile( pszModelName, aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_Triangulate | aiProcess_FlipUVs );
 
-    logger::Info( "Model has %i meshes, we expect 1" ENDL, passimpLoadedModel->mNumMeshes );
-    assert::Release( passimpLoadedModel->mNumMeshes == 1 );
-    const aiMesh *const passimpLoadedMesh = passimpLoadedModel->mMeshes[ 0 ];
+    if ( !passimpLoadedScene )
+    {
+        logger::Info( "Model load failed :c" ENDL );
+        return false;
+    }
 
-    logger::Info( "Model has %i vertices and %i faces" ENDL, passimpLoadedMesh->mNumVertices, passimpLoadedMesh->mNumFaces );
+    if ( passimpLoadedScene->mNumMeshes > 1 )
+    {
+        logger::Info( "We expect 1 mesh per scene, but this scene has more! truncating." ENDL );
+    }
 
-    ::util::data::Span<float> sflVertexes( passimpLoadedMesh->mNumVertices * 3, reinterpret_cast<float *>( passimpLoadedMesh->mVertices ) );
+    const aiMesh *const passimpLoadedMesh = passimpLoadedScene->mMeshes[ 0 ];
+    logger::Info( "\tModel has %i vertices and %i faces" ENDL, passimpLoadedMesh->mNumVertices, passimpLoadedMesh->mNumFaces );
+
+    ::util::data::Span<renderer::ModelVertexAttributes> sflVertexes( passimpLoadedMesh->mNumVertices, memory::alloc_nT<renderer::ModelVertexAttributes>( passimpLoadedMesh->mNumVertices ) );
+    for ( int i = 0; i < passimpLoadedMesh->mNumVertices; i++ )
+    {
+        sflVertexes.m_pData[ i ] = {
+            .vPosition { .x = passimpLoadedMesh->mVertices[ i ].x, .y = passimpLoadedMesh->mVertices[ i ].y, .z = passimpLoadedMesh->mVertices[ i ].z },
+            .vTextureCoordinates = { .x = passimpLoadedMesh->mTextureCoords[ 0 ][ i ].x, .y = passimpLoadedMesh->mTextureCoords[ 0 ][ i ].y }
+        };
+    }
+
     ::util::data::Span<u16> snIndexes( passimpLoadedMesh->mNumFaces * 3, memory::alloc_nT<u16>( passimpLoadedMesh->mNumFaces * 3 ) );
     for ( int i = 0; i < passimpLoadedMesh->mNumFaces; i++ )
     {
-        assert::Release( passimpLoadedMesh->mFaces[ i ].mNumIndices == 3 );
+        if ( passimpLoadedMesh->mFaces[ i ].mNumIndices != 3 ) [[unlikely]]
+        {
+            logger::Info( "Model has weird number of face indices for face %i, not loading..." ENDL, passimpLoadedMesh->mFaces[ i ].mNumIndices );
+            return false;
+        }
 
         snIndexes.m_pData[ i * 3 ] = passimpLoadedMesh->mFaces[ i ].mIndices[ 0 ];
         snIndexes.m_pData[ i * 3 + 1 ] = passimpLoadedMesh->mFaces[ i ].mIndices[ 1 ];
         snIndexes.m_pData[ i * 3 + 2 ] = passimpLoadedMesh->mFaces[ i ].mIndices[ 2 ];
     }
 
-    return renderer::UploadModel( pRendererState, sflVertexes, snIndexes );
+    *o_gpuLoadedModel = renderer::UploadModel( pRendererState, sflVertexes, snIndexes );
+    memory::free( sflVertexes.m_pData );
+    memory::free( snIndexes.m_pData );
+
+    for ( int i = 0; i < passimpLoadedScene->mNumMaterials; i++ )
+    {
+        int nTextureIndex = 0;
+        aiString path;
+        while ( passimpLoadedScene->mMaterials[ i ]->GetTexture( aiTextureType_BASE_COLOR, nTextureIndex++, &path ) == aiReturn_SUCCESS )
+        {
+            logger::Info( "\tModel texture: %s" ENDL, path.C_Str() );
+        }
+    }
+
+    /*// TODO: TEMP!!!
+    const aiTexture *const passimpTexture = passimpLoadedScene->GetEmbeddedTexture( "*0" );
+    logger::Info( "Height: %i, Width: %i" ENDL, passimpTexture->mHeight, passimpTexture->mWidth );
+
+    if ( !passimpTexture->mHeight ) // compressed :c
+    {
+        logger::Info( "Compressed texture with format %s" ENDL, passimpTexture->achFormatHint );
+    }*/
+
+    util::maths::Vec2<i32> vImageSize;
+    int nImageChannels;
+    const byte *const pImageData = stbi_load( "test_resource/damaged/Default_albedo.tga", &vImageSize.x, &vImageSize.y, &nImageChannels, 4 );
+
+    logger::Info( "%i channels" ENDL, nImageChannels );
+
+    o_sgpuLoadedTextures.m_pData[ 0 ] = renderer::UploadTexture( pRendererState, { .x = static_cast<u16>( vImageSize.x ), .y = static_cast<u16>( vImageSize.y ) }, WGPUTextureFormat_RGBA8Unorm, pImageData );
+
+    aiReleaseImport( passimpLoadedScene );
+    return true;
 }

@@ -23,18 +23,13 @@
 #include "game_consolecommand.hpp"
 #include "game_loadassimp.hpp"
 
-static bool s_bRunTests = false;
-static bool s_bExitAfterTests = true;
-config::Var cvarRunTests = config::RegisterVar( "dev::runtests", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bRunTests );
-config::Var cvarExitAfterTests = config::RegisterVar( "dev::exitaftertests", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bExitAfterTests );
+static bool s_bRunTests = false; config::Var cvarRunTests = config::RegisterVar( "dev::runtests", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bRunTests );
+static bool s_bExitAfterTests = true; config::Var cvarExitAfterTests = config::RegisterVar( "dev::exitaftertests", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bExitAfterTests );
 
-static bool s_bRunGameLoop = true;
-static bool s_bCaptureMouse = false;
-config::Var cvarRunGameLoop = config::RegisterVar( "game::runloop", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bRunGameLoop );
-config::Var cvarCaptureMouse = config::RegisterVar( "game::capturemouse", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bCaptureMouse );
+static bool s_bRunGameLoop = true; config::Var cvarRunGameLoop = config::RegisterVar( "game::runloop", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bRunGameLoop );
+static bool s_bCaptureMouse = false; config::Var cvarCaptureMouse = config::RegisterVar( "game::capturemouse", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bCaptureMouse );
 
-static bool s_bShowImguiDemo = false;
-config::Var cvarShowImguiDemo = config::RegisterVar( "dev::imguidemo", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bShowImguiDemo );
+static bool s_bShowImguiDemo = false; config::Var cvarShowImguiDemo = config::RegisterVar( "dev::imguidemo", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bShowImguiDemo );
 
 int main( const int nArgs, const char *const *const ppszArgs )
 {
@@ -73,6 +68,9 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
     //filesystem::Initialise();
     //jobsystem::Initialise();
+
+    // default to wayland where available
+    SDL_SetHint( SDL_HINT_VIDEODRIVER, "wayland,x11" );
 
     SDL_Init( SDL_INIT_VIDEO );
     SDL_Window *const psdlWindow = SDL_CreateWindow( "Titanium - SDL + WGPU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1600, 900, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN ); // TODO: do we need SDL_WINDOW_VULKAN/whatever api?
@@ -142,16 +140,30 @@ int main( const int nArgs, const char *const *const ppszArgs )
     renderer::InitialisePhysicalRenderingDevice( &renderingDevice );
 
     renderer::TitaniumRendererState rendererState {};
-    renderer::Initialise( &renderingDevice, &rendererState, psdlWindow );
+    if ( !renderer::Initialise( &renderingDevice, &rendererState, psdlWindow ) )
+    {
+        return 1;
+    }
 
-    renderer::RenderView rendererMainView { .m_vCameraPosition { .x = 0.f, .y = 0.f, .z = 5.f } };
-    renderer::RenderView_Create( &rendererState, &rendererMainView, sys::sdl::GetWindowSizeVector( psdlWindow ) );
+    renderer::RenderView rendererMainView {
+        .m_vCameraPosition { .x = 0.f, .y = 0.f, .z = 5.f },
+        .m_vRenderResolution = sys::sdl::GetWindowSizeVector( psdlWindow )
+    };
+    renderer::RenderView_Create( &rendererState, &rendererMainView );
 
-    renderer::GPUModelHandle hHelmetModel = Assimp_LoadScene( &rendererState, "test_resource/DamagedHelmet.gltf" );
+    renderer::GPUModelHandle hHelmetModel;
+    util::data::StaticSpan<renderer::GPUTextureHandle, 1> sgpuHelmetTextures;
+    if ( !Assimp_LoadScene( &rendererState, "test_resource/damaged/DamagedHelmet.gltf", &hHelmetModel, sgpuHelmetTextures.ToSpan() ) )
+    {
+        logger::Info( "Required model load failed, exiting :c" ENDL );
+        return 1;
+    }
+
     renderer::RenderObject renderobjHelmet {
         .m_vPosition {},
-        .m_vRotation {},
-        .m_gpuModel = hHelmetModel
+        .m_vRotation { },
+        .m_gpuModel = hHelmetModel,
+        .m_gpuTexture = sgpuHelmetTextures.m_tData[ 0 ]
     };
     renderer::RenderObject_Create( &rendererState, &renderobjHelmet );
 
@@ -254,13 +266,13 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         if ( ImGui::IsKeyDown( ImGuiKey_W ) )
         {
-            rendererMainView.m_vCameraPosition.z += 15.f;
+            rendererMainView.m_vCameraPosition.z += 2.f;
             rendererMainView.m_bGPUDirty = true;
         }
 
         if ( ImGui::IsKeyDown( ImGuiKey_S ) )
         {
-            rendererMainView.m_vCameraPosition.z -= 15.f;
+            rendererMainView.m_vCameraPosition.z -= 2.f;
             rendererMainView.m_bGPUDirty = true;
         }
 

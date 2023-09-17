@@ -38,6 +38,8 @@ namespace renderer
 		WGPUSwapChain m_wgpuSwapChain;
 		WGPUQueue m_wgpuQueue;
 
+		WGPUSampler m_wgpuTextureSampler;
+
 		DepthTextureAndView m_depthTextureAndView;
 
 		WGPUBindGroupLayout m_wgpuUniformBindGroupLayout_UShaderView;
@@ -58,7 +60,7 @@ namespace renderer
 	 *
 	 *  If it was not previously initialised, it should be zeroed out (i.e. memset to 0)
 	 */
-	void Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow );
+	bool Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow );
 
 	/*
 	 *	An interface for the buffers that have been allocated for a model on the GPU
@@ -72,16 +74,24 @@ namespace renderer
 		size_t m_nIndexBufferSize;
 		int m_nIndexBufferCount;
 	};
+
+	struct ModelVertexAttributes
+	{
+		util::maths::Vec3<f32> vPosition;
+		util::maths::Vec2<f32> vTextureCoordinates;
+	};
 	
-	GPUModelHandle UploadModel( TitaniumRendererState *const pRendererState, const util::data::Span<float> sflVertices, const util::data::Span<u16> snIndexes );
+	GPUModelHandle UploadModel( TitaniumRendererState *const pRendererState, const util::data::Span<ModelVertexAttributes> sVertices, const util::data::Span<u16> snIndexes );
 	void FreeGPUModel( GPUModelHandle gpuModel );
 
 	struct GPUTextureHandle
 	{
-
+		WGPUTexture m_wgpuTexture;
+		WGPUTextureView m_wgpuTextureView;
 	};
 
-	GPUTextureHandle UploadTexture();
+	// TODO: we need to establish actual pixel format types and stuff, just taking a byte array kind of sucks
+	GPUTextureHandle UploadTexture( TitaniumRendererState *const pRendererState, const util::maths::Vec2<u16> vTextureSize, const WGPUTextureFormat wgpuTextureFormat, const byte *const pTextureData );
 	void FreeGPUTexture( GPUTextureHandle gpuTexture );
 
 	/*
@@ -100,7 +110,7 @@ namespace renderer
 		BufferAndBindgroup m_viewUniforms;
 	};
 
-	void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView, const util::maths::Vec2<u32> vWindowSize );
+	void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView );
 	void RenderView_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView );
 	void RenderView_Free( RenderView *const pRenderView );
 
@@ -116,6 +126,7 @@ namespace renderer
 
 		BufferAndBindgroup m_objectUniforms;
 		GPUModelHandle m_gpuModel;
+		GPUTextureHandle m_gpuTexture;
 	};
 
     void RenderObject_Create( TitaniumRendererState *const pRendererState, RenderObject *const pRenderableObject );
