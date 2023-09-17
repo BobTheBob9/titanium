@@ -48,17 +48,16 @@ namespace renderer
     void RenderView_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
         // TODO: investigate why this doesn't need to be transposed
-        glm::mat4x4 R2 = glm::yawPitchRoll( glm::radians( pRenderView->m_vCameraRotation.x ), glm::radians( pRenderView->m_vCameraRotation.y ), glm::radians( pRenderView->m_vCameraRotation.z ) );
-        glm::mat4x4 T2 = glm::translate( R2, -glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
-        glm::mat4x4 MViewTransform = T2;
+        glm::mat4x4 mat4fTransform = glm::yawPitchRoll( glm::radians( pRenderView->m_vCameraRotation.x ), glm::radians( pRenderView->m_vCameraRotation.y ), glm::radians( pRenderView->m_vCameraRotation.z ) );
+        mat4fTransform = glm::translate( mat4fTransform, -glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
 
         f32 flAspectRatio = f32( pRenderView->m_vRenderResolution.x ) / f32( pRenderView->m_vRenderResolution.y );
         f32 flNearDist = 0.01;
         f32 flFarDist = 10000.0;
-        glm::mat4x4 MProjectFocal = glm::perspective( 1.5f, flAspectRatio, flNearDist, flFarDist );
+        glm::mat4x4 mat4fProjectFocal = glm::perspective( 1.5f, flAspectRatio, flNearDist, flFarDist );
 
-        const glm::mat4x4 mat4fCameraTransform = MProjectFocal * MViewTransform;
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_mat4fCameraTransform ), &mat4fCameraTransform, sizeof( mat4fCameraTransform ) );
+        const glm::mat4x4 mat4fCamera = mat4fProjectFocal * mat4fTransform;
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_mat4fCameraTransform ), &mat4fCamera, sizeof( mat4fCamera ) );
         pRenderView->m_bGPUDirty = false;
     }
 
