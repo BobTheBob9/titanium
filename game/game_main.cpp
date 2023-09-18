@@ -146,7 +146,8 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
 
     renderer::RenderView rendererMainView {
-        .m_vCameraPosition { .x = 0.f, .y = 0.f, .z = 5.f },
+        .m_vCameraPosition { .x = -5.f, .y = -5.f, .z = 5.f },
+        .m_vCameraRotation { .x = 320.f, .y = -130.f },
         .m_vRenderResolution = sys::sdl::GetWindowSizeVector( psdlWindow )
     };
     renderer::RenderView_Create( &rendererState, &rendererMainView );
@@ -239,12 +240,12 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         if ( ImGui::IsKeyDown( ImGuiKey_UpArrow ) )
         {
-            vMouseMove.y -= 10;
+            vMouseMove.y += 10;
         }
 
         if ( ImGui::IsKeyDown( ImGuiKey_DownArrow ) )
         {
-            vMouseMove.y += 10;
+            vMouseMove.y -= 10;
         }
 
         if ( ImGui::IsKeyDown( ImGuiKey_RightArrow ) )

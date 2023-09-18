@@ -1,13 +1,20 @@
 #include "renderer.hpp"
 #include "renderer_uniforms.hpp"
 #include "util/data/staticspan.hpp"
+#include "util/maths.hpp"
 
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
 namespace renderer
 {
+    glm::mat4x4 GLM_YawPitchRoll_ZUpFromDegrees( util::maths::Vec3<f32> vfObjectRotation )
+    {
+        return glm::yawPitchRoll( glm::radians( vfObjectRotation.z ), glm::radians( -vfObjectRotation.y ), glm::radians( -vfObjectRotation.x ) );
+    }
+
     void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
         // make buffer
@@ -47,9 +54,8 @@ namespace renderer
      */
     void RenderView_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
-        // TODO: investigate why this doesn't need to be transposed
-        glm::mat4x4 mat4fTransform = glm::yawPitchRoll( glm::radians( pRenderView->m_vCameraRotation.x ), glm::radians( pRenderView->m_vCameraRotation.y ), glm::radians( pRenderView->m_vCameraRotation.z ) );
-        mat4fTransform = glm::translate( mat4fTransform, -glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
+        glm::mat4x4 mat4fTransform = GLM_YawPitchRoll_ZUpFromDegrees( pRenderView->m_vCameraRotation );
+        mat4fTransform = glm::translate( mat4fTransform, glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
 
         f32 flAspectRatio = f32( pRenderView->m_vRenderResolution.x ) / f32( pRenderView->m_vRenderResolution.y );
         f32 flNearDist = 0.01;
@@ -108,7 +114,7 @@ namespace renderer
 
     void RenderObject_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
     {
-        glm::mat4x4 mat4fTransform = glm::yawPitchRoll( pRenderObject->m_vRotation.x, pRenderObject->m_vRotation.y, pRenderObject->m_vRotation.z );
+        glm::mat4x4 mat4fTransform = GLM_YawPitchRoll_ZUpFromDegrees( pRenderObject->m_vRotation );
         mat4fTransform = glm::translate( mat4fTransform, glm::vec3( pRenderObject->m_vPosition.x, pRenderObject->m_vPosition.y, pRenderObject->m_vPosition.z  ) );
         wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderObject->m_objectUniforms.m_wgpuBuffer, offsetof( UShaderObjectInstance, m_mat4fBaseTransform ),  &mat4fTransform, sizeof( mat4fTransform ) );
 
