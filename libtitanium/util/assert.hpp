@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdlib>
 #include <libtitanium/logger/logger.hpp>
 
 namespace assert
@@ -17,9 +18,9 @@ namespace assert
         if ( !bCondition ) [[ unlikely ]] 
         {
             logger::Info( "assertion failed %s" ENDL, pMessageFormat );
+            exit( EXIT_FAILURE );
         }
     }
-
 
     /*
     
@@ -28,10 +29,16 @@ namespace assert
     */
     inline void Debug( const bool bCondition, const char * const pMessageFormat = nullptr, ... )
     {
+#ifdef NDEBUG
+        (void)bCondition;
+        (void)pMessageFormat;
+#else // #ifdef NDEBUG
         // TODO: temp
         if ( !bCondition ) [[ unlikely ]]
         {
             logger::Info( "assertion failed %s" ENDL, pMessageFormat );
+            exit( EXIT_FAILURE );
         }
+#endif // #else // #ifndef NDEBUG
     }
 };

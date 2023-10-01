@@ -2,9 +2,17 @@
 
 #define ENDL "\n"
 
+#ifndef HAS_LOGGED_TEXT_BUF
+    #define HAS_LOGGED_TEXT_BUF 1
+#endif // #ifndef HAS_LOGGED_TEXT_BUF
+
+#if HAS_LOGGED_TEXT_BUF
+    extern char g_szLoggedTextBuffer[ 4096 ][ 50 ];
+#endif // #if HAS_LOGGED_TEXT_BUF
+
 namespace logger
 {
-    enum class eLogLevel
+    enum class ELogLevel
     {
         INFO,
         WARN,
@@ -12,7 +20,7 @@ namespace logger
         ERROR_FATAL
     };
 
-    void Log( const eLogLevel eLevel, const char *const pFmt, ... );
+    void Log( const ELogLevel eLevel, const char *const pFmt, ... );
 
     void Info( const char *const pFmt, ... );
     void Warn( const char *const pFmt, ... );

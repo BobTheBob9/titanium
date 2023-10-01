@@ -88,12 +88,13 @@ target_compile_options( libtitanium_logger INTERFACE ${TITANIUM_COMPILER_ARGS} )
 add_library( libtitanium_sys INTERFACE )
 target_include_directories( libtitanium_sys INTERFACE
     ${CMAKE_SOURCE_DIR}
+    ${SDL2_INCLUDE_DIRS}
 )
 target_sources( libtitanium_sys INTERFACE
     ${CMAKE_SOURCE_DIR}/libtitanium/sys/platform_sdl.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/sys/sdl_stringify.cpp
 )
-target_link_libraries( libtitanium_sys INTERFACE libtitanium_util libtitanium_logger )
+target_link_libraries( libtitanium_sys INTERFACE libtitanium_util libtitanium_logger ${SDL2_LIBRARIES} )
 target_compile_options( libtitanium_sys INTERFACE ${TITANIUM_COMPILER_ARGS} )
 
 
@@ -125,6 +126,21 @@ target_link_libraries( libtitanium_imguiwidgets INTERFACE imgui libtitanium_util
 target_compile_options( libtitanium_imguiwidgets INTERFACE ${TITANIUM_COMPILER_ARGS} )
 
 
+add_library( libtitanium_input INTERFACE )
+target_include_directories( libtitanium_input INTERFACE
+    ${CMAKE_SOURCE_DIR}
+    ${SDL2_INCLUDE_DIRS}
+)
+target_sources( libtitanium_input INTERFACE
+    ${CMAKE_SOURCE_DIR}/libtitanium/input/input_device.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/input/input_device_enum.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/input/input_actions.cpp
+)
+target_link_libraries( libtitanium_input INTERFACE ${SDL2_LIBRARIES} )
+target_compile_options( libtitanium_input INTERFACE ${TITANIUM_COMPILER_ARGS} )
+
+
+
 # TODO: VERY TEMP! this should be done in a fancy way of some kind
 add_executable( titanium_bin game/game_main.cpp game/game_consolecommand.cpp game/game_loadassimp.cpp )
 target_include_directories( titanium_bin PUBLIC ${CMAKE_SOURCE_DIR}/libtitanium ${SDL2_INCLUDE_DIRS} )
@@ -137,6 +153,7 @@ target_link_libraries( titanium_bin PUBLIC webgpu assimp openal ${SDL2_LIBRARIES
     libtitanium_sys
     libtitanium_renderer
     libtitanium_imguiwidgets
+    libtitanium_input
 )
 target_compile_options( titanium_bin INTERFACE ${TITANIUM_COMPILER_ARGS} )
 

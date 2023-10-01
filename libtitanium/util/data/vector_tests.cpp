@@ -1,4 +1,4 @@
-#if USE_TESTS
+#if HAS_TESTS
     TEST( Vector )
     {
         util::data::Vector<u64> vnTestVec;
@@ -31,4 +31,4 @@
     
         return true;
     }
-#endif // #if USE_TESTS
+#endif // #if HAS_TESTS

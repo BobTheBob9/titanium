@@ -1,5 +1,4 @@
 #include "game_loadassimp.hpp"
-#include "renderer/renderer.hpp"
 
 #include <assimp/material.h>
 #include <assimp/types.h>
@@ -8,6 +7,7 @@
 #include <libtitanium/util/data/span.hpp>
 #include <libtitanium/util/assert.hpp>
 #include <libtitanium/logger/logger.hpp>
+#include <libtitanium/renderer/renderer.hpp>
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -87,12 +87,9 @@ bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, co
     }*/
 
     util::maths::Vec2<i32> vImageSize;
-    int nImageChannels;
-    const byte *const pImageData = stbi_load( "test_resource/damaged/Default_albedo.tga", &vImageSize.x, &vImageSize.y, &nImageChannels, 4 );
-
-    logger::Info( "%i channels" ENDL, nImageChannels );
-
+    const byte *const pImageData = stbi_load( "test_resource/damaged/Default_albedo.tga", &vImageSize.x, &vImageSize.y, nullptr, 4 );
     o_sgpuLoadedTextures.m_pData[ 0 ] = renderer::UploadTexture( pRendererState, { .x = static_cast<u16>( vImageSize.x ), .y = static_cast<u16>( vImageSize.y ) }, WGPUTextureFormat_RGBA8Unorm, pImageData );
+    stbi_image_free( (void*)pImageData );
 
     aiReleaseImport( passimpLoadedScene );
     return true;

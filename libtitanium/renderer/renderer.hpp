@@ -1,5 +1,6 @@
 #pragma once
 
+#include <imgui.h>
 #include <SDL.h>
 #include <webgpu/webgpu.h>
 
@@ -93,6 +94,7 @@ namespace renderer
 	// TODO: we need to establish actual pixel format types and stuff, just taking a byte array kind of sucks
 	GPUTextureHandle UploadTexture( TitaniumRendererState *const pRendererState, const util::maths::Vec2<u16> vTextureSize, const WGPUTextureFormat wgpuTextureFormat, const byte *const pTextureData );
 	void FreeGPUTexture( GPUTextureHandle gpuTexture );
+	ImTextureID GPUTexture_GetImguiTexture( GPUTextureHandle gpuTexture );
 
 	/*
 	 *	The code-controlled view through which the scene is rendered

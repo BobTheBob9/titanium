@@ -9,8 +9,8 @@ namespace renderer
 {
     static bool s_bPreferLowPowerAdapter = false;
     static bool s_bForceFallbackAdapter = false;
-    config::Var cvarPreferLowPowerAdapter = config::RegisterVar( "renderer::device::preferlowpoweradapter", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bPreferLowPowerAdapter );
-    config::Var cvarForceFallbackAdapter = config::RegisterVar( "renderer::device::forcefallbackadapter", config::EFVarUsageFlags::STARTUP, config::VARFUNCS_BOOL, &s_bForceFallbackAdapter );
+    config::Var * pcvarPreferLowPowerAdapter = config::RegisterVar( "renderer::device::preferlowpoweradapter", config::EFVarUsageFlags::STARTUP, config::VARF_BOOL, &s_bPreferLowPowerAdapter );
+    config::Var * pcvarForceFallbackAdapter = config::RegisterVar( "renderer::device::forcefallbackadapter", config::EFVarUsageFlags::STARTUP, config::VARF_BOOL, &s_bForceFallbackAdapter );
 
     void InitialisePhysicalRenderingDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice )
     {
@@ -150,8 +150,8 @@ namespace renderer
                           wgpuAdapterLimits.limits.maxComputeWorkgroupSizeZ,
                           wgpuAdapterLimits.limits.maxComputeWorkgroupsPerDimension );
 
-            ::util::data::StaticSpan<WGPUFeatureName, 32> swgpuAdapterFeatures;
-            size_t nFeatures = wgpuAdapterEnumerateFeatures( wgpuGraphicsAdapter, swgpuAdapterFeatures.m_tData );
+            WGPUFeatureName wgpuAdapterFeatures[ 32 ];
+            size_t nFeatures = wgpuAdapterEnumerateFeatures( wgpuGraphicsAdapter, wgpuAdapterFeatures );
 
             if ( nFeatures )
             {
@@ -160,7 +160,7 @@ namespace renderer
                 for ( uint i = 0; i < nFeatures; i++ )
                 {
                     // TODO: track down why we're getting invalid enum values in this
-                    logger::Info( "\t%s" ENDL, WGPUFeatureNameToString( swgpuAdapterFeatures.m_tData[ i ] ) );
+                    logger::Info( "\t%s" ENDL, WGPUFeatureNameToString( wgpuAdapterFeatures[ i ] ) );
                 }
             }
         }();

@@ -193,8 +193,10 @@ namespace util::string
     */
 };
 
-TEST( string )
-{
-    TEST_EXPECT( util::string::CStringStartsWith( "renderer:showfps", "renderer" ) );
-    return true;
-}
+#if HAS_TESTS
+    TEST( string )
+    {
+        TEST_EXPECT( util::string::CStringStartsWith( "renderer:showfps", "renderer" ) );
+        return true;
+    }
+#endif // #if HAS_TESTS

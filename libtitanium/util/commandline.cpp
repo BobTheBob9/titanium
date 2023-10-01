@@ -1,5 +1,6 @@
 #include "commandline.hpp"
 
+#include <libtitanium/util/static_array.hpp>
 #include <libtitanium/util/data/staticspan.hpp>
 #include <libtitanium/util/string.hpp>
 #include <libtitanium/memory/mem_core.hpp>
@@ -152,11 +153,11 @@ namespace util::commandline
     }
 }
 
-#if USE_TESTS
+#if HAS_TESTS
     TEST( Commandline )
     {
         util::commandline::CommandArgs caArgs;
-        util::data::StaticSpan<const char *, 9> sCommandlineArgs { 
+        const char *const szCommandlineArgs[] {
             "hi", 
             "+connect", "localhost", 
             "wow", 
@@ -165,9 +166,9 @@ namespace util::commandline
             "cool" 
         };
         
-        util::commandline::CreateFromSystemWithAlloc( &caArgs, sCommandlineArgs.Elements(), sCommandlineArgs.m_tData );
+        util::commandline::CreateFromSystemWithAlloc( &caArgs, util::StaticArray_Length( szCommandlineArgs ), szCommandlineArgs );
         
-        TEST_EXPECT( caArgs.m_nArgumentStrings == sCommandlineArgs.Elements() );
+        TEST_EXPECT( caArgs.m_nArgumentStrings == util::StaticArray_Length( szCommandlineArgs ) );
         TEST_EXPECT( caArgs.m_eBufferSource == util::commandline::CommandArgs::EBufferSource::SYSTEM_COPY );
 
         {
@@ -175,7 +176,7 @@ namespace util::commandline
             int i = 0;
             while ( ( pszArgIterator = GetNextArgument( &caArgs, pszArgIterator ) ) )
             {
-                TEST_EXPECT( !strcmp( pszArgIterator, sCommandlineArgs.m_tData[ i++ ] ) );
+                TEST_EXPECT( !strcmp( pszArgIterator, szCommandlineArgs[ i++ ] ) );
             }
         }
 
@@ -195,4 +196,4 @@ namespace util::commandline
 
         return true;
     }
-#endif // #if USE_TESTS
+#endif // #if HAS_TESTS

@@ -1,8 +1,9 @@
 #include "game_consolecommand.hpp"
 
+#include <libtitanium/util/string.hpp>
 #include <libtitanium/logger/logger.hpp>
 #include <libtitanium/config/config.hpp>
-#include <libtitanium/util/data/staticspan.hpp>
+#include <libtitanium/util/static_array.hpp>
 
 #include <string.h>
 #include <ctype.h>
@@ -16,15 +17,12 @@ void C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, const
         return;
     }
 
-    util::data::StaticSpan<config::Var *, 10> scvarUntypedVars {};
-    {
-        util::data::Span<config::Var *> scvarUntypedVarsTemp = scvarUntypedVars.ToSpan(); // temp span to avoid taking address of temp
-        config::FindVarsStartingWith( spszConsoleInput.m_pData, &scvarUntypedVarsTemp );
-    }
+    config::Var * pcvarUntypedVars[10] {};
+    config::FindVarsStartingWith( spszConsoleInput.m_pData, util::StaticArray_ToSpan( pcvarUntypedVars ) );
 
-    for ( uint i = 0; i < scvarUntypedVars.Elements() && scvarUntypedVars.m_tData[ i ]; i++ )
+    for ( uint i = 0; i < util::StaticArray_Length( pcvarUntypedVars ) && pcvarUntypedVars[ i ]; i++ )
     {
-        const char *const pszName = scvarUntypedVars.m_tData[i]->szName;
+        const char *const pszName = pcvarUntypedVars[i]->szName;
         if ( !util::string::CStringsEqual( spszConsoleInput.m_pData, pszName ) )
         {
             o_spszAutocompleteItems.m_pData[ i ] = pszName; // util::data::StringBuf<128>( "%s = %s", scvarUntypedVars.m_tData[i]->V_GetName(), scvarUntypedVars.m_tData[i]->V_ToString().ToCStr() );
@@ -87,11 +85,12 @@ void C_ConsoleCommandCompletion( const util::data::Span<char> spszConsoleInput, 
         if ( bShouldSetNext )
         {
             pVar->setFuncs.fnSetFromString( pVar->pValue, szCurrentValue.ToConstCStr() );
+            pVar->bDirty = true;
         }
 
-        util::data::StaticSpan<char, 128> sszValue;
-        pVar->setFuncs.fnToString( pVar->pValue, sszValue.ToSpan() );
-        logger::Info( "%s = %s" ENDL, szCurrentVar.ToConstCStr(), sszValue.m_tData );
+        char szValue[ 128 ];
+        pVar->setFuncs.fnToString( pVar->pValue, util::StaticArray_ToSpan( szValue ) );
+        logger::Info( "%s = %s" ENDL, szCurrentVar.ToConstCStr(), szValue );
     }
     else
     {

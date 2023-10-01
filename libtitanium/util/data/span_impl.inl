@@ -48,4 +48,10 @@ namespace util::data
     {
         return Span<T, TSize>( m_nElements - nOffset, m_pData + nOffset );
     }
+
+    template <typename T, std::unsigned_integral TSize>
+    Span<T, TSize> Span<T, TSize>::Slice( const TSize nFirstIndex, const TSize nLength )
+    {
+        return Span<T, TSize>( nLength, m_pData + nFirstIndex );
+    }
 }

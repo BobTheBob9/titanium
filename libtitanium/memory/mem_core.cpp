@@ -2,8 +2,6 @@
 
 #include <stdlib.h>
 
-#include <libtitanium/util/string.hpp>
-
 namespace memory
 {
     static int s_nAllocs = 0; // temp: need atomic

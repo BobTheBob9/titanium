@@ -12,14 +12,14 @@ namespace dev::tests
 {
     /*
     
-    USE_TESTS controls whether we should compile in test code
+    HAS_TESTS controls whether we should compile in test code
     
     */
-    #ifndef USE_TESTS
-        #define USE_TESTS 1
-    #endif  // #ifndef USE_TESTS
+    #ifndef HAS_TESTS
+        #define HAS_TESTS 1
+    #endif  // #ifndef HAS_TESTS
 
-#if USE_TESTS
+#if HAS_TESTS
     using FnTest = bool(*)();
     void AddTest( const char *const pszTestName, const FnTest fnTest );
     bool RunTests();
@@ -34,5 +34,5 @@ namespace dev::tests
             return false; \
         } else logger::Info( "passed" ENDL ); \
 
-#endif // #if USE_TESTS
+#endif // #if HAS_TESTS
 }

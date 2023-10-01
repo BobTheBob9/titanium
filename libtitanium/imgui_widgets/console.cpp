@@ -1,4 +1,5 @@
 #include "imgui.h"
+#include "util/static_array.hpp"
 #include "widgets.hpp"
 
 #include <libtitanium/config/config.hpp>
@@ -40,14 +41,14 @@ namespace imguiwidgets
     {
         if ( ImGui::Begin( "Developer Console" ) )
         {
-            util::data::StaticSpan<util::data::StringBuf<128>, 10> spszAutocompleteItems;
-            fnCommandHintCallback( spszConsoleInput, spszAutocompleteItems.ToConstSpan(), pCallbackUserData );
+            util::data::StringBuf<128> szAutocompleteItems[10];
+            fnCommandHintCallback( spszConsoleInput, util::StaticArray_ToSpan( szAutocompleteItems ), pCallbackUserData );
 
             // TODO: do this in a dropdown
             ImGui::InputTextMultiline( "##ConsoleLog", util::data::StringBuf<1>().ToCStr(), 0, ImVec2( 0, -( ImGui::GetTextLineHeightWithSpacing() * 1.1 ) ), ImGuiInputTextFlags_ReadOnly );
 
             // TODO: do this in callback
-            C_ConsoleUserData callbackUserData { .pszSelectedEntry = spszAutocompleteItems.m_tData[ 0 ].ToCStr() };
+            C_ConsoleUserData callbackUserData { .pszSelectedEntry = szAutocompleteItems[ 0 ].ToCStr() };
             if ( ImGui::InputText( "Input", spszConsoleInput.m_pData, spszConsoleInput.m_nElements, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory, C_ConsoleInput, &callbackUserData ) )
             {
                 fnCommandCompletionCallback( spszConsoleInput, pCallbackUserData );
@@ -56,22 +57,25 @@ namespace imguiwidgets
 
             ImVec2 vAutocompletePos = ImGui::GetItemRectMin();
             vAutocompletePos.y += ImGui::GetItemRectSize().y;
-            ImGui::End();
 
-            ImGui::SetNextWindowPos( vAutocompletePos );
-            ImGui::Begin( "ConsoleAutocomplete", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoSavedSettings );
+            if ( util::StaticArray_Length( szAutocompleteItems ) && *szAutocompleteItems[ 0 ].m_szStr )
             {
-                for ( uint i = 0; i < spszAutocompleteItems.Elements() && *spszAutocompleteItems.m_tData[ i ].m_szStr; i++ )
+                ImGui::SetNextWindowPos( vAutocompletePos );
+                ImGui::Begin( "ConsoleAutocomplete", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove |   ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing );
                 {
-                    ImGui::PushID( i );
-                    if ( ImGui::Selectable( spszAutocompleteItems.m_tData[ i ].ToCStr(), false ) )
+                    for ( uint i = 0; i < util::StaticArray_Length( szAutocompleteItems ) && *szAutocompleteItems[ i ].m_szStr; i++ )
                     {
-                        strcpy( spszConsoleInput.m_pData, spszAutocompleteItems.m_tData[ 0 ].ToCStr() );
+                        ImGui::PushID( i );
+                        if ( ImGui::Selectable( szAutocompleteItems[ i ].ToCStr(), false ) )
+                        {
+                            strcpy( spszConsoleInput.m_pData, szAutocompleteItems[ 0 ].ToCStr() );
+                        }
+                        ImGui::PopID();
                     }
-                    ImGui::PopID();
                 }
+                ImGui::End();
             }
-            ImGui::End();
         }
+        ImGui::End();
     }
 }

@@ -1,7 +1,8 @@
 #include "renderer.hpp"
 #include "renderer_uniforms.hpp"
-#include "util/data/staticspan.hpp"
-#include "util/maths.hpp"
+
+#include <libtitanium/util/maths.hpp>
+#include <libtitanium/util/static_array.hpp>
 
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
@@ -60,7 +61,7 @@ namespace renderer
         f32 flAspectRatio = f32( pRenderView->m_vRenderResolution.x ) / f32( pRenderView->m_vRenderResolution.y );
         f32 flNearDist = 0.01;
         f32 flFarDist = 10000.0;
-        glm::mat4x4 mat4fProjectFocal = glm::perspective( 1.5f, flAspectRatio, flNearDist, flFarDist );
+        glm::mat4x4 mat4fProjectFocal = glm::perspective( glm::radians( pRenderView->m_flCameraFOV ), flAspectRatio, flNearDist, flFarDist );
 
         const glm::mat4x4 mat4fCamera = mat4fProjectFocal * mat4fTransform;
         wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_mat4fCameraTransform ), &mat4fCamera, sizeof( mat4fCamera ) );
@@ -78,7 +79,7 @@ namespace renderer
         WGPUBuffer wgpuUniformBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuStandardUniformBufferDescriptor );
 
         // make binding to buffer
-        util::data::StaticSpan<WGPUBindGroupEntry, 3> wgpuObjectBindings {
+        WGPUBindGroupEntry wgpuObjectBindings[] {
             {
                 .binding = 0,
                 .buffer = wgpuUniformBuffer,
@@ -96,8 +97,8 @@ namespace renderer
 
         WGPUBindGroupDescriptor wgpuBindGroupDescriptor {
             .layout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderObjectInstance,
-            .entryCount = static_cast<u32>( wgpuObjectBindings.Elements() ),
-            .entries = wgpuObjectBindings.m_tData
+            .entryCount = util::StaticArray_Length( wgpuObjectBindings ),
+            .entries = wgpuObjectBindings
         };
         WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
 

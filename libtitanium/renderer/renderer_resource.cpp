@@ -1,3 +1,4 @@
+#include "imgui.h"
 #include "renderer.hpp"
 #include <webgpu/webgpu.h>
 
@@ -63,7 +64,11 @@ namespace renderer
         wgpuQueueWriteTexture( pRendererState->m_wgpuQueue, &wgpuTextureWriteDestDesc, pTextureData, wgpuTextureSourceDesc.bytesPerRow * wgpuTextureSourceDesc.rowsPerImage, &wgpuTextureSourceDesc, &wgpuTextureDesc.size );
 
         return { r_wgpuTexture, r_wgpuTextureView };
+    }
 
+    ImTextureID GPUTexture_GetImguiTexture( const GPUTextureHandle gpuTexture )
+    {
+        return static_cast<ImTextureID>( gpuTexture.m_wgpuTextureView );
     }
 
 	void FreeGPUTexture( GPUTextureHandle gpuTexture )

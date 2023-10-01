@@ -33,6 +33,7 @@ namespace util::data
         bool Contains( const T tFindValue, const FnFindComparator fnComparator = DefaultFind ) const;
 
         Span<T, TSize> Offset( const TSize nOffset );
+        Span<T, TSize> Slice( const TSize nFirstIndex, const TSize nLength );
     };  
 }
 

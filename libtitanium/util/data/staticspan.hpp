@@ -17,12 +17,14 @@ namespace util::data
 
         StaticSpan() = default;
         StaticSpan( const std::initializer_list<T> ptInitialValue );
-        u64 Elements() const;
-        u64 Size() const;
+        constexpr u64 Elements() const;
+        constexpr u64 Size() const;
 
         Span<T> ToSpan();
         const Span<T> ToConstSpan();
     };
+
+    template <u64 TSize> StaticSpan<char, TSize> StaticSpan_FromString( const char *const pszFmt, ... );
 }
 
 #include "staticspan_impl.inl"

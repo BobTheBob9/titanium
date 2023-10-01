@@ -5,7 +5,7 @@
 namespace imguiwidgets
 {
     static bool s_bShowDebugOverlays = true;
-    config::Var cvarShowDebugOverlays = config::RegisterVar( "dev::debugoverlays", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bShowDebugOverlays );
+    config::Var * pcvarShowDebugOverlays = config::RegisterVar( "dev::debugoverlays", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bShowDebugOverlays );
 
     bool BeginDebugOverlay()
     {

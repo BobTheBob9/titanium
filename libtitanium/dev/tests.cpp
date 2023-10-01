@@ -3,7 +3,7 @@
 #include <libtitanium/util/data/vector.hpp>
 #include <libtitanium/logger/logger.hpp>
 
-#if USE_TESTS
+#if HAS_TESTS
 namespace dev::tests
 {
     struct TestEntry
@@ -40,4 +40,4 @@ namespace dev::tests
         return true;
     }
 }
-#endif // #if USE_TESTS
+#endif // #if HAS_TESTS

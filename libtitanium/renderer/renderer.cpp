@@ -1,5 +1,4 @@
 #include "renderer.hpp"
-#include "imgui_widgets/widgets.hpp"
 #include "renderer_uniforms.hpp"
 
 #include "extern/imgui/imgui.h"
@@ -11,10 +10,11 @@
 #include <libtitanium/util/numerics.hpp>
 #include <libtitanium/util/maths.hpp>
 #include <libtitanium/sys/platform_sdl.hpp>
-#include <libtitanium/util/data/staticspan.hpp>
+#include <libtitanium/util/static_array.hpp>
 #include <libtitanium/logger/logger.hpp>
 #include <libtitanium/config/config.hpp>
 #include <libtitanium/renderer/renderer_stringify.hpp>
+#include <libtitanium/imgui_widgets/widgets.hpp>
 
 #include <chrono> // temp probably, idk if we wanna use this for time
 #include <numbers>
@@ -33,8 +33,8 @@ namespace renderer
 {
     static bool s_bPreferImmmediatePresent = false;
     static bool s_bShowFps = false;
-    config::Var cvarPreferImmediatePresent = config::RegisterVar( "renderer::preferimmediatepresent", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bPreferImmmediatePresent );
-    config::Var cvarShowFps = config::RegisterVar( "renderer::showfps", config::EFVarUsageFlags::NONE, config::VARFUNCS_BOOL, &s_bShowFps );
+    config::Var * pcvarPreferImmediatePresent = config::RegisterVar( "renderer::preferimmediatepresent", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bPreferImmmediatePresent );
+    config::Var * pcvarShowFps = config::RegisterVar( "renderer::showfps", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bShowFps );
     
     void C_WGPUVirtualDeviceHandleUncaughtError( const WGPUErrorType ewgpuErrorType, const char * const pszMessage, void *const pUserdata )
     {
@@ -142,16 +142,6 @@ namespace renderer
         wgpuTextureViewRelease( pDepthTexture->m_wgpuDepthTextureView );
     }
 
-    WGPUBindGroupLayout CreateBindGroupLayout( TitaniumRendererState *const pRendererState, util::data::Span<WGPUBindGroupLayoutEntry> swgpuBindGroupLayoutEntries )
-    {
-        WGPUBindGroupLayoutDescriptor wgpuUniformBindGroupLayoutDescriptor {
-            .entryCount = static_cast<u32>( swgpuBindGroupLayoutEntries.m_nElements ),
-            .entries = swgpuBindGroupLayoutEntries.m_pData
-        };
-
-        return wgpuDeviceCreateBindGroupLayout( pRendererState->m_wgpuVirtualDevice, &wgpuUniformBindGroupLayoutDescriptor );
-    }
-
 
 
     bool Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow )
@@ -219,45 +209,65 @@ namespace renderer
         // create error scope for pipeline creation so we can react to it
         wgpuDevicePushErrorScope( wgpuVirtualDevice, WGPUErrorFilter_Validation );
 
-        // create builtin bindgroup layouts, this defines the way uniforms and textures are laid out in the render pipeline
-        WGPUBindGroupLayout wgpuRenderViewBindGroupLayout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderView = CreateBindGroupLayout( pRendererState, util::data::StaticSpan<WGPUBindGroupLayoutEntry, 1> {
-            {
-                .binding = 0,
-                .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
-                .buffer {
-                    .type = WGPUBufferBindingType_Uniform,
-                    .minBindingSize = sizeof( UShaderView )
+        WGPUBindGroupLayout wgpuRenderViewBindGroupLayout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderView = [ wgpuVirtualDevice ]()
+        {
+            // create builtin bindgroup layouts, this defines the way uniforms and textures are laid out in the render pipeline
+            WGPUBindGroupLayoutEntry wgpuShaderViewBindGroups[] {
+                {
+                    .binding = 0,
+                    .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
+                    .buffer {
+                        .type = WGPUBufferBindingType_Uniform,
+                        .minBindingSize = sizeof( UShaderView )
+                    }
                 }
-            }
-        }.ToConstSpan() );
+            };
+            WGPUBindGroupLayoutDescriptor wgpuShaderViewBindgroupLayoutDesc {
+                .entryCount = util::StaticArray_Length( wgpuShaderViewBindGroups ),
+                .entries = wgpuShaderViewBindGroups
+            };
 
-        WGPUBindGroupLayout wgpuObjectBindGroupLayout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderObjectInstance = CreateBindGroupLayout( pRendererState, util::data::StaticSpan<WGPUBindGroupLayoutEntry, 3> {
-            // object uniforms
-            {
-                .binding = 0,
-                .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
+            return wgpuDeviceCreateBindGroupLayout( wgpuVirtualDevice, &wgpuShaderViewBindgroupLayoutDesc );
+        }();
 
-                .buffer {
-                    .type = WGPUBufferBindingType_Uniform,
-                    .minBindingSize = sizeof( UShaderObjectInstance )
+
+        WGPUBindGroupLayout wgpuObjectBindGroupLayout = pRendererState->m_wgpuUniformBindGroupLayout_UShaderObjectInstance = [ wgpuVirtualDevice ]()
+        {
+            // create builtin bindgroup layouts, this defines the way uniforms and textures are laid out in the render pipeline
+            WGPUBindGroupLayoutEntry wgpuShaderObjectBindGroups[] {
+                // object uniforms
+                {
+                    .binding = 0,
+                    .visibility = WGPUShaderStage_Fragment | WGPUShaderStage_Vertex,
+
+                    .buffer {
+                        .type = WGPUBufferBindingType_Uniform,
+                        .minBindingSize = sizeof( UShaderObjectInstance )
+                    }
+                },
+
+                // texture and texture sampler
+                {
+                    .binding = 1,
+                    .visibility = WGPUShaderStage_Fragment,
+                    .texture {
+                        .sampleType = WGPUTextureSampleType_Float,
+                        .viewDimension = WGPUTextureViewDimension_2D
+                    }
+                },
+                {
+                    .binding = 2,
+                    .visibility = WGPUShaderStage_Fragment,
+                    .sampler { .type = WGPUSamplerBindingType_Filtering }
                 }
-            },
+            };
+            WGPUBindGroupLayoutDescriptor wgpuShaderViewBindgroupLayoutDesc {
+                .entryCount = util::StaticArray_Length( wgpuShaderObjectBindGroups ),
+                .entries = wgpuShaderObjectBindGroups
+            };
 
-            // texture and texture sampler
-            {
-                .binding = 1,
-                .visibility = WGPUShaderStage_Fragment,
-                .texture {
-                    .sampleType = WGPUTextureSampleType_Float,
-                    .viewDimension = WGPUTextureViewDimension_2D
-                }
-            },
-            {
-                .binding = 2,
-                .visibility = WGPUShaderStage_Fragment,
-                .sampler { .type = WGPUSamplerBindingType_Filtering }
-            }
-        }.ToConstSpan() );
+            return wgpuDeviceCreateBindGroupLayout( wgpuVirtualDevice, &wgpuShaderViewBindgroupLayoutDesc );
+        }();
 
         // Create base render pipeline, with a basic shader that uses the global uniform buffer, and the per-object uniform buffer
         pRendererState->m_wgpuObjectRenderPipeline = [ wgpuVirtualDevice, wgpuSwapchainFormat, wgpuRenderViewBindGroupLayout, wgpuObjectBindGroupLayout ]()
@@ -320,19 +330,19 @@ namespace renderer
                 return wgpuDeviceCreateShaderModule( wgpuVirtualDevice, &wgpuShaderDescriptor );
             }();
 
-            util::data::StaticSpan<WGPUBindGroupLayout, 2> swgpuPipelineBindGroupLayouts {
+            WGPUBindGroupLayout wgpuPipelineBindGroupLayouts[] {
                 wgpuRenderViewBindGroupLayout,
                 wgpuObjectBindGroupLayout,
             };
 
             // create pipeline layout
             WGPUPipelineLayoutDescriptor wgpuPipelineLayoutDescriptor {
-                .bindGroupLayoutCount = static_cast<u32>( swgpuPipelineBindGroupLayouts.Elements() ),
-                .bindGroupLayouts = swgpuPipelineBindGroupLayouts.m_tData
+                .bindGroupLayoutCount = util::StaticArray_Length( wgpuPipelineBindGroupLayouts ),
+                .bindGroupLayouts = wgpuPipelineBindGroupLayouts
             };
             WGPUPipelineLayout wgpuPipelineLayout =  wgpuDeviceCreatePipelineLayout( wgpuVirtualDevice, &wgpuPipelineLayoutDescriptor );
 
-            util::data::StaticSpan<WGPUVertexAttribute, 2> sVertexAttributes {
+            WGPUVertexAttribute wgpuVertexAttributes[] {
                 // position attribute
                 {
                     .format = WGPUVertexFormat_Float32x3,
@@ -349,8 +359,8 @@ namespace renderer
             WGPUVertexBufferLayout wgpuVertexBufferLayout {
                 .arrayStride = sizeof( f32 ) * 5,
                 .stepMode = WGPUVertexStepMode_Vertex,
-                .attributeCount = static_cast<u32>( sVertexAttributes.Elements() ),
-                .attributes = sVertexAttributes.m_tData
+                .attributeCount = util::StaticArray_Length( wgpuVertexAttributes ),
+                .attributes = wgpuVertexAttributes
             };
 
             WGPUDepthStencilState wgpuDepthStencilOperations {

@@ -6,7 +6,6 @@
 #include <libtitanium/util/enum_flags.hpp>
 #include <libtitanium/util/data/vector.hpp>
 #include <libtitanium/util/data/stringbuf.hpp>
-#include <libtitanium/util/string.hpp>
 
 namespace config
 {
@@ -57,16 +56,23 @@ namespace config
             FnVarSetFromString fnSetFromString;
         } setFuncs;
 
+        bool bDirty = false;
+
         void * pValue;
     };
 
     void VarBool_ToString( const void *const pCvarPointer, util::data::Span<char> o_spszOutputBuffer );
     void VarBool_SuggestValues( const void *const pCvarPointer, const char *const pszIncompleteValue, util::data::Span<util::data::StringBuf<32>> o_sspszOutputBuffer );
     void VarBool_SetFromString( void *const pCvarPointer, const char *const pszValue );
-    constexpr Var::SetFuncs VARFUNCS_BOOL = { .fnToString = VarBool_ToString, .fnSuggestValues = VarBool_SuggestValues, .fnSetFromString = VarBool_SetFromString };
+    constexpr Var::SetFuncs VARF_BOOL = { .fnToString = VarBool_ToString, .fnSuggestValues = VarBool_SuggestValues, .fnSetFromString = VarBool_SetFromString };
 
-    Var RegisterVar( const char *const pszName, const EFVarUsageFlags efUsage, Var::SetFuncs setFuncs, void *const pValue );
+    void VarFloat_ToString( const void *const pCvarPointer, util::data::Span<char> o_spszOutputBuffer );
+    void VarFloat_SuggestValues( const void *const pCvarPointer, const char *const pszIncompleteValue, util::data::Span<util::data::StringBuf<32>> o_sspszOutputBuffer );
+    void VarFloat_SetFromString( void *const pCvarPointer, const char *const pszValue );
+    constexpr Var::SetFuncs VARF_FLOAT = { .fnToString = VarFloat_ToString, .fnSuggestValues = VarFloat_SuggestValues, .fnSetFromString = VarFloat_SetFromString };
+
+    Var * RegisterVar( const char *const pszName, const EFVarUsageFlags efUsage, Var::SetFuncs setFuncs, void *const pValue );
     Var * FindVar( const char *const pszVarName );
-    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<Var *> * o_pspcvarVars );
-    void StaticFree();
+    void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<Var *> o_spcvarVars );
+    void FreeVars();
 };

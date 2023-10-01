@@ -5,14 +5,6 @@
 
 namespace sys::sdl
 {
-    /*void Initialise()
-    {
-        SDL_Init( SDL_INIT_VIDEO );
-
-        logger::Info( "sdl runtime version is %s" ENDL, sys::sdl::StringRuntimeVersion().ToConstCStr() );
-        logger::Info( "engine was compiled against sdl version %s" ENDL, sys::sdl::StringCompilationVersion().ToConstCStr() );
-    }*/
-
     WGPUSurface CreateWGPUSurfaceForWindow( SDL_Window *const psdlWindow, const WGPUInstance wgpuInstance )
     {        
         SDL_SysWMinfo sdlPlatWindowInfo;
