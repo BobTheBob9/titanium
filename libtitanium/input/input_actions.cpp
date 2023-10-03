@@ -70,9 +70,9 @@ namespace input
         SetDigitalActionBits( snCurrentInputs, nActionIndex, 0b00 );
     }
 
-    float AnalogueActionValue( const util::data::Span<i16> snCurrentAnalogueInputs, const uint nActionIndex )
+    float AnalogueActionValue( const util::data::Span<f32> sflCurrentAnalogueInputs, const uint nActionIndex )
     {
-        return static_cast<float>( snCurrentAnalogueInputs.m_pData[ nActionIndex ] ) / static_cast<float>( maxof( i16 ) );
+        return sflCurrentAnalogueInputs.m_pData[ nActionIndex ];
     }
 }
 

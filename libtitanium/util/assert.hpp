@@ -18,7 +18,9 @@ namespace assert
         if ( !bCondition ) [[ unlikely ]] 
         {
             logger::Info( "assertion failed %s" ENDL, pMessageFormat );
-            exit( EXIT_FAILURE );
+
+            __builtin_trap();
+            //exit( EXIT_FAILURE );
         }
     }
 
@@ -37,7 +39,9 @@ namespace assert
         if ( !bCondition ) [[ unlikely ]]
         {
             logger::Info( "assertion failed %s" ENDL, pMessageFormat );
-            exit( EXIT_FAILURE );
+
+            __builtin_trap();
+            //exit( EXIT_FAILURE );
         }
 #endif // #else // #ifndef NDEBUG
     }

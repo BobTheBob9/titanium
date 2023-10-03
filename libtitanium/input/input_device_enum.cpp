@@ -300,7 +300,18 @@ namespace input
             return sdlEKeyboardButtonToSDL[ static_cast<int>( EKeyboardMouseButton::NONE ) ];
         }
 
-        return sdlEKeyboardButtonToSDL[ static_cast<int>( eButton ) ];    }
+        return sdlEKeyboardButtonToSDL[ static_cast<int>( eButton ) ];
+    }
+
+    uint EKeyboardMouseButton_ToSDLMouseButtonBitmask( const EKeyboardMouseButton eButton )
+    {
+        if ( eButton >= EKeyboardMouseButton::_MOUSE_MAX )
+        {
+            return sdlEMouseButtonToSDLBitmask[ static_cast<int>( EKeyboardMouseButton::NONE ) ];
+        }
+
+        return sdlEMouseButtonToSDLBitmask[ static_cast<int>( eButton ) ];
+    }
 
 
     const char *const szEControllerAxisToString[] {

@@ -20,6 +20,8 @@ namespace util::data
         Span();
         Span( const TSize nElements, T *const pData );
 
+        // TODO: this should use pointers, and have better arg names ( also probably make the userdata optional )
+        // TODO: also, a find method that just returns a pointer to the data rather than an index would be nice
         using FnFindComparator = bool(*)( const T tFirst, const T tSecond );
         static bool DefaultFind( const T tFirst, const T tSecond );
 

@@ -6,6 +6,7 @@
 #include <SDL_joystick.h>
 #include <SDL_keycode.h>
 #include <SDL_stdinc.h>
+#include <SDL_timer.h>
 #include <cstdlib>
 #include <stdlib.h>
 
@@ -88,11 +89,8 @@ static EProgram s_eProgram = EProgram::GAME; config::Var * pcvarProgram = config
 
 static bool s_bRunGameLoop = true; config::Var * pcvarRunGameLoop = config::RegisterVar( "game::runloop", config::EFVarUsageFlags::STARTUP, config::VARF_BOOL, &s_bRunGameLoop );
 
-static bool s_bCaptureMouse = false; config::Var * pcvarCaptureMouse = config::RegisterVar( "game::capturemouse", config::EFVarUsageFlags::STARTUP, config::VARF_BOOL, &s_bCaptureMouse );
-
+static bool s_bCaptureMouse = false; config::Var * pcvarCaptureMouse = config::RegisterVar( "game::capturemouse", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bCaptureMouse );
 static f32 s_flCameraFov = 20.f; config::Var * pcvarCameraFov = config::RegisterVar( "game::camerafov", config::EFVarUsageFlags::NONE, config::VARF_FLOAT, &s_flCameraFov );
-static bool s_bShowImguiDemo = false; config::Var * pcvarShowImguiDemo = config::RegisterVar( "dev::imguidemo", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bShowImguiDemo );
-
 static bool s_bShowConsole = false; config::Var * pcvarShowConsole = config::RegisterVar( "game::showconsole", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bShowConsole );
 
 struct AnalogueBindDefinition
@@ -123,16 +121,19 @@ AnalogueBindDefinition s_AnalogueBindDefinitions[] {
         .szName = "lookright",
         .eDefaultKBButtonPos = input::EKeyboardMouseButton::KEYBOARD_RIGHTARROW,
         .eDefaultKBButtonNeg = input::EKeyboardMouseButton::KEYBOARD_LEFTARROW,
+        .eDefaultKBAxis = input::EKeyboardMouseAxis::MOUSE_MOVE_X,
         .eDefaultControllerAxis = input::EControllerAxis::RIGHTSTICK_X
     },
     { // EAnalogueInputActions::LOOKUP
         .szName = "lookup",
         .eDefaultKBButtonPos = input::EKeyboardMouseButton::KEYBOARD_UPARROW,
         .eDefaultKBButtonNeg = input::EKeyboardMouseButton::KEYBOARD_DOWNARROW,
+        .eDefaultKBAxis = input::EKeyboardMouseAxis::MOUSE_MOVE_Y,
         .eDefaultControllerAxis = input::EControllerAxis::RIGHTSTICK_Y
     },
     { // EAnalogueInputActions::ZOOM
         .szName = "zoom",
+        .eDefaultKBAxis = input::EKeyboardMouseAxis::MOUSE_WHEEL,
         .eDefaultControllerButtonPos = input::EControllerButton::DPAD_DOWN,
         .eDefaultControllerButtonNeg = input::EControllerButton::DPAD_UP
     },
@@ -163,11 +164,17 @@ namespace EDigitalInputActions
 {
     enum EDigitalInputActions
     {
+        GRAB_OBJECT,
         TOGGLECONSOLE
     };
 }
 
 DigitalBindDefinition s_DigitalBindDefinitions[] {
+    { // EDigitalInputActions::GRAB_OBJECT
+        .szName = "grab_object",
+        .eDefaultKBButton = input::EKeyboardMouseButton::MOUSE_LEFT,
+        //.eDefaultControllerAxis = input::EControllerAxis::TRIGGER_RIGHT
+    },
     { // EDigitalInputActions::TOGGLECONSOLE
         .szName = "toggleconsole",
         .eDefaultKBButton = input::EKeyboardMouseButton::KEYBOARD_GRAVE,
@@ -215,7 +222,6 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
     // default to wayland where available
     SDL_SetHint( SDL_HINT_VIDEODRIVER, "wayland,x11" );
-
     SDL_Init( SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER );
     SDL_Window *const psdlWindow = SDL_CreateWindow( "Titanium - SDL + WGPU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1600, 900, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN ); // TODO: do we need SDL_WINDOW_VULKAN/whatever api?
 
@@ -315,13 +321,10 @@ int main( const int nArgs, const char *const *const ppszArgs )
         renderobjHelmet,
     };
 
-    if ( s_bCaptureMouse )
-    {
-        SDL_SetWindowMouseGrab( psdlWindow, SDL_TRUE );
-        SDL_SetRelativeMouseMode( SDL_TRUE );
-    }
-
     char szConsoleInput[ 256 ] {};
+
+
+    input::SetupSDL();
 
     // i would be very surprised if someone plugs in more than 16 controllers
     input::InputDevice inputDevices[16] {};
@@ -341,7 +344,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
             .eControllerAxis = s_AnalogueBindDefinitions[ i ].eDefaultControllerAxis,
         };
     }
-    i16 nAnalogueInputActionValues[ util::StaticArray_Length( s_AnalogueBindDefinitions ) ];
+    float flAnalogueInputActionValues[ util::StaticArray_Length( s_AnalogueBindDefinitions ) ];
 
     input::DigitalBinding digitalBinds[ util::StaticArray_Length( s_DigitalBindDefinitions ) ];
     for ( uint i = 0; i < util::StaticArray_Length( s_DigitalBindDefinitions ); i++ )
@@ -355,20 +358,26 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
     u8 nDigitalInputActionValues[ input::SizeNeededForDigitalActions( util::StaticArray_Length( s_DigitalBindDefinitions ) ) ];
 
+    SDL_SetWindowGrab( psdlWindow, SDL_TRUE );
+
+    u64 nTimeNow = SDL_GetPerformanceCounter();
+    u64 nTimeLastFrame;
+
     bool bRunGame = s_bRunGameLoop;
     while ( bRunGame )
     {
+        nTimeLastFrame = nTimeNow;
+        nTimeNow = SDL_GetPerformanceCounter();
+
+        // TODO: temp, reexamine
+        float flDeltaTime = (double)((nTimeNow - nTimeLastFrame)*1000 / (double)SDL_GetPerformanceFrequency()) / 1000;
+
         {
             SDL_Event sdlEvent;
             while ( SDL_PollEvent( &sdlEvent ) )
             {
-                if ( !ImGui_ImplSDL2_ProcessEvent( &sdlEvent ) )
-                {
-                    if ( input::ProcessSDLInputEvent( &sdlEvent, util::StaticArray_ToSpan( inputDevices ) ) )
-                    {
-                        continue;
-                    }
-                }
+                ImGui_ImplSDL2_ProcessEvent( &sdlEvent );
+                input::ProcessSDLInputEvent( &sdlEvent, util::StaticArray_ToSpan( inputDevices ) );
 
                 switch ( sdlEvent.type )
                 {
@@ -390,6 +399,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
                     case SDL_QUIT:
                     {
+                        logger::Info( "Recieved SDL_QUIT event" ENDL );
                         bRunGame = false;
                         break;
                     }
@@ -401,30 +411,37 @@ int main( const int nArgs, const char *const *const ppszArgs )
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        input::ProcessAnalogueActions( util::StaticArray_ToSpan( inputDevices ), util::StaticArray_ToSpan( analogueBinds ), util::StaticArray_ToSpan( nAnalogueInputActionValues ) );
+        input::ProcessAnalogueActions( util::StaticArray_ToSpan( inputDevices ), util::StaticArray_ToSpan( analogueBinds ), util::StaticArray_ToSpan( flAnalogueInputActionValues ), flDeltaTime );
         input::ProcessDigitalActions( util::StaticArray_ToSpan( inputDevices ), util::StaticArray_ToSpan( digitalBinds ), util::StaticArray_ToSpan( nDigitalInputActionValues ) );
-        rendererMainView.m_vCameraRotation.x += input::AnalogueActionValue( util::StaticArray_ToSpan( nAnalogueInputActionValues ), EAnalogueInputActions::LOOKRIGHT );
-        rendererMainView.m_vCameraRotation.y += input::AnalogueActionValue( util::StaticArray_ToSpan( nAnalogueInputActionValues ), EAnalogueInputActions::LOOKUP );
-        rendererMainView.m_flCameraFOV = s_flCameraFov += input::AnalogueActionValue( util::StaticArray_ToSpan( nAnalogueInputActionValues ), EAnalogueInputActions::ZOOM );
+
+        float flXMove = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::LOOKRIGHT );
+        float flYMove = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::LOOKUP );
+        if ( input::DigitalActionHeld( util::StaticArray_ToSpan( nDigitalInputActionValues ), EDigitalInputActions::GRAB_OBJECT ) )
+        {
+            renderObjects[ 0 ].m_vRotation.x += flXMove;
+            renderObjects[ 0 ].m_vRotation.y += flYMove;
+            renderObjects[ 0 ].m_bGPUDirty = true; // we've changed the state of the object, we need to tell the renderer to write the new data to the gpu
+        }
+        else
+        {
+            rendererMainView.m_vCameraRotation.x += flXMove;
+            rendererMainView.m_vCameraRotation.y += flYMove;
+        }
+
+        rendererMainView.m_flCameraFOV = s_flCameraFov += input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::ZOOM );
         rendererMainView.m_bGPUDirty = true;
 
-        renderObjects[ 0 ].m_vRotation.x += input::AnalogueActionValue( util::StaticArray_ToSpan( nAnalogueInputActionValues ), EAnalogueInputActions::MOVERIGHT );
-        renderObjects[ 0 ].m_vRotation.y += input::AnalogueActionValue( util::StaticArray_ToSpan( nAnalogueInputActionValues ), EAnalogueInputActions::MOVEUP );
-        renderObjects[ 0 ].m_bGPUDirty = true; // we've changed the state of the object, we need to tell the renderer to write the new data to the gpu
+        input::PostProcess( util::StaticArray_ToSpan( inputDevices ) );
 
         if ( input::DigitalActionPressed( util::StaticArray_ToSpan( nDigitalInputActionValues ), EDigitalInputActions::TOGGLECONSOLE ) )
         {
             s_bShowConsole = !s_bShowConsole;
+            //SDL_SetRelativeMouseMode( s_bShowConsole ? SDL_FALSE : SDL_TRUE );
         }
 
         if ( s_bShowConsole )
         {
             imguiwidgets::Console( util::StaticArray_ToSpan( szConsoleInput ), nullptr, C_ConsoleAutocomplete, C_ConsoleCommandCompletion );
-        }
-
-        if ( s_bShowImguiDemo )
-        {
-            ImGui::ShowDemoWindow( &s_bShowImguiDemo );
         }
 
         if ( pcvarCameraFov->bDirty )
@@ -437,6 +454,8 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         if ( imguiwidgets::BeginDebugOverlay() )
         {
+            ImGui::Text("%f", flDeltaTime);
+
             ImGui::Text( "Camera: %fdeg { %f %f %f } { %f %f %f }", rendererMainView.m_flCameraFOV,
                                                                    rendererMainView.m_vCameraPosition.x, rendererMainView.m_vCameraPosition.y, rendererMainView.m_vCameraPosition.z,
                                                                    rendererMainView.m_vCameraRotation.x, rendererMainView.m_vCameraRotation.y, rendererMainView.m_vCameraRotation.z );
@@ -453,6 +472,8 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         renderer::Frame( &rendererState, &rendererMainView, util::StaticArray_ToSpan( renderObjects ) );
     }
+
+    logger::Info( "Game is over. Exiting..." ENDL );
 
     // free all loaded models
     for ( uint i = 0; i <  util::StaticArray_Length( renderObjects ); i++ )

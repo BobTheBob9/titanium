@@ -32,6 +32,8 @@ namespace input
      *  TODO: work out supporting multiple controllers etc
      */
 
+    constexpr f32 MAX_JOYSTICK = 1.f;
+    constexpr f32 MIN_JOYSTICK = -MAX_JOYSTICK;
     constexpr uint SizeNeededForDigitalActions( const uint nActions ) { return ( 2 * nActions + 8 ) / 8; }
 
     void SetDigitalActionHeld( const util::data::Span<u8> snCurrentInputs, const uint nActionIndex );
@@ -43,5 +45,5 @@ namespace input
     bool DigitalActionPressed( const util::data::Span<u8> snCurrentInputs, const uint nActionIndex );
     bool DigitalActionDepressed( const util::data::Span<u8> snCurrentInputs, const uint nActionIndex );
 
-    float AnalogueActionValue( const util::data::Span<i16> snCurrentAnalogueInputs, const uint nActionIndex );
+    float AnalogueActionValue( const util::data::Span<f32> sflCurrentAnalogueInputs, const uint nActionIndex );
 }

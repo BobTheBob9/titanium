@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libtitanium/util/data/span.hpp>
+#include <libtitanium/util/maths.hpp>
 
 #include <SDL_gamecontroller.h>
 #include <SDL_events.h>
@@ -179,6 +180,7 @@ namespace input
     EControllerButton EControllerButtonFromString( const char *const pszButton );
     const char * EControllerButtonAxisToString( const EControllerButton eButton );
     SDL_GameControllerButton EControllerButtonToSDLButton( const EControllerButton eControllerButton );
+    uint EKeyboardMouseButton_ToSDLMouseButtonBitmask( const EKeyboardMouseButton eButton );
 
     enum class EInputDeviceType
     {
@@ -187,10 +189,20 @@ namespace input
         CONTROLLER
     };
 
+    struct KeyboardMouseData
+    {
+        util::maths::Vec2<i32> vMouseMovement;
+        float flScrollMovement;
+    };
+
     struct InputDevice
     {
         EInputDeviceType eDeviceType;
-        SDL_GameController * pSDLGameController;
+
+        union {
+            SDL_GameController * pSDLGameController;
+            KeyboardMouseData keyboardAndMouseData;
+        };
     };
     void InputDevice_InitialiseKeyboard( InputDevice *const pInputDevice );
 
@@ -212,7 +224,9 @@ namespace input
         EControllerAxis eControllerAxis;
     };
 
+    void SetupSDL();
     bool ProcessSDLInputEvent( const SDL_Event *const pSdlEvent, util::data::Span<InputDevice> sInputDevices );
-    void ProcessAnalogueActions( util::data::Span<InputDevice> sMulticastInputDevices, const util::data::Span<AnalogueBinding> sInputBindings, util::data::Span<i16> o_snAnalogueActionState );
+    void ProcessAnalogueActions( util::data::Span<InputDevice> sMulticastInputDevices, const util::data::Span<AnalogueBinding> sInputBindings, util::data::Span<f32> o_snAnalogueActionState, const float flsecFrameTime );
     void ProcessDigitalActions( util::data::Span<InputDevice> sMulticastInputDevices, const util::data::Span<DigitalBinding> sInputBindings, util::data::Span<u8> o_snDigitalActionState );
+    void PostProcess( util::data::Span<InputDevice> sInputDevices );
 }

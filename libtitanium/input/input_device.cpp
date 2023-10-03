@@ -1,6 +1,8 @@
 #include "input_device.hpp"
 #include "input/input_actions.hpp"
 
+#include <glm/glm.hpp>
+
 #include <SDL_mouse.h>
 #include <libtitanium/config/config.hpp>
 #include <libtitanium/util/assert.hpp>
@@ -18,13 +20,38 @@ namespace input
     // maybe provide helpers for float deadzone => i16 deadzone?
     f32 s_flControllerDeadzone = 0.005; config::Var * pcvarControllerDeadzone = config::RegisterVar( "input::controllerdeadzone", config::EFVarUsageFlags::NONE, config::VARF_FLOAT, &s_flControllerDeadzone );
 
+    // mirrors the source/quake default values for m_yaw and m_pitch, so source/quake sensitivities work!
+    f32 s_flMouseYawScale = 0.022; config::Var * pcvarYawScale = config::RegisterVar( "input::mouseyawscale", config::EFVarUsageFlags::NONE, config::VARF_FLOAT, &s_flMouseYawScale );
+    f32 s_flMousePitchScale = 0.022; config::Var * pcvarPitchScale = config::RegisterVar( "input::mousepitchscale", config::EFVarUsageFlags::NONE, config::VARF_FLOAT, &s_flMousePitchScale );
+
+    // default value taken from winquake's joy_pitchsensitivity var
+    f32 s_flJoystickScale = 150.f; config::Var * pcvarJoystickScale = config::RegisterVar( "input::joystickscale", config::EFVarUsageFlags::NONE, config::VARF_FLOAT, &s_flJoystickScale );
+
+    void SetupSDL()
+    {
+        SDL_SetRelativeMouseMode( SDL_TRUE );
+    }
+
     void InputDevice_InitialiseKeyboard( InputDevice *const pInputDevice )
     {
         *pInputDevice = { .eDeviceType = EInputDeviceType::KEYBOARD_MOUSE, .pSDLGameController = nullptr };
     }
 
+    bool FindKeyboardAndMouse( const InputDevice first, const InputDevice second )
+    {
+        (void)second;
+        return first.eDeviceType == EInputDeviceType::KEYBOARD_MOUSE;
+    }
+
     bool ProcessSDLInputEvent( const SDL_Event *const pSdlEvent, util::data::Span<InputDevice> sInputDevices )
     {
+        const util::data::Span<InputDevice>::R_IndexOf_s findKeyboard = sInputDevices.IndexOf( {}, FindKeyboardAndMouse );
+        InputDevice * pKeyboardAndMouse = nullptr;
+        if ( findKeyboard.bFound )
+        {
+            pKeyboardAndMouse = &sInputDevices.m_pData[ findKeyboard.nIndex ];
+        }
+
         switch ( pSdlEvent->type )
         {
             case SDL_CONTROLLERDEVICEADDED:
@@ -57,7 +84,7 @@ namespace input
                         logger::Info( "Disconnecting controller \"%s\" from index %i" ENDL, SDL_GameControllerName( pSDLGameController ), i );
                         SDL_GameControllerClose( pSDLGameController );
                         sInputDevices.m_pData[ i ] = { .eDeviceType = EInputDeviceType::INVALID, .pSDLGameController = nullptr };
-                        return true;
+                        break;
                     }
                 }
 
@@ -67,28 +94,34 @@ namespace input
 
             case SDL_MOUSEMOTION:
             {
+                if ( findKeyboard.bFound )
+                {
+                    assert::Debug( SDL_GetRelativeMouseMode() );
+                    pKeyboardAndMouse->keyboardAndMouseData.vMouseMovement.x += pSdlEvent->motion.xrel;
+                    pKeyboardAndMouse->keyboardAndMouseData.vMouseMovement.y += -pSdlEvent->motion.yrel;
+                }
 
+                return true;
             }
 
             case SDL_MOUSEWHEEL:
             {
+                if ( findKeyboard.bFound )
+                {
+                    pKeyboardAndMouse->keyboardAndMouseData.flScrollMovement += pSdlEvent->wheel.preciseY;
+                }
 
+                return true;
             }
 
-            default:
-            {
-                return false;
-            }
+            default: return false;
         }
     }
 
-    constexpr i16 MAX_JOYSTICK = maxof( i16 );
-    constexpr i16 MIN_JOYSTICK = -MAX_JOYSTICK;
-
-    void ProcessAnalogueActions( util::data::Span<InputDevice> sMulticastInputDevices, const util::data::Span<AnalogueBinding> sInputBindings, util::data::Span<i16> o_snAnalogueActionState )
+    void ProcessAnalogueActions( util::data::Span<InputDevice> sMulticastInputDevices, const util::data::Span<AnalogueBinding> sInputBindings, util::data::Span<f32> o_snAnalogueActionState, const float flsecFrameTime )
     {
         assert::Debug( sInputBindings.m_nElements == o_snAnalogueActionState.m_nElements );
-        memset( o_snAnalogueActionState.m_pData, 0, o_snAnalogueActionState.m_nElements * sizeof( i16 ) );
+        memset( o_snAnalogueActionState.m_pData, 0, o_snAnalogueActionState.m_nElements * sizeof( f32 ) );
 
         for ( uint i = 0; i < sMulticastInputDevices.m_nElements; i++ )
         {
@@ -100,35 +133,76 @@ namespace input
 
             for ( uint j = 0; j < sInputBindings.m_nElements; j++ )
             {
-                i16 nValue = 0;
+                bool bScaleToFrameTime = true;
+                f32 flValue = 0;
 
                 if ( pInputDevice->eDeviceType == EInputDeviceType::KEYBOARD_MOUSE )
                 {
-                    // TODO: mouse button and axis support
-                    const u8* const pbSDLKeyStates = SDL_GetKeyboardState( nullptr );
-                    const u32 nMouseStateBits = SDL_GetMouseState( nullptr, nullptr );
-
-                    EKeyboardMouseButton ePosButton = sInputBindings.m_pData[ j ].eKBButtonPos;
-                    if ( EKeyboardMouseButton_IsMouseInput( ePosButton ) )
+                    if ( sInputBindings.m_pData[ j ].eKBAxis != EKeyboardMouseAxis::NONE )
                     {
-                    }
-                    else
-                    {
-                        if ( pbSDLKeyStates[ EKeyboardMouseButton_ToSDLKeyboardScancode( ePosButton ) ] )
+                        switch ( sInputBindings.m_pData[ j ].eKBAxis )
                         {
-                            nValue += MAX_JOYSTICK;
+                            case EKeyboardMouseAxis::MOUSE_WHEEL:
+                            {
+                                flValue += pInputDevice->keyboardAndMouseData.flScrollMovement;
+                                bScaleToFrameTime = false;
+                                break;
+                            }
+
+                            // TODO: these are busted
+                            case EKeyboardMouseAxis::MOUSE_MOVE_X:
+                            {
+                                flValue += pInputDevice->keyboardAndMouseData.vMouseMovement.x * s_flMouseYawScale;
+                                bScaleToFrameTime = false;
+                                break;
+                            }
+
+                            case EKeyboardMouseAxis::MOUSE_MOVE_Y:
+                            {
+                                flValue += pInputDevice->keyboardAndMouseData.vMouseMovement.y * s_flMousePitchScale;
+                                bScaleToFrameTime = false;
+                                break;
+                            }
+
+                            default: break;
                         }
                     }
-
-                    EKeyboardMouseButton eNegButton = sInputBindings.m_pData[ j ].eKBButtonNeg;
-                    if ( EKeyboardMouseButton_IsMouseInput( eNegButton ) )
-                    {
-                    }
                     else
                     {
-                        if ( pbSDLKeyStates[ EKeyboardMouseButton_ToSDLKeyboardScancode( eNegButton ) ] )
+                        // TODO: mouse button and axis support
+                        const u8* const pbSDLKeyStates = SDL_GetKeyboardState( nullptr );
+                        const u32 nMouseStateBits = SDL_GetMouseState( nullptr, nullptr );
+
+                        EKeyboardMouseButton ePosButton = sInputBindings.m_pData[ j ].eKBButtonPos;
+                        if ( EKeyboardMouseButton_IsMouseInput( ePosButton ) )
                         {
-                            nValue += MIN_JOYSTICK;
+                            if ( SDL_GetMouseState( nullptr, nullptr ) & EKeyboardMouseButton_ToSDLMouseButtonBitmask( sInputBindings.m_pData[ i ].eKBButtonPos ) )
+                            {
+                                flValue += MAX_JOYSTICK;
+                            }
+                        }
+                        else
+                        {
+                            if ( pbSDLKeyStates[ EKeyboardMouseButton_ToSDLKeyboardScancode( ePosButton ) ] )
+                            {
+                                flValue += MAX_JOYSTICK;
+                            }
+                        }
+
+                        EKeyboardMouseButton eNegButton = sInputBindings.m_pData[ j ].eKBButtonNeg;
+                        if ( EKeyboardMouseButton_IsMouseInput( eNegButton ) )
+                        {
+                            if ( SDL_GetMouseState( nullptr, nullptr ) & EKeyboardMouseButton_ToSDLMouseButtonBitmask( sInputBindings.m_pData[ i ].eKBButtonPos ) )
+                            {
+                                flValue += MIN_JOYSTICK;
+                            }
+                        }
+                        else
+                        {
+                            if ( pbSDLKeyStates[ EKeyboardMouseButton_ToSDLKeyboardScancode( eNegButton ) ] )
+                            {
+                                flValue += MIN_JOYSTICK;
+                            }
                         }
                     }
                 }
@@ -136,18 +210,18 @@ namespace input
                 {
                     if ( SDL_GameControllerGetButton( pInputDevice->pSDLGameController, EControllerButtonToSDLButton( sInputBindings.m_pData[ j ].eControllerButtonPos ) ) )
                     {
-                        nValue += MAX_JOYSTICK;
+                        flValue += MAX_JOYSTICK;
                     }
                     else if ( SDL_GameControllerGetButton( pInputDevice->pSDLGameController, EControllerButtonToSDLButton(sInputBindings.m_pData[ j ].eControllerButtonNeg ) ) )
                     {
-                        nValue += MIN_JOYSTICK;
+                        flValue += MIN_JOYSTICK;
                     }
                     else
                     {
                         SDL_GameControllerAxis sdlGameControllerAxis = EControllerAxisToSDLAxis( sInputBindings.m_pData[ j ].eControllerAxis );
-                        nValue = SDL_GameControllerGetAxis( pInputDevice->pSDLGameController, sdlGameControllerAxis );
+                        int nValue = SDL_GameControllerGetAxis( pInputDevice->pSDLGameController, sdlGameControllerAxis );
 
-                        if ( abs( nValue ) < MAX_JOYSTICK * s_flControllerDeadzone )
+                        if ( abs( nValue ) < maxof( i16 ) * s_flControllerDeadzone )
                         {
                             nValue = 0;
                         }
@@ -156,13 +230,20 @@ namespace input
                         {
                             nValue = -nValue;
                         }
+
+                        flValue = static_cast<float>( nValue ) / static_cast<float>( maxof( i16 ) );
                     }
 
                 }
 
-                if ( abs( nValue ) > abs( o_snAnalogueActionState.m_pData[ j ] ) )
+                if ( fabs( flValue ) > fabs( o_snAnalogueActionState.m_pData[ j ] ) )
                 {
-                    o_snAnalogueActionState.m_pData[ j ] = nValue;
+                    if ( bScaleToFrameTime )
+                    {
+                        flValue *= flsecFrameTime * s_flJoystickScale;
+                    }
+
+                    o_snAnalogueActionState.m_pData[ j ] = flValue;
                 }
             }
         }
@@ -170,7 +251,7 @@ namespace input
 
     void ProcessDigitalActions( util::data::Span<InputDevice> sMulticastInputDevices, const util::data::Span<DigitalBinding> sInputBindings, util::data::Span<u8> o_snDigitalActionState )
     {
-        assert::Debug( util::maths::WithinRange( sInputBindings.m_nElements, SizeNeededForDigitalActions( o_snDigitalActionState.m_nElements ), SizeNeededForDigitalActions( o_snDigitalActionState.m_nElements ) + 1 ) );
+        //assert::Debug( util::maths::WithinRange( sInputBindings.m_nElements, SizeNeededForDigitalActions( o_snDigitalActionState.m_nElements ), SizeNeededForDigitalActions( o_snDigitalActionState.m_nElements ) + 1 ) );
 
         for ( uint i = 0; i < sInputBindings.m_nElements; i++ )
         {
@@ -187,10 +268,16 @@ namespace input
 
                 if ( pInputDevice->eDeviceType == EInputDeviceType::KEYBOARD_MOUSE )
                 {
-                    // TODO: mouse button and axis support
 
-                    const u8* const pbSDLKeyStates = SDL_GetKeyboardState( nullptr );
-                    bCurrentlyHeld = pbSDLKeyStates[ EKeyboardMouseButton_ToSDLKeyboardScancode( sInputBindings.m_pData[ i ].eKBButton ) ];
+                    if ( EKeyboardMouseButton_IsMouseInput( sInputBindings.m_pData[ i ].eKBButton ) )
+                    {
+                        bCurrentlyHeld = SDL_GetMouseState( nullptr, nullptr ) & EKeyboardMouseButton_ToSDLMouseButtonBitmask( sInputBindings.m_pData[ i ].eKBButton );
+                    }
+                    else
+                    {
+                        const u8* const pbSDLKeyStates = SDL_GetKeyboardState( nullptr );
+                        bCurrentlyHeld = pbSDLKeyStates[ EKeyboardMouseButton_ToSDLKeyboardScancode( sInputBindings.m_pData[ i ].eKBButton ) ];
+                    }
                 }
                 else if ( pInputDevice->eDeviceType == EInputDeviceType::CONTROLLER )
                 {
@@ -230,6 +317,18 @@ namespace input
                 {
                     SetDigitalActionClear( o_snDigitalActionState, i );
                 }
+            }
+        }
+    }
+
+    void PostProcess( util::data::Span<InputDevice> sInputDevices )
+    {
+        for ( uint i = 0; i < sInputDevices.m_nElements; i++ )
+        {
+            if ( sInputDevices.m_pData[ i ].eDeviceType == EInputDeviceType::KEYBOARD_MOUSE )
+            {
+                // reset pending data we've processed already
+                sInputDevices.m_pData[ i ].keyboardAndMouseData = {};
             }
         }
     }
