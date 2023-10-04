@@ -7,7 +7,6 @@
 #include <SDL_keycode.h>
 #include <SDL_stdinc.h>
 #include <SDL_timer.h>
-#include <cstdlib>
 #include <stdlib.h>
 
 #include <SDL.h>
@@ -35,6 +34,7 @@
 
 #include "game_consolecommand.hpp"
 #include "game_loadassimp.hpp"
+#include "memory/mem_external.hpp"
 #include "util/assert.hpp"
 #include "util/maths.hpp"
 
@@ -91,7 +91,6 @@ static bool s_bRunGameLoop = true; config::Var * pcvarRunGameLoop = config::Regi
 
 static bool s_bCaptureMouse = false; config::Var * pcvarCaptureMouse = config::RegisterVar( "game::capturemouse", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bCaptureMouse );
 static f32 s_flCameraFov = 20.f; config::Var * pcvarCameraFov = config::RegisterVar( "game::camerafov", config::EFVarUsageFlags::NONE, config::VARF_FLOAT, &s_flCameraFov );
-static bool s_bShowConsole = false; config::Var * pcvarShowConsole = config::RegisterVar( "game::showconsole", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bShowConsole );
 
 struct AnalogueBindDefinition
 {
@@ -220,6 +219,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
     //filesystem::Initialise();
     //jobsystem::Initialise();
 
+    //memory::SetExternMemoryFunctions_SDL();
     // default to wayland where available
     SDL_SetHint( SDL_HINT_VIDEODRIVER, "wayland,x11" );
     SDL_Init( SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER );
@@ -321,6 +321,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         renderobjHelmet,
     };
 
+    bool bShowConsole = false;
     char szConsoleInput[ 256 ] {};
 
 
@@ -435,11 +436,11 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         if ( input::DigitalActionPressed( util::StaticArray_ToSpan( nDigitalInputActionValues ), EDigitalInputActions::TOGGLECONSOLE ) )
         {
-            s_bShowConsole = !s_bShowConsole;
-            //SDL_SetRelativeMouseMode( s_bShowConsole ? SDL_FALSE : SDL_TRUE );
+            bShowConsole = !bShowConsole;
+            SDL_SetRelativeMouseMode( bShowConsole ? SDL_FALSE : SDL_TRUE );
         }
 
-        if ( s_bShowConsole )
+        if ( bShowConsole )
         {
             imguiwidgets::Console( util::StaticArray_ToSpan( szConsoleInput ), nullptr, C_ConsoleAutocomplete, C_ConsoleCommandCompletion );
         }
@@ -479,11 +480,16 @@ int main( const int nArgs, const char *const *const ppszArgs )
     for ( uint i = 0; i <  util::StaticArray_Length( renderObjects ); i++ )
     {
         // TODO: causes malloc assert seemingly?
-        //renderer::FreeGPUModel( sRenderObjects.m_tData[ i ].m_gpuModel );
+        renderer::FreeGPUModel( renderObjects[ i ].m_gpuModel );
         renderer::RenderObject_Free( &renderObjects[ i ] );
     }
 
     config::FreeVars(); // TODO: this sucks
+
+    ImGui::DestroyContext();
+
+    SDL_DestroyWindow( psdlWindow );
+    SDL_Quit();
 
     logger::Info( "%i unfreed allocations" ENDL, memory::GetAllocs() );
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdlib>
+#include <libtitanium/util/debug.hpp>
 #include <libtitanium/logger/logger.hpp>
 
 namespace assert
@@ -31,10 +31,7 @@ namespace assert
     */
     inline void Debug( const bool bCondition, const char * const pMessageFormat = nullptr, ... )
     {
-#ifdef NDEBUG
-        (void)bCondition;
-        (void)pMessageFormat;
-#else // #ifdef NDEBUG
+#if HAS_DEBUG
         // TODO: temp
         if ( !bCondition ) [[ unlikely ]]
         {
@@ -43,6 +40,9 @@ namespace assert
             __builtin_trap();
             //exit( EXIT_FAILURE );
         }
+#else // #ifdef NDEBUG
+        (void)bCondition;
+        (void)pMessageFormat;
 #endif // #else // #ifndef NDEBUG
     }
 };

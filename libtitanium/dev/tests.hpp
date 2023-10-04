@@ -1,5 +1,6 @@
 #pragma once
 
+#include <libtitanium/util/debug.hpp>
 #include <libtitanium/util/staticinitialise.hpp>
 #include <libtitanium/logger/logger.hpp>
 
@@ -16,7 +17,7 @@ namespace dev::tests
     
     */
     #ifndef HAS_TESTS
-        #define HAS_TESTS 1
+        #define HAS_TESTS HAS_DEBUG
     #endif  // #ifndef HAS_TESTS
 
 #if HAS_TESTS

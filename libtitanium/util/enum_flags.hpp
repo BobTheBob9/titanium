@@ -1,4 +1,7 @@
+#pragma once
 #include <type_traits>
+
+// TODO: i'm not a fan of how these have to be declared in .hpp/cpp seperately
 
 #define ENUM_FLAGS_DECLARE( T ) T operator&( const T tFirst, const T tSecond ); T operator|( const T tFirst, const T tSecond )
 

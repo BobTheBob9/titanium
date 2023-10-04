@@ -1,8 +1,10 @@
 #include "game_loadassimp.hpp"
 
+
+
 #include <assimp/material.h>
 #include <assimp/types.h>
-#include <cstdio>
+#include <stdio.h>
 #include <libtitanium/memory/mem_core.hpp>
 #include <libtitanium/util/data/span.hpp>
 #include <libtitanium/util/assert.hpp>
@@ -14,6 +16,7 @@
 #include <assimp/postprocess.h>
 #include <webgpu/webgpu.h>
 
+#include <libtitanium/memory/mem_external.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 

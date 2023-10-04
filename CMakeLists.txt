@@ -48,6 +48,7 @@ target_include_directories( libtitanium_memory INTERFACE
 )
 target_sources( libtitanium_memory INTERFACE
     ${CMAKE_SOURCE_DIR}/libtitanium/memory/mem_core.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/memory/mem_external.cpp
 )
 target_link_libraries( libtitanium_memory INTERFACE libtitanium_util )
 target_compile_options( libtitanium_memory INTERFACE ${TITANIUM_COMPILER_ARGS} )

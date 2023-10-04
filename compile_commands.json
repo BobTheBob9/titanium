@@ -85,6 +85,12 @@
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/memory/mem_external.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/memory/mem_external.cpp",
+  "file": "/home/bobthebob/repos/titanium/libtitanium/memory/mem_external.cpp"
+},
+
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
   "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -o CMakeFiles/titanium_bin.dir/libtitanium/dev/tests.cpp.o -c /home/bobthebob/repos/titanium/libtitanium/dev/tests.cpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/dev/tests.cpp"
 },
@@ -247,6 +253,12 @@
 
 {
   "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/util/debug.hpp",
+  "file": "/home/bobthebob/repos/titanium/libtitanium/util/debug.hpp"
+},
+
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
   "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/logger/logger.hpp",
   "file": "/home/bobthebob/repos/titanium/libtitanium/logger/logger.hpp"
 },
@@ -369,6 +381,12 @@
   "directory": "/home/bobthebob/repos/titanium/build",
   "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/game/game_loadassimp.hpp",
   "file": "/home/bobthebob/repos/titanium/game/game_loadassimp.hpp"
+},
+
+{
+  "directory": "/home/bobthebob/repos/titanium/build",
+  "command": "/nix/store/9k6s3zmhj2pvkg8a5s8n7d2sbpffv8hv-clang-wrapper-16.0.1/bin/clang++ -DWEBGPU_BACKEND_WGPU -I/home/bobthebob/repos/titanium/libtitanium -I/home/bobthebob/repos/titanium/extern/imgui/. -I/home/bobthebob/repos/titanium -isystem /nix/store/dclg31r2xfkm204225i7a3sxrgfimqvf-SDL2-2.26.5-dev/include/SDL2 -isystem /home/bobthebob/repos/titanium/build/_deps/webgpu-backend-wgpu-src/include -g -Wall -Wextra -Wpedantic -std=gnu++20 -c /home/bobthebob/repos/titanium/libtitanium/memory/mem_external.hpp",
+  "file": "/home/bobthebob/repos/titanium/libtitanium/memory/mem_external.hpp"
 },
 
 {

@@ -2,30 +2,27 @@
 
 #include <source_location>
 
+#include <libtitanium/util/debug.hpp>
 #include <libtitanium/util/numerics.hpp>
 
 /*
-
-Functions for allocating memory and tracking the allocation of memory
-
-*/  
+ *  Functions for allocating memory and tracking the allocation of memory
+ */
 namespace memory
 {
     /*
-    
-    MALLOC_DEBUG controls whether we should compile in runtime memory debugging features
-    We do still include a few monitoring features without MALLOC_DEBUG, but most (high perf cost) shouldn't be
-    
-    */
-    #ifndef MALLOC_DEBUG
-        #define MALLOC_DEBUG 1
+     *  HAS_MEM_DEBUG controls whether we should compile in runtime memory debugging features
+     *  We do still include a few monitoring features without HAS_MEM_DEBUG, but most (high perf cost) shouldn't be
+     */
+    #ifndef HAS_MEM_DEBUG
+        #define HAS_MEM_DEBUG 0 //HAS_DEBUG
     #endif  // #ifndef MALLOC_DEBUG
 
 
     // TODO: REWORKING!!!
 
     /*
-    
+
     Debug allocation stuff
     This ALL needs to be blanked for release!
     
@@ -97,6 +94,12 @@ namespace memory
     */
     void free(void* pMemoryToFree, const MemPool *const pMemPool = nullptr, const std::source_location location =
                std::source_location::current());
+
+    void * externalMalloc( size_t size );
+    void externalFree( void * ptr );
+    void * externalCalloc( size_t nmemb, size_t size );
+    void * externalRealloc( void * ptr, size_t size );
+    void * externalReallocarray( void * ptr, size_t nmemb, size_t size );
 
     int GetAllocs();
 };
