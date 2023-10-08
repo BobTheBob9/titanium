@@ -17,7 +17,7 @@ namespace assert
         // TODO: error
         if ( !bCondition ) [[ unlikely ]] 
         {
-            logger::Info( "assertion failed %s" ENDL, pMessageFormat );
+            logger::Info( "assertion failed: \"%s\"" ENDL, pMessageFormat ? pMessageFormat : "" );
 
             __builtin_trap();
             //exit( EXIT_FAILURE );
@@ -35,7 +35,7 @@ namespace assert
         // TODO: temp
         if ( !bCondition ) [[ unlikely ]]
         {
-            logger::Info( "assertion failed %s" ENDL, pMessageFormat );
+            logger::Info( "assertion failed: \"%s\"" ENDL, pMessageFormat );
 
             __builtin_trap();
             //exit( EXIT_FAILURE );

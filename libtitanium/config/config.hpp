@@ -4,7 +4,7 @@
 
 #include <libtitanium/util/numerics.hpp>
 #include <libtitanium/util/enum_flags.hpp>
-#include <libtitanium/util/data/vector.hpp>
+#include <libtitanium/util/data/span.hpp>
 #include <libtitanium/util/data/stringbuf.hpp>
 
 namespace config

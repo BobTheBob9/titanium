@@ -19,6 +19,14 @@ void operator delete [](void * pData ) throw() {
     memory::externalFree( pData );
 }*/
 
+enum class EExternAllocationUser
+{
+    NONE,
+    UNKNOWN,
+    SDL,
+    STB_IMAGE
+};
+
 namespace memory
 {
     void SetExternMemoryFunctions_SDL()

@@ -1,9 +1,9 @@
 #include "renderer.hpp"
 
-#include <libtitanium/util/data/staticspan.hpp>
 #include <libtitanium/logger/logger.hpp>
 #include <libtitanium/config/config.hpp>
 #include <libtitanium/renderer/renderer_stringify.hpp>
+#include <webgpu/webgpu.h>
 
 namespace renderer
 {
@@ -164,5 +164,11 @@ namespace renderer
                 }
             }
         }();
+    }
+
+	void ShutdownDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice )
+    {
+        wgpuAdapterRelease( pRendererDevice->m_wgpuGraphicsAdapter );
+        wgpuInstanceRelease( pRendererDevice->m_wgpuInstance );
     }
 }

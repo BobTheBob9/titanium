@@ -24,6 +24,7 @@ namespace dev::tests
     using FnTest = bool(*)();
     void AddTest( const char *const pszTestName, const FnTest fnTest );
     bool RunTests();
+    void CleanupTests();
 
     // Macro that defines a named test function and adds it to the global tests object
     #define TEST( name ) bool __##name##Test(); namespace { static util::StaticInitialise __##name##TestINITIALISER( [](){ dev::tests::AddTest( #name, __##name##Test ); } ); }; bool __##name##Test()

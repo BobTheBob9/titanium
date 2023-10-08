@@ -1,23 +1,24 @@
 #include "commandline.hpp"
+#include "logger/logger.hpp"
 
+#include <libtitanium/util/assert.hpp>
 #include <libtitanium/util/static_array.hpp>
-#include <libtitanium/util/data/staticspan.hpp>
 #include <libtitanium/util/string.hpp>
 #include <libtitanium/memory/mem_core.hpp>
 #include <libtitanium/dev/tests.hpp>
 
 #include <string.h>
 
-namespace util::commandline
+namespace util
 {
-    void CreateFromSystemWithAlloc( CommandArgs *const pcaCommandArgs, const int nArgs, const char *const *const ppszArgs )
+    void CommandArgs::CreateFromSystemWithAlloc( CommandArgs *const pcaCommandArgs, const int nArgs, const char *const *const ppszArgs )
     {
         // TODO: if we get a proper string copy function that takes the null terminator also, use this here
         // also
         // TODO update for new mem alloc stuff
 
         // Figure out the size of the buffer in pcaCommandArgs.m_sBuffer
-        size_t nBufSize = 0;
+        uint nBufSize = 0;
         for ( int i = 0; i < nArgs; i++ )
         {
             nBufSize += util::string::LengthOfCStringWithTerminator( ppszArgs[ i ] );
@@ -35,9 +36,9 @@ namespace util::commandline
         }
 
         // copy to out command args struct
-        pcaCommandArgs->m_eBufferSource = CommandArgs::EBufferSource::SYSTEM_COPY;
+        pcaCommandArgs->m_eBufferSource = EBufferSource::SYSTEM_COPY;
         pcaCommandArgs->m_nArgumentStrings = nArgs;
-        pcaCommandArgs->m_sBuffer = util::data::Span<char>( nBufSize, pArgBuffer );
+        pcaCommandArgs->m_sBuffer = { .nLength = nBufSize, .pData = pArgBuffer };
     }
 
     /*
@@ -45,13 +46,13 @@ namespace util::commandline
      *  CommandArgs structs created from this function allocate no memory, instead just using the pointer passed to this function as their buffer
      *  This function destructively replaces separators between arguments with null pointers, use CreateFromBufferWithAlloc to create CommandArgs non-destructively, with a memory allocation
      */
-    void CreateFromBufferDestructive( CommandArgs *const pcaCommandArgs )
+    void CommandArgs::CreateFromBufferDestructive( CommandArgs *const pcaCommandArgs )
     {
         (void)pcaCommandArgs;
         // TODO: this
     }
 
-    void CreateFromBufferWithAlloc( CommandArgs *const pcaCommandArgs )
+    void CommandArgs::CreateFromBufferWithAlloc( CommandArgs *const pcaCommandArgs )
     {
         (void)pcaCommandArgs;
         // TODO: this
@@ -61,15 +62,15 @@ namespace util::commandline
      *  Gets the next argument given the current argument in the argument buffer, if no arguments are left, returns nullptr
      *  if pszCurrentArgument is nullptr, returns the first argument in the buffer
      */
-    const char * GetNextArgument( CommandArgs *const pcaCommandArgs, const char *const pszCurrentArgument )
+    const char * CommandArgs::GetNextArgument( CommandArgs *const pcaCommandArgs, const char *const pszCurrentArgument )
     {
         if ( !pszCurrentArgument ) [[ unlikely ]]
         {
-            return pcaCommandArgs->m_sBuffer.m_pData;
+            return pcaCommandArgs->m_sBuffer.pData;
         }
 
-        const char *const pBufUpperIndex = pcaCommandArgs->m_sBuffer.m_pData + pcaCommandArgs->m_sBuffer.m_nElements;
-        assert::Debug( util::maths::WithinRange<const void *>( pszCurrentArgument, pcaCommandArgs->m_sBuffer.m_pData, pBufUpperIndex ) );
+        const char *const pBufUpperIndex = pcaCommandArgs->m_sBuffer.pData + pcaCommandArgs->m_sBuffer.nLength;
+        assert::Debug( util::maths::WithinRange<const void *>( pszCurrentArgument, pcaCommandArgs->m_sBuffer.pData, pBufUpperIndex ) );
 
         // iterate from the current arg, to the next, then return it
         // if we exceed the argument buffer, return nullptr
@@ -87,7 +88,7 @@ namespace util::commandline
     /*
      *  Finds the value of the argument passed into the function, i.e. the string immediately after it
      */
-    const char * GetArgumentValue( CommandArgs *const pcaCommandArgs, const char *const pszArgumentToFind ) 
+    const char * CommandArgs::GetArgumentValue( CommandArgs *const pcaCommandArgs, const char *const pszArgumentToFind )
     { 
         // find the position of the argument passed in
         const char * pszArgIterator = nullptr;
@@ -111,7 +112,7 @@ namespace util::commandline
     /*
      *  
      */
-    R_FindArgumentPair GetNextArgumentPairByWildcard( CommandArgs *const pcaCommandArgs, const char *const pszSearchString, const size_t nSearchStringLength, const char *const pszCurrentArgument )
+    CommandArgs::R_FindArgumentPair CommandArgs::GetNextArgumentPairByWildcard( CommandArgs *const pcaCommandArgs, const char *const pszSearchString, const size_t nSearchStringLength, const char *const pszCurrentArgument )
     {
         const char * pszArgIterator = pszCurrentArgument;
         while ( ( pszArgIterator = GetNextArgument( pcaCommandArgs, pszArgIterator ) ) )
@@ -130,7 +131,7 @@ namespace util::commandline
         return { .bFound = false };
     }
 
-    bool HasArgument( CommandArgs *const pcaCommandArgs, const char *const pszArgumentToFind )
+    bool CommandArgs::HasArgument( CommandArgs *const pcaCommandArgs, const char *const pszArgumentToFind )
     {
         const char * pszArgIterator = nullptr;
         while ( ( pszArgIterator = GetNextArgument( pcaCommandArgs, pszArgIterator ) ) )
@@ -144,11 +145,11 @@ namespace util::commandline
         return false;
     }
 
-    void Free( CommandArgs *const pcaCommandArgs )
+    void CommandArgs::FreeMembers( CommandArgs *const pcaCommandArgs )
     {
         if ( pcaCommandArgs->m_eBufferSource < CommandArgs::EBufferSource::__MAX_COPY )
         {
-            memory::free( pcaCommandArgs->m_sBuffer.m_pData );
+            memory::free( pcaCommandArgs->m_sBuffer.pData );
         }
     }
 }
@@ -156,7 +157,7 @@ namespace util::commandline
 #if HAS_TESTS
     TEST( Commandline )
     {
-        util::commandline::CommandArgs caArgs;
+        util::CommandArgs caArgs;
         const char *const szCommandlineArgs[] {
             "hi", 
             "+connect", "localhost", 
@@ -166,33 +167,33 @@ namespace util::commandline
             "cool" 
         };
         
-        util::commandline::CreateFromSystemWithAlloc( &caArgs, util::StaticArray_Length( szCommandlineArgs ), szCommandlineArgs );
+        util::CommandArgs::CreateFromSystemWithAlloc( &caArgs, util::StaticArray_Length( szCommandlineArgs ), szCommandlineArgs );
         
         TEST_EXPECT( caArgs.m_nArgumentStrings == util::StaticArray_Length( szCommandlineArgs ) );
-        TEST_EXPECT( caArgs.m_eBufferSource == util::commandline::CommandArgs::EBufferSource::SYSTEM_COPY );
+        TEST_EXPECT( caArgs.m_eBufferSource == util::CommandArgs::CommandArgs::EBufferSource::SYSTEM_COPY );
 
         {
             const char * pszArgIterator = nullptr;
             int i = 0;
-            while ( ( pszArgIterator = GetNextArgument( &caArgs, pszArgIterator ) ) )
+            while ( ( pszArgIterator = util::CommandArgs::GetNextArgument( &caArgs, pszArgIterator ) ) )
             {
                 TEST_EXPECT( !strcmp( pszArgIterator, szCommandlineArgs[ i++ ] ) );
             }
         }
 
-        TEST_EXPECT( !strcmp( util::commandline::GetArgumentValue( &caArgs, "+sv_cheats" ), "1" ) );
-        TEST_EXPECT( !strcmp( util::commandline::GetArgumentValue( &caArgs, "+connect" ), "localhost" ) );
+        TEST_EXPECT( !strcmp( util::CommandArgs::GetArgumentValue( &caArgs, "+sv_cheats" ), "1" ) );
+        TEST_EXPECT( !strcmp( util::CommandArgs::GetArgumentValue( &caArgs, "+connect" ), "localhost" ) );
 
         {
             // find the values of all arguments prefixed with "+", e.g. for finding convar values
-            util::commandline::R_FindArgumentPair argIterator {};
-            while ( ( argIterator = util::commandline::GetNextArgumentPairByWildcard( &caArgs, "+", 1, argIterator.pszValue ) ).bFound )
+            util::CommandArgs::R_FindArgumentPair argIterator {};
+            while ( ( argIterator = util::CommandArgs::GetNextArgumentPairByWildcard( &caArgs, "+", 1, argIterator.pszValue ) ).bFound )
             {
-                TEST_EXPECT( !strcmp( util::commandline::GetArgumentValue( &caArgs, argIterator.pszKey ), argIterator.pszValue ) );
+                TEST_EXPECT( !strcmp( util::CommandArgs::GetArgumentValue( &caArgs, argIterator.pszKey ), argIterator.pszValue ) );
             }
         }
 
-        TEST_EXPECT( util::commandline::GetArgumentValue( &caArgs, "cool" ) == nullptr );
+        TEST_EXPECT( util::CommandArgs::GetArgumentValue( &caArgs, "cool" ) == nullptr );
 
         return true;
     }

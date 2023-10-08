@@ -1,42 +1,97 @@
 #pragma once
 
-#include <concepts>
-
+#include <libtitanium/memory/mem_core.hpp>
 #include <libtitanium/util/numerics.hpp>
+
+#include <concepts>
 
 namespace util::data
 {
     /*
-    
-    Wrapper around c-style arrays with an included length field
-    
-    */
+     *  A typed pointer with a length. Super general purpose
+     */
     template <typename T, std::unsigned_integral TSize = u32>
     struct Span
     {
-        TSize m_nElements;
-        T* m_pData;
+        TSize nLength;
+        T * pData;
 
-        Span();
-        Span( const TSize nElements, T *const pData );
+        static Span<T, TSize> Offset( const Span<T, TSize> *const pSpan, const TSize nOffset );
+        static Span<T, TSize> Slice( const Span<T, TSize> *const pSpan, const TSize nFirstIndex, const TSize nLength );
 
-        // TODO: this should use pointers, and have better arg names ( also probably make the userdata optional )
-        // TODO: also, a find method that just returns a pointer to the data rather than an index would be nice
-        using FnFindComparator = bool(*)( const T tFirst, const T tSecond );
-        static bool DefaultFind( const T tFirst, const T tSecond );
+        using FnFindCompare = bool(*)( const T *const ptCurrentValue, const T *const ptUserComparator );
+        static bool ValueFind( const T *const ptCurrentValue, const T *const ptUserComparator );
 
-        struct R_IndexOf_s
+        static T * Find( const Span<T, TSize> *const pSpan, const FnFindCompare fnComparator, const T *const tFindValue );
+
+        struct R_IndexOf
         {
             bool bFound;
             TSize nIndex;
         };
-        
-        R_IndexOf_s IndexOf( const T tFindValue, const FnFindComparator fnComparator = DefaultFind ) const;
-        bool Contains( const T tFindValue, const FnFindComparator fnComparator = DefaultFind ) const;
+        static R_IndexOf IndexOf( const Span<T, TSize> *const pSpan, const FnFindCompare fnComparator, const T *const tFindValue );
 
-        Span<T, TSize> Offset( const TSize nOffset );
-        Span<T, TSize> Slice( const TSize nFirstIndex, const TSize nLength );
+        template <memory::AllocationFuncs<T> TAllocator = memory::ALLOC_DEFAULT<T>> static void ReallocateResize( Span<T, TSize> *const pSpan, const TSize nLength );
     };  
-}
 
-#include "span_impl.inl"
+
+
+    template <typename T, std::unsigned_integral TSize>
+    Span<T, TSize> Span<T, TSize>::Offset( const Span<T, TSize> *const pSpan, const TSize nOffset )
+    {
+        return { .nLength = pSpan->nLength - nOffset, .pData = pSpan->pData + nOffset };
+    }
+
+    template <typename T, std::unsigned_integral TSize>
+    Span<T, TSize> Span<T, TSize>::Slice( const Span<T, TSize> *const pSpan, const TSize nFirstIndex, const TSize nLength )
+    {
+        return { .nLength = nLength, .pData = pSpan->pData + nFirstIndex };
+    }
+
+    template <typename T, std::unsigned_integral TSize>
+    bool Span<T, TSize>::ValueFind( const T *const ptCurrentValue, const T *const ptUserComparator )
+    {
+        return *ptCurrentValue == *ptUserComparator;
+    }
+
+    template <typename T, std::unsigned_integral TSize>
+    T * Span<T, TSize>::Find( const Span<T, TSize> *const pSpan, const FnFindCompare fnComparator, const T *const ptFindValue )
+    {
+        for ( TSize i = 0; i < pSpan->nLength; i++ )
+        {
+            if ( fnComparator( &pSpan->pData[ i ], ptFindValue ) )
+            {
+                return &pSpan->pData[ i ];
+            }
+        }
+
+        return nullptr;
+    }
+
+    template <typename T, std::unsigned_integral TSize>
+    typename Span<T, TSize>::R_IndexOf Span<T, TSize>::IndexOf( const Span<T, TSize> *const pSpan, const FnFindCompare fnComparator, const T *const ptFindValue )
+    {
+        for ( TSize i = 0; i < pSpan->nLength; i++ )
+        {
+            if ( fnComparator( &pSpan->pData[ i ], ptFindValue ) )
+            {
+                return {
+                    .bFound = true,
+                    .nIndex = i
+                };
+            }
+        }
+
+        return {
+            .bFound = false
+        };
+    }
+
+    template <typename T, std::unsigned_integral TSize>
+    template <memory::AllocationFuncs<T> TAllocator>
+    void Span<T, TSize>::ReallocateResize( Span<T, TSize> *const pSpan, const TSize nLength )
+    {
+        pSpan->nLength = nLength;
+        pSpan->pData = TAllocator.fnReallocateCount( pSpan->pData, nLength );
+    }
+}

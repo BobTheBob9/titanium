@@ -3,7 +3,7 @@
 #include "mem_core.hpp"
 
 #ifndef HAS_CUSTOM_EXTERN_ALLOCS
-    #define HAS_CUSTOM_EXTERN_ALLOCS 0
+    #define HAS_CUSTOM_EXTERN_ALLOCS 1
 #endif // #ifndef HAS_TRACK_EXTERN_ALLOCS
 
 #if HAS_CUSTOM_EXTERN_ALLOCS

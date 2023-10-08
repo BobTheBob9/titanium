@@ -4,7 +4,6 @@
 
 #include <libtitanium/config/config.hpp>
 #include <libtitanium/util/data/span.hpp>
-#include <libtitanium/util/data/staticspan.hpp>
 #include <libtitanium/util/data/stringbuf.hpp>
 
 namespace imguiwidgets
@@ -49,10 +48,10 @@ namespace imguiwidgets
 
             // TODO: do this in callback
             C_ConsoleUserData callbackUserData { .pszSelectedEntry = szAutocompleteItems[ 0 ].ToCStr() };
-            if ( ImGui::InputText( "Input", spszConsoleInput.m_pData, spszConsoleInput.m_nElements, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory, C_ConsoleInput, &callbackUserData ) )
+            if ( ImGui::InputText( "Input", spszConsoleInput.pData, spszConsoleInput.nLength, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | ImGuiInputTextFlags_CallbackHistory, C_ConsoleInput, &callbackUserData ) )
             {
                 fnCommandCompletionCallback( spszConsoleInput, pCallbackUserData );
-                memset( spszConsoleInput.m_pData, '\0', spszConsoleInput.m_nElements );
+                memset( spszConsoleInput.pData, '\0', spszConsoleInput.nLength );
             }
 
             ImVec2 vAutocompletePos = ImGui::GetItemRectMin();
@@ -68,7 +67,7 @@ namespace imguiwidgets
                         ImGui::PushID( i );
                         if ( ImGui::Selectable( szAutocompleteItems[ i ].ToCStr(), false ) )
                         {
-                            strcpy( spszConsoleInput.m_pData, szAutocompleteItems[ 0 ].ToCStr() );
+                            strcpy( spszConsoleInput.pData, szAutocompleteItems[ 0 ].ToCStr() );
                         }
                         ImGui::PopID();
                     }

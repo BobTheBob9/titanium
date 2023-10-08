@@ -25,22 +25,22 @@ namespace util::string
 
     int LengthOfSpanString( const util::data::Span<char> spszString )
     {
-        return strlen( spszString.m_pData );
+        return strlen( spszString.pData );
     }
 
     void CopyTo( const char *const pszSource, util::data::Span<char> spszDestinationBuffer )
     {
-        const int nCopySize = util::maths::Min<int>( util::string::LengthOfCStringWithTerminator( pszSource ), spszDestinationBuffer.m_nElements );
-        memcpy( spszDestinationBuffer.m_pData, pszSource, nCopySize );
+        const int nCopySize = util::maths::Min<int>( util::string::LengthOfCStringWithTerminator( pszSource ), spszDestinationBuffer.nLength );
+        memcpy( spszDestinationBuffer.pData, pszSource, nCopySize );
     }
 
     void ConcatinateTo( const char* const pszSource, util::data::Span<char> spszDestinationBuffer )
     {
         const int nDestinationCopyBegin = util::string::LengthOfSpanString( spszDestinationBuffer );
         const int nSourceLength = util::string::LengthOfCStringWithTerminator( pszSource );
-        int nCopySize = util::maths::Min<int>( nDestinationCopyBegin + nSourceLength, spszDestinationBuffer.m_nElements - 1 );
+        int nCopySize = util::maths::Min<int>( nDestinationCopyBegin + nSourceLength, spszDestinationBuffer.nLength - 1 );
 
-        util::data::Span<char> spszEndingBuffer = spszDestinationBuffer.Offset( nCopySize );
+        util::data::Span<char> spszEndingBuffer = util::data::Span<char>::Offset( &spszDestinationBuffer, nCopySize );
         util::string::CopyTo( pszSource, spszEndingBuffer );
     }
 

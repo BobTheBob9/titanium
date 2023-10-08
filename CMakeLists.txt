@@ -5,12 +5,14 @@ option( TITANIUM_WARNINGS_AS_ERRORS OFF )
 if ( TITANIUM_WARNINGS_AS_ERRORS )
     set( TITANIUM_COMPILER_ARGS -Wall -Wextra -Wpedantic -Werror )
 else()
-    set( TITANIUM_COMPILER_ARGS -Wall -Wextra -Wpedantic )
+    set( TITANIUM_COMPILER_ARGS -Wall -Wextra -Wpedantic ) #-fsanitize=undefined -fsanitize=address
 endif()
+
+#set( CMAKE_EXE_LINKER_FLAGS -fsanitize=undefined -fsanitize=address )
 
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-set( CMAKE_CXX_STANDARD 20)
+set( CMAKE_CXX_STANDARD 20 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 find_package( SDL2 REQUIRED )
@@ -36,7 +38,8 @@ target_include_directories( libtitanium_util INTERFACE
 target_sources( libtitanium_util INTERFACE
     ${CMAKE_SOURCE_DIR}/libtitanium/util/commandline.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/util/string.cpp
-    ${CMAKE_SOURCE_DIR}/libtitanium/util/data/vector_tests.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/util/stacktrace.cpp
+    ${CMAKE_SOURCE_DIR}/libtitanium/util/data/span_dynamic_tests.cpp
 )
 target_link_libraries( libtitanium_util INTERFACE libtitanium_memory )
 target_compile_options( libtitanium_util INTERFACE ${TITANIUM_COMPILER_ARGS} )

@@ -7,14 +7,14 @@
 #include <libtitanium/util/string.hpp>
 #include <libtitanium/memory/mem_core.hpp>
 #include <libtitanium/util/data/span.hpp>
-#include <libtitanium/util/data/vector.hpp>
+#include <libtitanium/util/data/span_dynamic.hpp>
 
 namespace config
 {
     ENUM_FLAGS( EFVarSetFlags );
     ENUM_FLAGS( EFVarUsageFlags );
 
-    static util::data::Vector<Var *> s_vpcvarVars;
+    static util::data::SpanDynamic<Var *> s_vpcvarVars;
 
     void VarBool_ToString( const void *const pCvarPointer, util::data::Span<char> o_spszOutputBuffer )
     {
@@ -28,11 +28,11 @@ namespace config
         constexpr const char *const BOOL_VALUES[] { "true", "false" };
 
         uint nOutputIndex = 0;
-        for ( uint i = 0; i < sizeof( BOOL_VALUES ) / sizeof( char * ) && nOutputIndex < o_sspszOutputBuffer.m_nElements; i++ )
+        for ( uint i = 0; i < sizeof( BOOL_VALUES ) / sizeof( char * ) && nOutputIndex < o_sspszOutputBuffer.nLength; i++ )
         {
             if ( util::string::CStringStartsWith( BOOL_VALUES[ i ], pszIncompleteValue ) )
             {
-                o_sspszOutputBuffer.m_pData[ nOutputIndex++ ] = BOOL_VALUES[ i ];
+                o_sspszOutputBuffer.pData[ nOutputIndex++ ] = BOOL_VALUES[ i ];
             }
         }
     }
@@ -79,17 +79,17 @@ namespace config
 
         util::string::CopyTo( pszName, util::data::Span<char>( sizeof( pCvar->szName ), pCvar->szName ) );
 
-        s_vpcvarVars.AppendWithAlloc( pCvar );
+        util::data::SpanDynamic<Var *>::AppendTo( &s_vpcvarVars, pCvar );
         return pCvar;
     }
 
     Var * FindVar( const char *const pszVarName )
     {
-        for ( uint i = 0; i < s_vpcvarVars.Length(); i++ )
+        for ( uint i = 0; i < s_vpcvarVars.sData.nLength; i++ )
         {
-            if ( util::string::CStringsEqual( pszVarName, ( *s_vpcvarVars.GetAt( i ) )->szName ) )
+            if ( util::string::CStringsEqual( pszVarName, s_vpcvarVars.sData.pData[ i ]->szName ) )
             {
-                return *s_vpcvarVars.GetAt( i );
+                return s_vpcvarVars.sData.pData[ i ];
             }
         }
 
@@ -99,11 +99,11 @@ namespace config
     void FindVarsStartingWith( const char *const pszVarSearchString, util::data::Span<Var *> o_spcvarVars )
     {
         uint nFoundVars = 0;
-        for ( uint i = 0; i < s_vpcvarVars.Length() && nFoundVars < o_spcvarVars.m_nElements; i++ )
+        for ( uint i = 0; i < s_vpcvarVars.sData.nLength && nFoundVars < o_spcvarVars.nLength; i++ )
         {
-            if ( util::string::CStringStartsWith( ( *s_vpcvarVars.GetAt( i ) )->szName, pszVarSearchString ) )
+            if ( util::string::CStringStartsWith( s_vpcvarVars.sData.pData[ i ]->szName, pszVarSearchString ) )
             {
-                o_spcvarVars.m_pData[ nFoundVars++ ] = *s_vpcvarVars.GetAt( i );
+                o_spcvarVars.pData[ nFoundVars++ ] = s_vpcvarVars.sData.pData[ i ];
             }
         }
     }
@@ -111,11 +111,11 @@ namespace config
     // TODO: this sucks, and doesn't free everything
     void FreeVars()
     {
-        for ( uint i = 0; i < s_vpcvarVars.Length(); i++ )
+        for ( uint i = 0; i < s_vpcvarVars.sData.nLength; i++ )
         {
-            memory::free( *s_vpcvarVars.GetAt( i ) );
+            memory::free( s_vpcvarVars.sData.pData[ i ] );
         }
 
-        s_vpcvarVars.SetAllocated( 0 );
+        util::data::SpanDynamic<Var *>::SetLength( &s_vpcvarVars, 0 );
     }
 };

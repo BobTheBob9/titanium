@@ -16,7 +16,7 @@ namespace renderer
         return glm::yawPitchRoll( glm::radians( vfObjectRotation.z ), glm::radians( -vfObjectRotation.y ), glm::radians( -vfObjectRotation.x ) );
     }
 
-    void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
+    void RenderView::Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
         // make buffer
         WGPUBufferDescriptor wgpuUniformBufferDescriptor {
@@ -40,10 +40,10 @@ namespace renderer
         WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
 
         pRenderView->m_viewUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
-        RenderView_WriteToUniformBuffer( pRendererState, pRenderView );
+        WriteToUniformBuffer( pRendererState, pRenderView );
     }
 
-	void RenderView_Free( RenderView *const pRenderView )
+	void RenderView::Free( RenderView *const pRenderView )
     {
        wgpuBufferDestroy( pRenderView->m_viewUniforms.m_wgpuBuffer );
        wgpuBufferRelease( pRenderView->m_viewUniforms.m_wgpuBuffer );
@@ -53,7 +53,7 @@ namespace renderer
     /*
      *  Write all modified variables to the renderview's gpu uniform buffer
      */
-    void RenderView_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
+    void RenderView::WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
         glm::mat4x4 mat4fTransform = GLM_YawPitchRoll_ZUpFromDegrees( pRenderView->m_vCameraRotation );
         mat4fTransform = glm::translate( mat4fTransform, glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
@@ -68,7 +68,7 @@ namespace renderer
         pRenderView->m_bGPUDirty = false;
     }
 
-    void RenderObject_Create( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
+    void RenderObject::Create( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
     {
         // make buffer
         // TODO: this method of creating buffers kind of sucks, would be nice if there was a way to just map these to c structs at runtime
@@ -103,17 +103,17 @@ namespace renderer
         WGPUBindGroup r_wgpuBindGroup = wgpuDeviceCreateBindGroup( pRendererState->m_wgpuVirtualDevice, &wgpuBindGroupDescriptor );
 
         pRenderObject->m_objectUniforms = { .m_wgpuBindGroup = r_wgpuBindGroup, .m_wgpuBuffer = wgpuUniformBuffer };
-        RenderObject_WriteToUniformBuffer( pRendererState, pRenderObject );
+        WriteToUniformBuffer( pRendererState, pRenderObject );
     }
 
-    void RenderObject_Free( RenderObject *const pRenderObject )
+    void RenderObject::Free( RenderObject *const pRenderObject )
     {
         wgpuBufferDestroy( pRenderObject->m_objectUniforms.m_wgpuBuffer );
         wgpuBufferRelease( pRenderObject->m_objectUniforms.m_wgpuBuffer );
         wgpuBindGroupRelease( pRenderObject->m_objectUniforms.m_wgpuBindGroup );
     }
 
-    void RenderObject_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
+    void RenderObject::WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
     {
         glm::mat4x4 mat4fTransform = GLM_YawPitchRoll_ZUpFromDegrees( pRenderObject->m_vRotation );
         mat4fTransform = glm::translate( mat4fTransform, glm::vec3( pRenderObject->m_vPosition.x, pRenderObject->m_vPosition.y, pRenderObject->m_vPosition.z  ) );

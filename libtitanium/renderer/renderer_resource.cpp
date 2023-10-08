@@ -6,25 +6,25 @@ namespace renderer
 {
     GPUModelHandle UploadModel( TitaniumRendererState *const pRendererState, const ::util::data::Span<ModelVertexAttributes> sVertices, const ::util::data::Span<u16> snIndexes )
     {
-        const size_t nVertexBufSize = sVertices.m_nElements * sizeof( ModelVertexAttributes );
+        const size_t nVertexBufSize = sVertices.nLength * sizeof( ModelVertexAttributes );
         WGPUBufferDescriptor wgpuVertexBufferDescriptor {
             .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Vertex,
             .size = nVertexBufSize,
         };
         WGPUBuffer wgpuVertexBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuVertexBufferDescriptor );
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, wgpuVertexBuffer, 0, sVertices.m_pData, nVertexBufSize );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, wgpuVertexBuffer, 0, sVertices.pData, nVertexBufSize );
 
-        const size_t nIndexBufSize = snIndexes.m_nElements * sizeof( u16 );
+        const size_t nIndexBufSize = snIndexes.nLength * sizeof( u16 );
         WGPUBufferDescriptor wgpuIndexBufferDescriptor {
             .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Index,
             .size = nIndexBufSize
         };
         WGPUBuffer wgpuIndexBuffer = wgpuDeviceCreateBuffer( pRendererState->m_wgpuVirtualDevice, &wgpuIndexBufferDescriptor );
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, wgpuIndexBuffer, 0, snIndexes.m_pData, nIndexBufSize );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, wgpuIndexBuffer, 0, snIndexes.pData, nIndexBufSize );
 
         return {
             wgpuVertexBuffer, nVertexBufSize,
-            wgpuIndexBuffer, nIndexBufSize, static_cast<int>( snIndexes.m_nElements )
+            wgpuIndexBuffer, nIndexBufSize, static_cast<int>( snIndexes.nLength )
         };
     }
 

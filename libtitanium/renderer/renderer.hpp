@@ -54,6 +54,7 @@ namespace renderer
 	 *  Initialises the application's handle to the physical rendering device, this should generally done once per application
 	 */
 	void InitialisePhysicalRenderingDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice );
+	void ShutdownDevice( TitaniumPhysicalRenderingDevice *const pRendererDevice );
 
 	/*
 	 * 	Initialises (or re-initialises) the renderer
@@ -62,6 +63,7 @@ namespace renderer
 	 *  If it was not previously initialised, it should be zeroed out (i.e. memset to 0)
 	 */
 	bool Initialise( TitaniumPhysicalRenderingDevice *const pRendererDevice, TitaniumRendererState *const pRendererState, SDL_Window *const psdlWindow );
+	void Shutdown( TitaniumRendererState *const pRendererState );
 
 	/*
 	 *	An interface for the buffers that have been allocated for a model on the GPU
@@ -110,11 +112,11 @@ namespace renderer
 		util::maths::Vec2<u32> m_vRenderResolution;
 
 		BufferAndBindgroup m_viewUniforms;
-	};
 
-	void RenderView_Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView );
-	void RenderView_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView );
-	void RenderView_Free( RenderView *const pRenderView );
+		static void Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView );
+		static void WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView );
+		static void Free( RenderView *const pRenderView );
+	};
 
 	/*
 	 *  An object that can be rendered by the renderer
@@ -129,11 +131,12 @@ namespace renderer
 		BufferAndBindgroup m_objectUniforms;
 		GPUModelHandle m_gpuModel;
 		GPUTextureHandle m_gpuTexture;
+
+		static void Create( TitaniumRendererState *const pRendererState, RenderObject *const pRenderableObject );
+		static void Free( RenderObject *const pRenderableObject );
+	    static void WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject );
 	};
 
-    void RenderObject_Create( TitaniumRendererState *const pRendererState, RenderObject *const pRenderableObject );
-    void RenderObject_Free( RenderObject *const pRenderableObject );
-    void RenderObject_WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject );
 
 	/*
 	 *  Remakes swap chains etc for a new render resolution

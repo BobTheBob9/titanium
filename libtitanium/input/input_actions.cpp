@@ -19,13 +19,13 @@ namespace input
     bool GetDigitalActionHeldBit( const util::data::Span<u8> snCurrentInputs, const uint nActionIndex )
     {
         const int nActionBitIndex = ( nActionIndex % 4 ) * 2;
-        return ( snCurrentInputs.m_pData[ nActionIndex / 4 ] & ( 0b11 << nActionBitIndex ) ) & ( 0b10 << nActionBitIndex );
+        return ( snCurrentInputs.pData[ nActionIndex / 4 ] & ( 0b11 << nActionBitIndex ) ) & ( 0b10 << nActionBitIndex );
     }
 
     bool GetDigitalActionModifierBit( const util::data::Span<u8> snCurrentInputs, const uint nActionIndex )
     {
         const int nActionBitIndex = ( nActionIndex % 4 ) * 2;
-        return ( snCurrentInputs.m_pData[ nActionIndex / 4 ] & ( 0b11 << nActionBitIndex ) ) & ( 0b01 << nActionBitIndex );
+        return ( snCurrentInputs.pData[ nActionIndex / 4 ] & ( 0b11 << nActionBitIndex ) ) & ( 0b01 << nActionBitIndex );
     }
 
     bool DigitalActionHeld( const util::data::Span<u8> snCurrentInputs, const uint nActionIndex )
@@ -46,8 +46,8 @@ namespace input
     void SetDigitalActionBits( const util::data::Span<u8> snCurrentInputs, const uint nActionIndex, const u8 nSetBits )
     {
         const uint nBitIndex = ( nActionIndex % 4 ) * 2;
-        snCurrentInputs.m_pData[ nActionIndex / 4 ] &= ~( 0b11 << nBitIndex ); // clear
-        snCurrentInputs.m_pData[ nActionIndex / 4 ] |= nSetBits << nBitIndex;
+        snCurrentInputs.pData[ nActionIndex / 4 ] &= ~( 0b11 << nBitIndex ); // clear
+        snCurrentInputs.pData[ nActionIndex / 4 ] |= nSetBits << nBitIndex;
     }
 
     void SetDigitalActionHeld( const util::data::Span<u8> snCurrentInputs, const uint nActionIndex )
@@ -72,7 +72,7 @@ namespace input
 
     float AnalogueActionValue( const util::data::Span<f32> sflCurrentAnalogueInputs, const uint nActionIndex )
     {
-        return sflCurrentAnalogueInputs.m_pData[ nActionIndex ];
+        return sflCurrentAnalogueInputs.pData[ nActionIndex ];
     }
 }
 

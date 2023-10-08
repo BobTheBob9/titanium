@@ -190,6 +190,7 @@ namespace renderer
             case WGPUFeatureName_Undefined:
             case WGPUFeatureName_Force32:
             case WGPUFeatureName_Float32Filterable:
+            default: // not a fan of this, but ewgpuFeatureName is sometimes not a correct value, and so we get UB with this
             {
                 return "Unknown";
             }

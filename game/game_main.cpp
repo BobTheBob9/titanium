@@ -7,16 +7,20 @@
 #include <SDL_keycode.h>
 #include <SDL_stdinc.h>
 #include <SDL_timer.h>
+#include <SDL_video.h>
 #include <stdlib.h>
 
 #include <SDL.h>
 #include <SDL_events.h>
 #include <SDL_mouse.h>
+#include <libtitanium/util/maths.hpp>
 #include <libtitanium/util/string.hpp>
+#include <libtitanium/util/assert.hpp>
 #include <libtitanium/util/static_array.hpp>
 #include <libtitanium/util/data/span.hpp>
 #include <libtitanium/util/commandline.hpp>
 #include <libtitanium/memory/mem_core.hpp>
+#include <libtitanium/memory/mem_external.hpp>
 
 // systems that need initialising
 #include <libtitanium/sys/platform_sdl.hpp>
@@ -34,9 +38,6 @@
 
 #include "game_consolecommand.hpp"
 #include "game_loadassimp.hpp"
-#include "memory/mem_external.hpp"
-#include "util/assert.hpp"
-#include "util/maths.hpp"
 
 enum class EProgram
 {
@@ -184,13 +185,13 @@ DigitalBindDefinition s_DigitalBindDefinitions[] {
 int main( const int nArgs, const char *const *const ppszArgs )
 {
     // grab commandline args
-    util::commandline::CommandArgs caCommandLine {};
-    util::commandline::CreateFromSystemWithAlloc( &caCommandLine, nArgs, ppszArgs );
+    util::CommandArgs caCommandLine {};
+    util::CommandArgs::CreateFromSystemWithAlloc( &caCommandLine, nArgs, ppszArgs );
 
     // set config vars from commandline, everything preceded with + is treated as a var
     // TODO: somehow, convar system needs to be able to handle setting a var before it exists, and resetting it after death (e.g. if a weapon registers a var, then unregisters, then reregisters, keep the user's value across all that)
-    util::commandline::R_FindArgumentPair argIterator {};
-    while ( ( argIterator = util::commandline::GetNextArgumentPairByWildcard( &caCommandLine, "+", 1, argIterator.pszValue ) ).bFound )
+    util::CommandArgs::R_FindArgumentPair argIterator {};
+    while ( ( argIterator = util::CommandArgs::GetNextArgumentPairByWildcard( &caCommandLine, "+", 1, argIterator.pszValue ) ).bFound )
     {
         config::Var *const pVar = config::FindVar( argIterator.pszKey + 1 );
         if ( pVar )
@@ -199,11 +200,11 @@ int main( const int nArgs, const char *const *const ppszArgs )
         }
         else
         {
-
+            // TODO: this
         }
     }
 
-    util::commandline::Free( &caCommandLine );
+    util::CommandArgs::FreeMembers( &caCommandLine );
 
     char szProgramValue[32];
     pcvarProgram->setFuncs.fnToString( &s_eProgram, util::StaticArray_ToSpan( szProgramValue ) );
@@ -211,15 +212,20 @@ int main( const int nArgs, const char *const *const ppszArgs )
     logger::Info( "Hello world!" ENDL );
     logger::Info( "program = %s" ENDL, szProgramValue );
 
+#if HAS_TESTS
     if ( s_eProgram == EProgram::TESTS )
     {
         return dev::tests::RunTests() ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 
+    // ensure all memory committed for tests is cleaned up
+    dev::tests::CleanupTests();
+#endif // #if HAS_TESTS
+
     //filesystem::Initialise();
     //jobsystem::Initialise();
 
-    //memory::SetExternMemoryFunctions_SDL();
+    memory::SetExternMemoryFunctions_SDL();
     // default to wayland where available
     SDL_SetHint( SDL_HINT_VIDEODRIVER, "wayland,x11" );
     SDL_Init( SDL_INIT_EVENTS | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER );
@@ -228,6 +234,9 @@ int main( const int nArgs, const char *const *const ppszArgs )
     // initialise imgui
     ImGui::CreateContext();
     ImGui_ImplSDL2_InitForVulkan( psdlWindow ); // TODO: looking at the ImGui_ImplSDL2_InitFor* funcs, they're all pretty much identical (so doesn't matter which one we call), but sucks that we can't determine this at runtime atm
+
+    // TODO: multiple viewports are largely busted on linux, especially wayland :c
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
 
     // init style
     ImGuiStyle *const pImguiStyle = &ImGui::GetStyle();
@@ -300,7 +309,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         .m_flCameraFOV = s_flCameraFov,
         .m_vRenderResolution = sys::sdl::GetWindowSizeVector( psdlWindow )
     };
-    renderer::RenderView_Create( &rendererState, &rendererMainView );
+    renderer::RenderView::Create( &rendererState, &rendererMainView );
 
     renderer::GPUModelHandle hHelmetModel;
     renderer::GPUTextureHandle gpuHelmetTextures[1];
@@ -316,7 +325,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         .m_gpuModel = hHelmetModel,
         .m_gpuTexture = gpuHelmetTextures[ 0 ]
     };
-    renderer::RenderObject_Create( &rendererState, &renderobjHelmet );
+    renderer::RenderObject::Create( &rendererState, &renderobjHelmet );
     renderer::RenderObject renderObjects[] {
         renderobjHelmet,
     };
@@ -378,7 +387,11 @@ int main( const int nArgs, const char *const *const ppszArgs )
             while ( SDL_PollEvent( &sdlEvent ) )
             {
                 ImGui_ImplSDL2_ProcessEvent( &sdlEvent );
-                input::ProcessSDLInputEvent( &sdlEvent, util::StaticArray_ToSpan( inputDevices ) );
+
+                if ( !ImGui::IsWindowFocused( ImGuiFocusedFlags_AnyWindow ) )
+                {
+                    input::ProcessSDLInputEvent( &sdlEvent, util::StaticArray_ToSpan( inputDevices ) );
+                }
 
                 switch ( sdlEvent.type )
                 {
@@ -438,6 +451,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         {
             bShowConsole = !bShowConsole;
             SDL_SetRelativeMouseMode( bShowConsole ? SDL_FALSE : SDL_TRUE );
+            SDL_SetWindowGrab( psdlWindow, bShowConsole ? SDL_FALSE : SDL_TRUE );
         }
 
         if ( bShowConsole )
@@ -455,7 +469,8 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         if ( imguiwidgets::BeginDebugOverlay() )
         {
-            ImGui::Text("%f", flDeltaTime);
+            ImGui::Text( "%.0f FPS (%fms)", 1 / flDeltaTime, flDeltaTime * 1000.f );
+            //ImGui::Text( "Frame %i", flDeltaTime->m_nFramesRendered );
 
             ImGui::Text( "Camera: %fdeg { %f %f %f } { %f %f %f }", rendererMainView.m_flCameraFOV,
                                                                    rendererMainView.m_vCameraPosition.x, rendererMainView.m_vCameraPosition.y, rendererMainView.m_vCameraPosition.z,
@@ -481,8 +496,11 @@ int main( const int nArgs, const char *const *const ppszArgs )
     {
         // TODO: causes malloc assert seemingly?
         renderer::FreeGPUModel( renderObjects[ i ].m_gpuModel );
-        renderer::RenderObject_Free( &renderObjects[ i ] );
+        renderer::RenderObject::Free( &renderObjects[ i ] );
     }
+
+    renderer::Shutdown( &rendererState );
+    renderer::ShutdownDevice( &renderingDevice );
 
     config::FreeVars(); // TODO: this sucks
 
@@ -491,7 +509,10 @@ int main( const int nArgs, const char *const *const ppszArgs )
     SDL_DestroyWindow( psdlWindow );
     SDL_Quit();
 
-    logger::Info( "%i unfreed allocations" ENDL, memory::GetAllocs() );
+#if HAS_MEM_DEBUG
+    logger::Info( "%llu unfreed allocations" ENDL, memory::GetAllocs() );
+    memory::ReportAllocationInfo();
+#endif // #if HAS_MEM_DEBUG
 
     return EXIT_SUCCESS;
 }

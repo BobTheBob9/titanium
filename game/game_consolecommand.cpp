@@ -12,20 +12,20 @@ void C_ConsoleAutocomplete( const util::data::Span<char> spszConsoleInput, const
 {
     (void)pCallbackUserData;
 
-    if ( !*spszConsoleInput.m_pData )
+    if ( !*spszConsoleInput.pData )
     {
         return;
     }
 
     config::Var * pcvarUntypedVars[10] {};
-    config::FindVarsStartingWith( spszConsoleInput.m_pData, util::StaticArray_ToSpan( pcvarUntypedVars ) );
+    config::FindVarsStartingWith( spszConsoleInput.pData, util::StaticArray_ToSpan( pcvarUntypedVars ) );
 
     for ( uint i = 0; i < util::StaticArray_Length( pcvarUntypedVars ) && pcvarUntypedVars[ i ]; i++ )
     {
         const char *const pszName = pcvarUntypedVars[i]->szName;
-        if ( !util::string::CStringsEqual( spszConsoleInput.m_pData, pszName ) )
+        if ( !util::string::CStringsEqual( spszConsoleInput.pData, pszName ) )
         {
-            o_spszAutocompleteItems.m_pData[ i ] = pszName; // util::data::StringBuf<128>( "%s = %s", scvarUntypedVars.m_tData[i]->V_GetName(), scvarUntypedVars.m_tData[i]->V_ToString().ToCStr() );
+            o_spszAutocompleteItems.pData[ i ] = pszName; // util::data::StringBuf<128>( "%s = %s", scvarUntypedVars.m_tData[i]->V_GetName(), scvarUntypedVars.m_tData[i]->V_ToString().ToCStr() );
         }
 
     }
@@ -35,7 +35,7 @@ void C_ConsoleCommandCompletion( const util::data::Span<char> spszConsoleInput, 
 {
     (void)pCallbackUserData;
 
-    logger::Info( "> %s" ENDL, spszConsoleInput.m_pData );
+    logger::Info( "> %s" ENDL, spszConsoleInput.pData );
 
     util::data::StringBuf<128> szCurrentVar;
     memset( szCurrentVar.m_szStr, '\0', 128 );
@@ -46,9 +46,9 @@ void C_ConsoleCommandCompletion( const util::data::Span<char> spszConsoleInput, 
     bool bShouldSetNext = false;
 
     // parse console input
-    for ( uint i = 0; i < spszConsoleInput.m_nElements && spszConsoleInput.m_pData[ i ]; i++ )
+    for ( uint i = 0; i < spszConsoleInput.nLength && spszConsoleInput.pData[ i ]; i++ )
     {
-        const char cCurrentChar = spszConsoleInput.m_pData[ i ];
+        const char cCurrentChar = spszConsoleInput.pData[ i ];
         if ( !isspace( cCurrentChar ) )
         {
             if ( cCurrentChar == ';' )

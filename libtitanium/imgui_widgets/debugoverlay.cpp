@@ -1,4 +1,4 @@
-#include "widgets.hpp"
+#include "imgui.h"
 
 #include <libtitanium/config/config.hpp>
 
@@ -12,7 +12,7 @@ namespace imguiwidgets
         if ( s_bShowDebugOverlays )
         {
             ImGui::SetNextWindowPos( ImVec2( 0.f, 0.f ) );
-            ImGui::Begin( "Debug Overlay", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize );
+            ImGui::Begin( "Debug Overlay", nullptr, ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking );
 
             return true;
         }
