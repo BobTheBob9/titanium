@@ -73,6 +73,7 @@ namespace renderer
 
 	void FreeGPUTexture( GPUTextureHandle gpuTexture )
     {
-        (void)gpuTexture;
+        wgpuTextureViewRelease( gpuTexture.m_wgpuTextureView );
+        wgpuTextureRelease( gpuTexture.m_wgpuTexture );
     }
 }

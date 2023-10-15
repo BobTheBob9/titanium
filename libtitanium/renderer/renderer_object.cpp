@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 #include "renderer_uniforms.hpp"
 
+#include <libtitanium/logger/logger.hpp>
 #include <libtitanium/util/maths.hpp>
 #include <libtitanium/util/static_array.hpp>
 
@@ -11,11 +12,6 @@
 
 namespace renderer
 {
-    glm::mat4x4 GLM_YawPitchRoll_ZUpFromDegrees( util::maths::Vec3<f32> vfObjectRotation )
-    {
-        return glm::yawPitchRoll( glm::radians( vfObjectRotation.z ), glm::radians( -vfObjectRotation.y ), glm::radians( -vfObjectRotation.x ) );
-    }
-
     void RenderView::Create( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
         // make buffer
@@ -55,23 +51,17 @@ namespace renderer
      */
     void RenderView::WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
-        glm::mat4x4 mat4fTransform = GLM_YawPitchRoll_ZUpFromDegrees( pRenderView->m_vCameraRotation );
-        mat4fTransform = glm::translate( mat4fTransform, glm::vec3( pRenderView->m_vCameraPosition.x, pRenderView->m_vCameraPosition.y, pRenderView->m_vCameraPosition.z ) );
+        const util::maths::Matrix4x4 mat4Transform = util::maths::Matrix4x4::FromPositionAngles( pRenderView->m_vCameraPosition, util::maths::Vec3Angle<float>::MultiplyScalar( pRenderView->m_vCameraRotation, util::maths::DEG_TO_RAD<float> ) );
+        const util::maths::Matrix4x4 mat4Project = util::maths::Matrix4x4::FromProjectionPerspective( pRenderView->m_vRenderResolution, pRenderView->m_flCameraFOV, 0.01, 10000.0 );
 
-        f32 flAspectRatio = f32( pRenderView->m_vRenderResolution.x ) / f32( pRenderView->m_vRenderResolution.y );
-        f32 flNearDist = 0.01;
-        f32 flFarDist = 10000.0;
-        glm::mat4x4 mat4fProjectFocal = glm::perspective( glm::radians( pRenderView->m_flCameraFOV ), flAspectRatio, flNearDist, flFarDist );
-
-        const glm::mat4x4 mat4fCamera = mat4fProjectFocal * mat4fTransform;
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, m_mat4fCameraTransform ), &mat4fCamera, sizeof( mat4fCamera ) );
+        const util::maths::Matrix4x4 mat4Camera = util::maths::Matrix4x4::MultiplyMatrix( mat4Transform, mat4Project );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, mat4fCameraTransform ), &mat4Camera, sizeof( mat4Camera ) );
         pRenderView->m_bGPUDirty = false;
     }
 
     void RenderObject::Create( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
     {
         // make buffer
-        // TODO: this method of creating buffers kind of sucks, would be nice if there was a way to just map these to c structs at runtime
         WGPUBufferDescriptor wgpuStandardUniformBufferDescriptor {
             .usage = WGPUBufferUsage_CopyDst | WGPUBufferUsage_Uniform,
             .size = sizeof( UShaderObjectInstance )
@@ -115,9 +105,8 @@ namespace renderer
 
     void RenderObject::WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
     {
-        glm::mat4x4 mat4fTransform = GLM_YawPitchRoll_ZUpFromDegrees( pRenderObject->m_vRotation );
-        mat4fTransform = glm::translate( mat4fTransform, glm::vec3( pRenderObject->m_vPosition.x, pRenderObject->m_vPosition.y, pRenderObject->m_vPosition.z  ) );
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderObject->m_objectUniforms.m_wgpuBuffer, offsetof( UShaderObjectInstance, m_mat4fBaseTransform ),  &mat4fTransform, sizeof( mat4fTransform ) );
+        util::maths::Matrix4x4 mat4Transform = util::maths::Matrix4x4::FromPositionAngles( pRenderObject->m_vPosition, util::maths::Vec3Angle<float>::MultiplyScalar( pRenderObject->m_vRotation, util::maths::DEG_TO_RAD<float> ) );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderObject->m_objectUniforms.m_wgpuBuffer, offsetof( UShaderObjectInstance, mat4fBaseTransform ),  &mat4Transform, sizeof( mat4Transform ) );
 
         pRenderObject->m_bGPUDirty = false; // gpu has up-to-date state for the object
     }

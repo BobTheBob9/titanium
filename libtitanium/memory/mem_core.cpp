@@ -126,7 +126,7 @@ namespace memory
     }
 
     void * externalReallocarray( void * ptr, size_t nmemb, size_t size ) { return ::reallocarray( ptr, nmemb, size ); }
-    void externalFree( void * ptr ) { return ::memory::free( ptr ); }
+    void externalFree( void * ptr ) { if ( ptr ) return ::memory::free( ptr ); }
 
     size_t GetAllocs()
     {

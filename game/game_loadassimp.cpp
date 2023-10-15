@@ -70,6 +70,7 @@ bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, co
     memory::free( sflVertexes.pData );
     memory::free( snIndexes.pData );
 
+    uint nGlobalTextureIndex = 0;
     for ( uint i = 0; i < passimpLoadedScene->mNumMaterials; i++ )
     {
         int nTextureIndex = 0;
@@ -77,8 +78,18 @@ bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, co
         while ( passimpLoadedScene->mMaterials[ i ]->GetTexture( aiTextureType_BASE_COLOR, nTextureIndex++, &path ) == aiReturn_SUCCESS )
         {
             logger::Info( "\tModel texture: %s" ENDL, path.C_Str() );
+
+            /*util::maths::Vec2<i32> vImageSize;
+            const byte *const pImageData = stbi_load( path.C_Str(), &vImageSize.x, &vImageSize.y, nullptr, 4 );
+            o_sgpuLoadedTextures.pData[ nGlobalTextureIndex++ ] = renderer::UploadTexture( pRendererState, { .x = static_cast<u16>( vImageSize.x ), .y = static_cast<u16>( vImageSize.y ) }, WGPUTextureFormat_RGBA8Unorm, pImageData );
+            stbi_image_free( (void*)pImageData );*/
         }
     }
+
+    util::maths::Vec2<i32> vImageSize;
+    const byte *const pImageData = stbi_load( "test_resource/damaged/Default_albedo.tga", &vImageSize.x, &vImageSize.y, nullptr, 4 );
+    o_sgpuLoadedTextures.pData[ nGlobalTextureIndex++ ] = renderer::UploadTexture( pRendererState, { .x = static_cast<u16>( vImageSize.x ), .y = static_cast<u16>( vImageSize.y ) }, WGPUTextureFormat_RGBA8Unorm, pImageData );
+    stbi_image_free( (void*)pImageData );
 
     /*// TODO: TEMP!!!
     const aiTexture *const passimpTexture = passimpLoadedScene->GetEmbeddedTexture( "*0" );
@@ -88,11 +99,6 @@ bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, co
     {
         logger::Info( "Compressed texture with format %s" ENDL, passimpTexture->achFormatHint );
     }*/
-
-    util::maths::Vec2<i32> vImageSize;
-    const byte *const pImageData = stbi_load( "test_resource/damaged/Default_albedo.tga", &vImageSize.x, &vImageSize.y, nullptr, 4 );
-    o_sgpuLoadedTextures.pData[ 0 ] = renderer::UploadTexture( pRendererState, { .x = static_cast<u16>( vImageSize.x ), .y = static_cast<u16>( vImageSize.y ) }, WGPUTextureFormat_RGBA8Unorm, pImageData );
-    stbi_image_free( (void*)pImageData );
 
     aiReleaseImport( passimpLoadedScene );
     return true;

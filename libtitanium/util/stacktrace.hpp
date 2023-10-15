@@ -7,7 +7,7 @@ namespace util
     struct StackMember
     {
         void * pAddress;
-        char szFuncName[ 128 ];
+        char szFuncName[ 256 ];
     };
 
     void GetStacktrace( util::data::Span<StackMember> o_sStackTrace );

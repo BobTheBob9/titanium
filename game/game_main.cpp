@@ -1,18 +1,11 @@
-#include "extern/imgui/imgui.h"
-#include "extern/imgui/imgui_impl_sdl2.h"
-#include "extern/imgui/imgui_impl_wgpu.h"
-
-#include <SDL_gamecontroller.h>
-#include <SDL_joystick.h>
-#include <SDL_keycode.h>
-#include <SDL_stdinc.h>
-#include <SDL_timer.h>
-#include <SDL_video.h>
-#include <stdlib.h>
-
 #include <SDL.h>
 #include <SDL_events.h>
-#include <SDL_mouse.h>
+#include <SDL_stdinc.h>
+#include <SDL_timer.h>
+#include <libtitanium/sys/platform_sdl.hpp>
+
+#include <stdlib.h>
+
 #include <libtitanium/util/maths.hpp>
 #include <libtitanium/util/string.hpp>
 #include <libtitanium/util/assert.hpp>
@@ -23,7 +16,6 @@
 #include <libtitanium/memory/mem_external.hpp>
 
 // systems that need initialising
-#include <libtitanium/sys/platform_sdl.hpp>
 #include <libtitanium/config/config.hpp>
 #include <libtitanium/filesystem/filesystem.hpp>
 #include <libtitanium/jobsystem/jobsystem.hpp>
@@ -35,6 +27,10 @@
 #include <libtitanium/input/input_actions.hpp>
 
 #include <libtitanium/dev/tests.hpp>
+
+#include <imgui.h>
+#include <imgui_impl_sdl2.h>
+#include <imgui_impl_wgpu.h>
 
 #include "game_consolecommand.hpp"
 #include "game_loadassimp.hpp"
@@ -88,10 +84,13 @@ static EProgram s_eProgram = EProgram::GAME; config::Var * pcvarProgram = config
     }
 }, &s_eProgram );
 
+static bool s_bImguiDockingEnable = true; config::Var * pcvarImguiDockingEnable = config::RegisterVar( "imgui::docking", config::EFVarUsageFlags::STARTUP, config::VARF_BOOL, &s_bImguiDockingEnable );
+static bool s_bImguiMultiViewportEnable = true; config::Var * pcvarImguiMultiViewportEnable = config::RegisterVar( "imgui::multiviewport", config::EFVarUsageFlags::STARTUP, config::VARF_BOOL, &s_bImguiMultiViewportEnable );
+
 static bool s_bRunGameLoop = true; config::Var * pcvarRunGameLoop = config::RegisterVar( "game::runloop", config::EFVarUsageFlags::STARTUP, config::VARF_BOOL, &s_bRunGameLoop );
 
 static bool s_bCaptureMouse = false; config::Var * pcvarCaptureMouse = config::RegisterVar( "game::capturemouse", config::EFVarUsageFlags::NONE, config::VARF_BOOL, &s_bCaptureMouse );
-static f32 s_flCameraFov = 20.f; config::Var * pcvarCameraFov = config::RegisterVar( "game::camerafov", config::EFVarUsageFlags::NONE, config::VARF_FLOAT, &s_flCameraFov );
+static f32 s_flCameraFov = 120.f; config::Var * pcvarCameraFov = config::RegisterVar( "game::camerafov", config::EFVarUsageFlags::NONE, config::VARF_FLOAT, &s_flCameraFov );
 
 struct AnalogueBindDefinition
 {
@@ -236,64 +235,16 @@ int main( const int nArgs, const char *const *const ppszArgs )
     ImGui_ImplSDL2_InitForVulkan( psdlWindow ); // TODO: looking at the ImGui_ImplSDL2_InitFor* funcs, they're all pretty much identical (so doesn't matter which one we call), but sucks that we can't determine this at runtime atm
 
     // TODO: multiple viewports are largely busted on linux, especially wayland :c
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+    // setting the flags doesn't seem problematic though
+    if ( s_bImguiDockingEnable )
+    {
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    }
 
-    // init style
-    ImGuiStyle *const pImguiStyle = &ImGui::GetStyle();
-    [ pImguiStyle ](){
-        // classic source vgui-like style
-        // TODO: should be configurable in config files
-        pImguiStyle->Colors[ ImGuiCol_Text ]                 = ImVec4( 0.81f, 0.81f, 0.81f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_TextDisabled ]         = ImVec4( 0.56f, 0.56f, 0.56f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_TextSelectedBg ]       = ImVec4( 0.12f, 0.37f, 0.75f, 0.50f );
-        pImguiStyle->Colors[ ImGuiCol_WindowBg ]             = ImVec4( 0.27f, 0.27f, 0.27f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ChildBg ]              = ImVec4( 0.00f, 0.00f, 0.00f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_PopupBg ]              = ImVec4( 0.27f, 0.27f, 0.27f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_Border ]               = ImVec4( 0.41f, 0.41f, 0.41f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_BorderShadow ]         = ImVec4( 0.04f, 0.04f, 0.04f, 0.64f );
-        pImguiStyle->Colors[ ImGuiCol_FrameBg ]              = ImVec4( 0.13f, 0.13f, 0.13f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_FrameBgHovered ]       = ImVec4( 0.19f, 0.19f, 0.19f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_FrameBgActive ]        = ImVec4( 0.24f, 0.24f, 0.24f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_TitleBg ]              = ImVec4( 0.22f, 0.22f, 0.22f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_TitleBgActive ]        = ImVec4( 0.27f, 0.27f, 0.27f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_TitleBgCollapsed ]     = ImVec4( 0.00f, 0.00f, 0.00f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_MenuBarBg ]            = ImVec4( 0.22f, 0.22f, 0.22f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ScrollbarBg ]          = ImVec4( 0.10f, 0.10f, 0.10f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ScrollbarGrab ]        = ImVec4( 0.41f, 0.41f, 0.41f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ScrollbarGrabHovered ] = ImVec4( 0.53f, 0.53f, 0.53f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ScrollbarGrabActive ]  = ImVec4( 0.63f, 0.63f, 0.63f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_CheckMark ]            = ImVec4( 0.61f, 0.61f, 0.61f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_SliderGrab ]           = ImVec4( 0.41f, 0.41f, 0.41f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_SliderGrabActive ]     = ImVec4( 0.53f, 0.53f, 0.53f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_Button ]               = ImVec4( 0.35f, 0.35f, 0.35f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ButtonHovered ]        = ImVec4( 0.45f, 0.45f, 0.45f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ButtonActive ]         = ImVec4( 0.52f, 0.52f, 0.52f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_Header ]               = ImVec4( 0.35f, 0.35f, 0.35f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_HeaderHovered ]        = ImVec4( 0.45f, 0.45f, 0.45f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_HeaderActive ]         = ImVec4( 0.53f, 0.53f, 0.53f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_Separator ]            = ImVec4( 0.53f, 0.53f, 0.57f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_SeparatorHovered ]     = ImVec4( 0.53f, 0.53f, 0.53f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_SeparatorActive ]      = ImVec4( 0.63f, 0.63f, 0.63f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ResizeGrip ]           = ImVec4( 0.41f, 0.41f, 0.41f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ResizeGripHovered ]    = ImVec4( 0.52f, 0.52f, 0.52f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_ResizeGripActive ]     = ImVec4( 0.63f, 0.63f, 0.63f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_Tab ]                  = ImVec4( 0.18f, 0.18f, 0.18f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_TabHovered ]           = ImVec4( 0.39f, 0.39f, 0.39f, 1.00f );
-        pImguiStyle->Colors[ ImGuiCol_TabActive ]            = ImVec4( 0.39f, 0.39f, 0.39f, 1.00f );
-
-        pImguiStyle->WindowBorderSize  = 0.0f;
-        pImguiStyle->FrameBorderSize   = 1.0f;
-        pImguiStyle->ChildBorderSize   = 1.0f;
-        pImguiStyle->PopupBorderSize   = 1.0f;
-        pImguiStyle->TabBorderSize     = 1.0f;
-
-        pImguiStyle->WindowRounding    = 4.0f;
-        pImguiStyle->FrameRounding     = 1.0f;
-        pImguiStyle->ChildRounding     = 1.0f;
-        pImguiStyle->PopupRounding     = 3.0f;
-        pImguiStyle->TabRounding       = 1.0f;
-        pImguiStyle->ScrollbarRounding = 1.0f;
-    }();
+    if ( s_bImguiMultiViewportEnable)
+    {
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    }
 
     renderer::TitaniumPhysicalRenderingDevice renderingDevice {};
     renderer::InitialisePhysicalRenderingDevice( &renderingDevice );
@@ -304,8 +255,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
 
     renderer::RenderView rendererMainView {
-        .m_vCameraPosition { .x = -5.f, .y = -5.f, .z = 5.f },
-        .m_vCameraRotation { .x = 320.f, .y = -130.f },
+        .m_vCameraPosition = { .x = 20.f, .y = 20.f, .z = -20.f },
         .m_flCameraFOV = s_flCameraFov,
         .m_vRenderResolution = sys::sdl::GetWindowSizeVector( psdlWindow )
     };
@@ -319,16 +269,25 @@ int main( const int nArgs, const char *const *const ppszArgs )
         return EXIT_FAILURE;
     }
 
-    renderer::RenderObject renderobjHelmet {
-        .m_vPosition {},
-        .m_vRotation { },
-        .m_gpuModel = hHelmetModel,
-        .m_gpuTexture = gpuHelmetTextures[ 0 ]
-    };
-    renderer::RenderObject::Create( &rendererState, &renderobjHelmet );
-    renderer::RenderObject renderObjects[] {
-        renderobjHelmet,
-    };
+    renderer::RenderObject renderObjects[ 3 * 3 * 3 ];
+
+    for ( int x = 0; x < 3; x++ )
+    {
+        for ( int y = 0; y < 3; y++ )
+        {
+            for ( int z = 0; z < 3; z++ )
+            {
+                const uint nIdx = z * 3 * 3 + y * 3 + x;
+                renderObjects[ nIdx ] = {
+                    .m_vPosition = { .x = x * 10.f, .y = y * 10.f, .z = z * 10.f },
+                    .m_gpuModel = hHelmetModel,
+                    .m_gpuTexture = gpuHelmetTextures[ 0 ]
+                };
+
+                renderer::RenderObject::Create( &rendererState, &renderObjects[ nIdx ] );
+            }
+        }
+    }
 
     bool bShowConsole = false;
     char szConsoleInput[ 256 ] {};
@@ -343,6 +302,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
     // make our actual binding objects
     // TODO: make user-configurable, through config var
     input::AnalogueBinding analogueBinds[ util::StaticArray_Length( s_AnalogueBindDefinitions ) ];
+    float flAnalogueInputActionValues[ util::StaticArray_Length( s_AnalogueBindDefinitions ) ];
     for ( uint i = 0; i < util::StaticArray_Length( s_AnalogueBindDefinitions ); i++ )
     {
         analogueBinds[ i ] = {
@@ -354,9 +314,9 @@ int main( const int nArgs, const char *const *const ppszArgs )
             .eControllerAxis = s_AnalogueBindDefinitions[ i ].eDefaultControllerAxis,
         };
     }
-    float flAnalogueInputActionValues[ util::StaticArray_Length( s_AnalogueBindDefinitions ) ];
 
     input::DigitalBinding digitalBinds[ util::StaticArray_Length( s_DigitalBindDefinitions ) ];
+    u8 nDigitalInputActionValues[ input::SizeNeededForDigitalActions( util::StaticArray_Length( s_DigitalBindDefinitions ) ) ];
     for ( uint i = 0; i < util::StaticArray_Length( s_DigitalBindDefinitions ); i++ )
     {
         digitalBinds[ i ] = {
@@ -366,7 +326,6 @@ int main( const int nArgs, const char *const *const ppszArgs )
             .eControllerAxis = s_DigitalBindDefinitions[ i ].eDefaultControllerAxis
         };
     }
-    u8 nDigitalInputActionValues[ input::SizeNeededForDigitalActions( util::StaticArray_Length( s_DigitalBindDefinitions ) ) ];
 
     SDL_SetWindowGrab( psdlWindow, SDL_TRUE );
 
@@ -380,7 +339,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         nTimeNow = SDL_GetPerformanceCounter();
 
         // TODO: temp, reexamine
-        float flDeltaTime = (double)((nTimeNow - nTimeLastFrame)*1000 / (double)SDL_GetPerformanceFrequency()) / 1000;
+        float flsecDeltaTime = (double)((nTimeNow - nTimeLastFrame)*1000 / (double)SDL_GetPerformanceFrequency()) / 1000;
 
         {
             SDL_Event sdlEvent;
@@ -425,22 +384,26 @@ int main( const int nArgs, const char *const *const ppszArgs )
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
-        input::ProcessAnalogueActions( util::StaticArray_ToSpan( inputDevices ), util::StaticArray_ToSpan( analogueBinds ), util::StaticArray_ToSpan( flAnalogueInputActionValues ), flDeltaTime );
+        input::ProcessAnalogueActions( util::StaticArray_ToSpan( inputDevices ), util::StaticArray_ToSpan( analogueBinds ), util::StaticArray_ToSpan( flAnalogueInputActionValues ), flsecDeltaTime );
         input::ProcessDigitalActions( util::StaticArray_ToSpan( inputDevices ), util::StaticArray_ToSpan( digitalBinds ), util::StaticArray_ToSpan( nDigitalInputActionValues ) );
 
-        float flXMove = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::LOOKRIGHT );
-        float flYMove = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::LOOKUP );
+        const util::maths::Vec3Angle<float> vflLookVector {
+            .yaw = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::LOOKRIGHT ),
+            .pitch = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::LOOKUP )
+        };
         if ( input::DigitalActionHeld( util::StaticArray_ToSpan( nDigitalInputActionValues ), EDigitalInputActions::GRAB_OBJECT ) )
         {
-            renderObjects[ 0 ].m_vRotation.x += flXMove;
-            renderObjects[ 0 ].m_vRotation.y += flYMove;
+            util::maths::Vec3Angle<float>::AddTo( &renderObjects[ 0 ].m_vRotation, vflLookVector );
             renderObjects[ 0 ].m_bGPUDirty = true; // we've changed the state of the object, we need to tell the renderer to write the new data to the gpu
         }
         else
         {
-            rendererMainView.m_vCameraRotation.x += flXMove;
-            rendererMainView.m_vCameraRotation.y += flYMove;
+            util::maths::Vec3Angle<float>::AddTo( &rendererMainView.m_vCameraRotation, vflLookVector );
         }
+
+        const float flForwardMove = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::MOVEUP );
+        const util::maths::Vec3<float> vfMoveVector = util::maths::Vec3<float>::MultiplyScalar( util::maths::AnglesToForward<float>( rendererMainView.m_vCameraRotation ), flForwardMove );
+        util::maths::Vec3<float>::AddTo( &rendererMainView.m_vCameraPosition, vfMoveVector );
 
         rendererMainView.m_flCameraFOV = s_flCameraFov += input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::ZOOM );
         rendererMainView.m_bGPUDirty = true;
@@ -456,6 +419,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         if ( bShowConsole )
         {
+            ImGui::ShowStyleEditor();
             imguiwidgets::Console( util::StaticArray_ToSpan( szConsoleInput ), nullptr, C_ConsoleAutocomplete, C_ConsoleCommandCompletion );
         }
 
@@ -469,18 +433,18 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         if ( imguiwidgets::BeginDebugOverlay() )
         {
-            ImGui::Text( "%.0f FPS (%fms)", 1 / flDeltaTime, flDeltaTime * 1000.f );
+            ImGui::Text( "%.0f FPS (%fms)", 1 / flsecDeltaTime, flsecDeltaTime * 1000.f );
             //ImGui::Text( "Frame %i", flDeltaTime->m_nFramesRendered );
 
             ImGui::Text( "Camera: %fdeg { %f %f %f } { %f %f %f }", rendererMainView.m_flCameraFOV,
                                                                    rendererMainView.m_vCameraPosition.x, rendererMainView.m_vCameraPosition.y, rendererMainView.m_vCameraPosition.z,
-                                                                   rendererMainView.m_vCameraRotation.x, rendererMainView.m_vCameraRotation.y, rendererMainView.m_vCameraRotation.z );
+                                                                   rendererMainView.m_vCameraRotation.yaw, rendererMainView.m_vCameraRotation.pitch, rendererMainView.m_vCameraRotation.roll );
 
             ImGui::Text( "Rendering %i objects:", util::StaticArray_Length( renderObjects ) );
             for ( uint i = 0; i < util::StaticArray_Length( renderObjects ); i++ )
             {
                 ImGui::Text( "\tObject %i: { %f %f %f } { %f %f %f }", i, renderObjects[ i ].m_vPosition.x, renderObjects[ i ].m_vPosition.y, renderObjects[ i ].m_vPosition.z,
-                           renderObjects[ i ].m_vRotation.x, renderObjects[ i ].m_vRotation.y, renderObjects[ i ].m_vRotation.z );
+                           renderObjects[ i ].m_vRotation.yaw, renderObjects[ i ].m_vRotation.pitch, renderObjects[ i ].m_vRotation.roll );
             }
 
             ImGui::End();
@@ -491,11 +455,16 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
     logger::Info( "Game is over. Exiting..." ENDL );
 
-    // free all loaded models
+    // free loaded models and textures
+    renderer::FreeGPUModel( hHelmetModel );
+    for ( uint i = 0; i < util::StaticArray_Length( gpuHelmetTextures ); i++ )
+    {
+        renderer::FreeGPUTexture( gpuHelmetTextures[ i ] );
+    }
+
+    // free all renderer objects
     for ( uint i = 0; i <  util::StaticArray_Length( renderObjects ); i++ )
     {
-        // TODO: causes malloc assert seemingly?
-        renderer::FreeGPUModel( renderObjects[ i ].m_gpuModel );
         renderer::RenderObject::Free( &renderObjects[ i ] );
     }
 

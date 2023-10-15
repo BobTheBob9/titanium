@@ -20,7 +20,7 @@ namespace renderer
     {
         // TODO: this should probably have the current time, but it doesn't seem necessary currently
 
-        glm::mat4x4 m_mat4fCameraTransform;
+        util::maths::Matrix4x4 mat4fCameraTransform;
     };
     #pragma pack( pop )
     static_assert( sizeof( UShaderView ) % 16 == 0 );
@@ -28,7 +28,7 @@ namespace renderer
     #pragma pack( push, 16 )
     struct UShaderObjectInstance
     {
-        glm::mat4x4 m_mat4fBaseTransform;
+         util::maths::Matrix4x4 mat4fBaseTransform;
     };
     #pragma pack( pop )
     static_assert( sizeof( UShaderObjectInstance ) % 16 == 0 );

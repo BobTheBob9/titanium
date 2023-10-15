@@ -36,6 +36,7 @@ target_include_directories( libtitanium_util INTERFACE
     ${CMAKE_SOURCE_DIR}
 )
 target_sources( libtitanium_util INTERFACE
+    ${CMAKE_SOURCE_DIR}/libtitanium/util/maths.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/util/commandline.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/util/string.cpp
     ${CMAKE_SOURCE_DIR}/libtitanium/util/stacktrace.cpp

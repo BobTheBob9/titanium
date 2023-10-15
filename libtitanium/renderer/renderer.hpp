@@ -106,7 +106,7 @@ namespace renderer
 		bool m_bGPUDirty;
 
 		util::maths::Vec3<f32> m_vCameraPosition;
-		util::maths::Vec3<f32> m_vCameraRotation;
+		util::maths::Vec3Angle<f32> m_vCameraRotation;
 		f32 m_flCameraFOV;
 
 		util::maths::Vec2<u32> m_vRenderResolution;
@@ -126,7 +126,7 @@ namespace renderer
 		bool m_bGPUDirty;
 
 		util::maths::Vec3<f32> m_vPosition;
-		util::maths::Vec3<f32> m_vRotation;
+		util::maths::Vec3Angle<f32> m_vRotation;
 
 		BufferAndBindgroup m_objectUniforms;
 		GPUModelHandle m_gpuModel;
