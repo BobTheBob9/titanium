@@ -277,7 +277,8 @@ namespace renderer
                     .code = R"(
                                 struct UShaderView
                                 {
-                                    mat4fCameraTransform : mat4x4<f32>
+                                    mat4fViewTransform : mat4x4<f32>,
+                                    mat4fPerspective : mat4x4<f32>
                                 };
 
                                 struct UShaderObjectInstance
@@ -306,7 +307,8 @@ namespace renderer
                                 @vertex fn vs_main( in : I_VertexShader ) -> R_VertexShader
                                 {
                                     var r_vertex : R_VertexShader;
-                                    r_vertex.position = u_view.mat4fCameraTransform * u_object.mat4fBaseTransform * vec4<f32>( in.position, 1.0 );
+
+                                    r_vertex.position = u_view.mat4fPerspective * u_view.mat4fViewTransform * u_object.mat4fBaseTransform * vec4<f32>( in.position, 1.0 );
                                     r_vertex.uv = in.uv;
 
                                     return r_vertex;

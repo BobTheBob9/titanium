@@ -1,4 +1,6 @@
 #include "maths.hpp"
+#include <libtitanium/dev/tests.hpp>
+#include <string.h>
 
 namespace util::maths
 {
@@ -14,36 +16,40 @@ namespace util::maths
 
     Matrix4x4 Matrix4x4::FromAngles( const Vec3Angle<f32> fvAngles )
     {
-        const f32 yawCos = cosf( fvAngles.yaw );
-        const f32 yawSin = sinf( fvAngles.yaw );
-        const f32 pitchCos = cosf( fvAngles.pitch );
-        const f32 pitchSin = sinf( fvAngles.pitch );
-        const f32 rollCos = cosf( fvAngles.roll );
-        const f32 rollSin = sinf( fvAngles.roll );
+        const f32 cosYaw = cosf( fvAngles.yaw );
+        const f32 sinYaw = sinf( fvAngles.yaw );
+        const f32 cosRoll2 = cosf( fvAngles.roll );
+        const f32 sinRoll2 = sinf( fvAngles.roll );
+        const f32 cosPitch = cosf( fvAngles.pitch );
+        const f32 sinPitch = sinf( fvAngles.pitch );
 
+        /*
+         *
         return { .flMatrices = {
             { ( yawCos * pitchCos ) + ( yawSin * pitchSin * rollSin ), pitchCos * rollSin, ( -yawSin * rollCos ) + ( yawCos * pitchSin * rollCos ), 0.f },
             { ( -yawCos * rollSin ) + ( yawSin * pitchSin * rollCos ), rollCos * pitchCos, ( rollSin * yawSin )  + ( yawCos * pitchSin * rollCos ), 0.f },
             { yawSin * pitchCos,                                       -pitchSin,            yawCos * pitchCos,                                     0.f },
+            { 0.f,                                                     0.f,                0.f,                                                     1.f }
+        } };*/
+
+        return { .flMatrices = {
+            { cosRoll2 * cosYaw,  ( sinPitch * sinRoll2 * cosYaw ) - ( cosPitch * sinYaw ),  ( sinPitch * sinYaw ) + ( cosPitch * sinRoll2 * cosYaw ),  0.f },
+            { cosRoll2 * sinYaw,  ( cosPitch * cosYaw ) + ( sinPitch * sinRoll2 * sinYaw ),  ( cosPitch * sinRoll2 * sinYaw ) - ( sinPitch * cosYaw ),  0.f },
+            { -sinRoll2,          sinPitch * cosRoll2,                                      cosPitch*cosRoll2,                                        0.f },
             { 0.f,                                                     0.f,                0.f,                                                     1.f }
         } };
     }
 
     Matrix4x4 Matrix4x4::FromPositionAngles( const Vec3<f32> fvPosition, const Vec3Angle<f32> fvAngles )
     {
-        const f32 yawCos = cosf( fvAngles.yaw );
-        const f32 yawSin = sinf( fvAngles.yaw );
-        const f32 pitchCos = cosf( fvAngles.pitch );
-        const f32 pitchSin = sinf( fvAngles.pitch );
-        const f32 rollCos = cosf( fvAngles.roll );
-        const f32 rollSin = sinf( fvAngles.roll );
+        Matrix4x4 r_matrix = FromAngles( fvAngles );
 
-        return { .flMatrices = {
-            { ( yawCos * rollCos ) + ( yawSin * pitchSin * rollSin ),  pitchCos * rollSin, ( -yawSin * rollCos ) + ( yawCos * pitchSin * rollSin ), 0.f },
-            { ( -yawCos * rollSin ) + ( yawSin * pitchSin * rollCos ), rollCos * pitchCos, ( rollSin * yawSin )  + ( yawCos * pitchSin * rollCos ), 0.f },
-            { yawSin * pitchCos,                                       -pitchSin,            yawCos * pitchCos,                                     0.f },
-            { fvPosition.x,                                            fvPosition.y,         fvPosition.z,                                          1.f }
-        } };
+        r_matrix.flMatrices[ 3 ][ 0 ] = fvPosition.x;
+        r_matrix.flMatrices[ 3 ][ 1 ] = fvPosition.y;
+        r_matrix.flMatrices[ 3 ][ 2 ] = fvPosition.z;
+        r_matrix.flMatrices[ 3 ][ 3 ] = 1.f;
+
+        return r_matrix;
     }
 
     Matrix4x4 Matrix4x4::FromProjectionPerspective( const Vec2<uint> vnRenderSize, const float fldegFov, const float flNearDist, const float flFarDist )
@@ -62,6 +68,7 @@ namespace util::maths
     Matrix4x4 Matrix4x4::MultiplyMatrix( const Matrix4x4 mat4First, const Matrix4x4 mat4Second )
     {
         // god this is ugly, lol
+        // i would really like to just do this as a
         Matrix4x4 r_matrix {};
 
         for ( uint i = 0; i < 4; i++ )
@@ -78,3 +85,11 @@ namespace util::maths
         return r_matrix;
     }
 }
+
+#if HAS_TESTS
+    TEST( Maths )
+    {
+        // TODO: stuff here
+        return true;
+    }
+#endif

@@ -86,10 +86,16 @@ bool Assimp_LoadScene( renderer::TitaniumRendererState *const pRendererState, co
         }
     }
 
-    util::maths::Vec2<i32> vImageSize;
-    const byte *const pImageData = stbi_load( "test_resource/damaged/Default_albedo.tga", &vImageSize.x, &vImageSize.y, nullptr, 4 );
-    o_sgpuLoadedTextures.pData[ nGlobalTextureIndex++ ] = renderer::UploadTexture( pRendererState, { .x = static_cast<u16>( vImageSize.x ), .y = static_cast<u16>( vImageSize.y ) }, WGPUTextureFormat_RGBA8Unorm, pImageData );
-    stbi_image_free( (void*)pImageData );
+    // TODO: stop hardcoding this
+    if (  o_sgpuLoadedTextures.nLength )
+    {
+        util::maths::Vec2<i32> vImageSize;
+        const byte *const pImageData = stbi_load( "test_resource/damaged/Default_albedo.tga", &vImageSize.x, &vImageSize.y, nullptr, 4 );
+        o_sgpuLoadedTextures.pData[ nGlobalTextureIndex++ ] = renderer::UploadTexture( pRendererState, { .x = static_cast<u16>( vImageSize.x ), .y = static_cast<u16>( vImageSize.y ) }, WGPUTextureFormat_RGBA8Unorm, pImageData );
+        stbi_image_free( (void*)pImageData );
+    }
+
+
 
     /*// TODO: TEMP!!!
     const aiTexture *const passimpTexture = passimpLoadedScene->GetEmbeddedTexture( "*0" );

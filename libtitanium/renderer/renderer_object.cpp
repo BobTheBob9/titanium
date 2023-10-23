@@ -51,11 +51,12 @@ namespace renderer
      */
     void RenderView::WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderView *const pRenderView )
     {
-        const util::maths::Matrix4x4 mat4Transform = util::maths::Matrix4x4::FromPositionAngles( pRenderView->m_vCameraPosition, util::maths::Vec3Angle<float>::MultiplyScalar( pRenderView->m_vCameraRotation, util::maths::DEG_TO_RAD<float> ) );
-        const util::maths::Matrix4x4 mat4Project = util::maths::Matrix4x4::FromProjectionPerspective( pRenderView->m_vRenderResolution, pRenderView->m_flCameraFOV, 0.01, 10000.0 );
+        UShaderView uView {
+            .mat4fViewTransform = util::maths::Matrix4x4::FromPositionAngles( pRenderView->m_vCameraPosition, util::maths::Vec3Angle<float>::MultiplyScalar( pRenderView->m_vCameraRotation, util::maths::DEG_TO_RAD<float> ) ),
+            .mat4fPerspective = util::maths::Matrix4x4::FromProjectionPerspective( pRenderView->m_vRenderResolution, pRenderView->m_flCameraFOV, 0.01, 10000.0 )
+        };
 
-        const util::maths::Matrix4x4 mat4Camera = util::maths::Matrix4x4::MultiplyMatrix( mat4Transform, mat4Project );
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, offsetof( UShaderView, mat4fCameraTransform ), &mat4Camera, sizeof( mat4Camera ) );
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderView->m_viewUniforms.m_wgpuBuffer, 0, &uView, sizeof( uView ) );
         pRenderView->m_bGPUDirty = false;
     }
 
@@ -105,9 +106,11 @@ namespace renderer
 
     void RenderObject::WriteToUniformBuffer( TitaniumRendererState *const pRendererState, RenderObject *const pRenderObject )
     {
-        util::maths::Matrix4x4 mat4Transform = util::maths::Matrix4x4::FromPositionAngles( pRenderObject->m_vPosition, util::maths::Vec3Angle<float>::MultiplyScalar( pRenderObject->m_vRotation, util::maths::DEG_TO_RAD<float> ) );
-        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderObject->m_objectUniforms.m_wgpuBuffer, offsetof( UShaderObjectInstance, mat4fBaseTransform ),  &mat4Transform, sizeof( mat4Transform ) );
+        UShaderObjectInstance uObject {
+            .mat4fBaseTransform = util::maths::Matrix4x4::FromPositionAngles( pRenderObject->m_vPosition, util::maths::Vec3Angle<float>::MultiplyScalar( pRenderObject->m_vRotation, util::maths::DEG_TO_RAD<float> ) )
+        };
 
+        wgpuQueueWriteBuffer( pRendererState->m_wgpuQueue, pRenderObject->m_objectUniforms.m_wgpuBuffer, 0, &uObject, sizeof( uObject ) );
         pRenderObject->m_bGPUDirty = false; // gpu has up-to-date state for the object
     }
 }

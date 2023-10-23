@@ -241,7 +241,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     }
 
-    if ( s_bImguiMultiViewportEnable)
+    if ( s_bImguiMultiViewportEnable )
     {
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     }
@@ -255,7 +255,8 @@ int main( const int nArgs, const char *const *const ppszArgs )
     }
 
     renderer::RenderView rendererMainView {
-        .m_vCameraPosition = { .x = 20.f, .y = 20.f, .z = -20.f },
+        //.m_vCameraPosition = { .x = 20.f, .y = 20.f, .z = -20.f },
+        .m_vCameraRotation = { .yaw = 180.f },
         .m_flCameraFOV = s_flCameraFov,
         .m_vRenderResolution = sys::sdl::GetWindowSizeVector( psdlWindow )
     };
@@ -269,7 +270,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         return EXIT_FAILURE;
     }
 
-    renderer::RenderObject renderObjects[ 3 * 3 * 3 ];
+    renderer::RenderObject renderObjects[ ( 3 * 3 * 3 ) + 2 ];
 
     for ( int x = 0; x < 3; x++ )
     {
@@ -279,7 +280,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
             {
                 const uint nIdx = z * 3 * 3 + y * 3 + x;
                 renderObjects[ nIdx ] = {
-                    .m_vPosition = { .x = x * 10.f, .y = y * 10.f, .z = z * 10.f },
+                    .m_vPosition = { .x = ( x - 1 ) * 10.f, .y = ( y - 1 ) * 10.f, .z = ( z - 1 ) * 10.f },
                     .m_gpuModel = hHelmetModel,
                     .m_gpuTexture = gpuHelmetTextures[ 0 ]
                 };
@@ -288,6 +289,26 @@ int main( const int nArgs, const char *const *const ppszArgs )
             }
         }
     }
+
+    renderer::GPUModelHandle hPlaneModel;
+    if ( !Assimp_LoadScene( &rendererState, "test_resource/plane.obj", &hPlaneModel, { .nLength = 0 } ) )
+    {
+        logger::Info( "Required model load failed, exiting :c" ENDL );
+        return EXIT_FAILURE;
+    }
+
+    // too lazy to actually like, make a double sided plane model
+    // so we are spawning 2
+    // :)
+    const uint nPlaneIndexBegin = 3 * 3 * 3;
+    renderer::RenderObject *const pPlaneBottom = &renderObjects[ nPlaneIndexBegin ];
+
+    *pPlaneBottom = { .m_gpuModel = hPlaneModel, .m_gpuTexture = gpuHelmetTextures[ 0 ] };
+    renderer::RenderObject::Create( &rendererState, pPlaneBottom );
+
+    renderer::RenderObject *const pPlaneTop = &renderObjects[ nPlaneIndexBegin + 1 ];
+    *pPlaneTop = { .m_vRotation = { .pitch = 180.f }, .m_gpuModel = hPlaneModel, .m_gpuTexture = gpuHelmetTextures[ 0 ] };
+    renderer::RenderObject::Create( &rendererState, pPlaneTop );
 
     bool bShowConsole = false;
     char szConsoleInput[ 256 ] {};

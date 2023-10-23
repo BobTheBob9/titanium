@@ -20,7 +20,8 @@ namespace renderer
     {
         // TODO: this should probably have the current time, but it doesn't seem necessary currently
 
-        util::maths::Matrix4x4 mat4fCameraTransform;
+        util::maths::Matrix4x4 mat4fViewTransform;
+        util::maths::Matrix4x4 mat4fPerspective;
     };
     #pragma pack( pop )
     static_assert( sizeof( UShaderView ) % 16 == 0 );

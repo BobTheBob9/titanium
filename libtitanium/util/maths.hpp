@@ -53,6 +53,7 @@ namespace util::maths
     template<util::templateconstraints::Arithmetic T>
     struct Vec3
     {
+        // generally, we define z as up, x as right, and y as forward from a view angle of 0, 0, 0
         T x, y, z;
 
         static Vec3<T> Add( const Vec3<T> vFirst, const Vec3<T> vSecond );
@@ -87,6 +88,8 @@ namespace util::maths
     template<util::templateconstraints::Arithmetic T>
     struct Vec3Angle
     {
+        // generally, we define yaw as rotation around z (left/right), pitch as rotation around x (up/down) and roll as rotation around y
+        // (x, y, z are defined above, in Vec3)
         T yaw, pitch, roll;
 
         static Vec3Angle<T> Add( const Vec3Angle<T> vFirst, const Vec3Angle<T> vSecond );
