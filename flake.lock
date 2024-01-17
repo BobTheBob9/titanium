@@ -42,14 +42,14 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 0,
-        "narHash": "sha256-t2q68kVnzddjR4ec5961RJZ0Yi2wceDkDISBpQb9zek=",
-        "type": "git",
-        "url": "file:///home/bobthebob/repos/libtitanium"
+        "lastModified": 1705451952,
+        "narHash": "sha256-C78bafqynVJrUNFKgpwNPkMlOFG1XRIFpFwUcgwIdkA=",
+        "path": "/home/bobthebob/repos/libtitanium",
+        "type": "path"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/bobthebob/repos/libtitanium"
+        "path": "/home/bobthebob/repos/libtitanium",
+        "type": "path"
       }
     },
     "nixpkgs": {

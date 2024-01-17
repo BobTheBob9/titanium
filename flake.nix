@@ -5,7 +5,8 @@
         nixpkgs.url = "github:NixOS/nixpkgs/23.05";
         futils.url = "github:numtide/flake-utils";
 
-        libtitanium.url = "git+file:///home/bobthebob/repos/libtitanium";
+        # for local simultaneous dev, you can override this: e.g. nix build --override-input libtitanium path:/home/bobthebob/repos/libtitanium
+        libtitanium.url = "github:BobTheBob9/libtitanium";
     };
 
     outputs = { self, nixpkgs, futils, libtitanium }:
