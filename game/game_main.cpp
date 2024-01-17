@@ -105,7 +105,7 @@ struct AnalogueBindDefinition
 
 namespace EAnalogueInputActions
 {
-    enum EAnalogueInputActions
+    enum : int
     {
         LOOKRIGHT,
         LOOKUP,
@@ -161,7 +161,7 @@ struct DigitalBindDefinition
 
 namespace EDigitalInputActions
 {
-    enum EDigitalInputActions
+    enum : int
     {
         GRAB_OBJECT,
         TOGGLECONSOLE
@@ -184,13 +184,13 @@ DigitalBindDefinition s_DigitalBindDefinitions[] {
 int main( const int nArgs, const char *const *const ppszArgs )
 {
     // grab commandline args
-    util::CommandArgs caCommandLine {};
-    util::CommandArgs::CreateFromSystemWithAlloc( &caCommandLine, nArgs, ppszArgs );
+    util::CommandArgs programCommandLine {};
+    util::CommandArgs::CreateFromSystemWithAlloc( &programCommandLine, nArgs, ppszArgs );
 
     // set config vars from commandline, everything preceded with + is treated as a var
     // TODO: somehow, convar system needs to be able to handle setting a var before it exists, and resetting it after death (e.g. if a weapon registers a var, then unregisters, then reregisters, keep the user's value across all that)
     util::CommandArgs::R_FindArgumentPair argIterator {};
-    while ( ( argIterator = util::CommandArgs::GetNextArgumentPairByWildcard( &caCommandLine, "+", 1, argIterator.pszValue ) ).bFound )
+    while ( ( argIterator = util::CommandArgs::GetNextArgumentPairByWildcard( &programCommandLine, "+", 1, argIterator.pszValue ) ).bFound )
     {
         config::Var *const pVar = config::FindVar( argIterator.pszKey + 1 );
         if ( pVar )
@@ -203,13 +203,12 @@ int main( const int nArgs, const char *const *const ppszArgs )
         }
     }
 
-    util::CommandArgs::FreeMembers( &caCommandLine );
+    util::CommandArgs::FreeMembers( &programCommandLine );
 
-    char szProgramValue[32];
-    pcvarProgram->setFuncs.fnToString( &s_eProgram, util::StaticArray_ToSpan( szProgramValue ) );
+    char szProgramValue[32]; pcvarProgram->setFuncs.fnToString( &s_eProgram, util::StaticArray_ToSpan( szProgramValue ) );
 
-    logger::Info( "Hello world!" ENDL );
-    logger::Info( "program = %s" ENDL, szProgramValue );
+    logger::Info( "Hello world!" ENDL
+                  "program = %s" ENDL, szProgramValue );
 
 #if HAS_TESTS
     if ( s_eProgram == EProgram::TESTS )
@@ -246,25 +245,26 @@ int main( const int nArgs, const char *const *const ppszArgs )
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     }
 
-    renderer::TitaniumPhysicalRenderingDevice renderingDevice {};
-    renderer::InitialisePhysicalRenderingDevice( &renderingDevice );
-    renderer::TitaniumRendererState rendererState {};
-    if ( !renderer::Initialise( &renderingDevice, &rendererState, psdlWindow ) )
+
+    renderer::Device renderDevice;
+    if ( !renderer::Device::Create( &renderDevice ) )
     {
         return EXIT_FAILURE;
     }
 
-    renderer::RenderView rendererMainView {
-        //.m_vCameraPosition = { .x = 20.f, .y = 20.f, .z = -20.f },
-        .m_vCameraRotation = { .yaw = 180.f },
-        .m_flCameraFOV = s_flCameraFov,
-        .m_vRenderResolution = sys::sdl::GetWindowSizeVector( psdlWindow )
+    renderer::DrawTarget drawTarget = renderer::DrawTarget::CreateFromSysWindow_SDL( &renderDevice, psdlWindow );
+
+    /*renderer::View rendererMainView {
+        .rotation = { .yaw = 180.f },
+        .fov = s_flCameraFov
     };
     renderer::RenderView::Create( &rendererState, &rendererMainView );
 
-    renderer::GPUModelHandle hHelmetModel;
-    renderer::GPUTextureHandle gpuHelmetTextures[1];
-    if ( !Assimp_LoadScene( &rendererState, "test_resource/damaged/DamagedHelmet.gltf", &hHelmetModel, util::StaticArray_ToSpan( gpuHelmetTextures ) ) )
+    renderer::GPUModel hHelmetModel;
+    renderer::GPUModel hPlaneModel;
+    renderer::GPUTexture gpuHelmetTextures[1];
+    if ( !Assimp_LoadScene( &rendererState, "test_resource/damaged/DamagedHelmet.gltf", &hHelmetModel, util::StaticArray_ToSpan( gpuHelmetTextures ) )
+      || !Assimp_LoadScene( &rendererState, "test_resource/plane.obj", &hPlaneModel, { .nLength = 0 } ) )
     {
         logger::Info( "Required model load failed, exiting :c" ENDL );
         return EXIT_FAILURE;
@@ -290,25 +290,17 @@ int main( const int nArgs, const char *const *const ppszArgs )
         }
     }
 
-    renderer::GPUModelHandle hPlaneModel;
-    if ( !Assimp_LoadScene( &rendererState, "test_resource/plane.obj", &hPlaneModel, { .nLength = 0 } ) )
-    {
-        logger::Info( "Required model load failed, exiting :c" ENDL );
-        return EXIT_FAILURE;
-    }
-
     // too lazy to actually like, make a double sided plane model
     // so we are spawning 2
     // :)
-    const uint nPlaneIndexBegin = 3 * 3 * 3;
-    renderer::RenderObject *const pPlaneBottom = &renderObjects[ nPlaneIndexBegin ];
+    {
+        const uint nPlaneIndexFirst = 3 * 3 * 3;
+        renderObjects[ nPlaneIndexFirst ] = { .m_gpuModel = hPlaneModel, .m_gpuTexture = gpuHelmetTextures[ 0 ] };
+        renderer::RenderObject::Create( &rendererState, &renderObjects[ nPlaneIndexFirst ] );
 
-    *pPlaneBottom = { .m_gpuModel = hPlaneModel, .m_gpuTexture = gpuHelmetTextures[ 0 ] };
-    renderer::RenderObject::Create( &rendererState, pPlaneBottom );
-
-    renderer::RenderObject *const pPlaneTop = &renderObjects[ nPlaneIndexBegin + 1 ];
-    *pPlaneTop = { .m_vRotation = { .pitch = 180.f }, .m_gpuModel = hPlaneModel, .m_gpuTexture = gpuHelmetTextures[ 0 ] };
-    renderer::RenderObject::Create( &rendererState, pPlaneTop );
+        renderObjects[ nPlaneIndexFirst + 1 ] = { .m_vRotation = { .pitch = 180.f }, .m_gpuModel = hPlaneModel, .m_gpuTexture = gpuHelmetTextures[ 0 ] };
+        renderer::RenderObject::Create( &rendererState, &renderObjects[ nPlaneIndexFirst + 1 ] );
+    }*/
 
     bool bShowConsole = false;
     char szConsoleInput[ 256 ] {};
@@ -360,6 +352,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
         nTimeNow = SDL_GetPerformanceCounter();
 
         // TODO: temp, reexamine
+        // ideally it'd be quite nice to have like, a timer util or something for this
         float flsecDeltaTime = (double)((nTimeNow - nTimeLastFrame)*1000 / (double)SDL_GetPerformanceFrequency()) / 1000;
 
         {
@@ -381,9 +374,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
                         {
                             case SDL_WINDOWEVENT_SIZE_CHANGED:
                             {
-                                const util::maths::Vec2<u32> vWindowSize = sys::sdl::GetWindowSizeVector( psdlWindow );
-                                logger::Info( "Window resized to { %i %i }" ENDL, vWindowSize.x, vWindowSize.y );
-                                renderer::ResolutionChanged( &renderingDevice, &rendererState, &rendererMainView, vWindowSize );
+                                renderer::DrawTarget::RecreateFromSysWindow_SDL( &drawTarget, &renderDevice, psdlWindow );
                                 break;
                             }
                         }
@@ -401,14 +392,14 @@ int main( const int nArgs, const char *const *const ppszArgs )
             }
         }
 
-        renderer::Preframe_ImGUI();
+        ImGui_ImplWGPU_NewFrame();
         ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
         input::ProcessAnalogueActions( util::StaticArray_ToSpan( inputDevices ), util::StaticArray_ToSpan( analogueBinds ), util::StaticArray_ToSpan( flAnalogueInputActionValues ), flsecDeltaTime );
         input::ProcessDigitalActions( util::StaticArray_ToSpan( inputDevices ), util::StaticArray_ToSpan( digitalBinds ), util::StaticArray_ToSpan( nDigitalInputActionValues ) );
 
-        const util::maths::Vec3Angle<float> vflLookVector {
+        /*const util::maths::Vec3Angle<float> vflLookVector {
             .yaw = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::LOOKRIGHT ),
             .pitch = input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::LOOKUP )
         };
@@ -428,6 +419,7 @@ int main( const int nArgs, const char *const *const ppszArgs )
 
         rendererMainView.m_flCameraFOV = s_flCameraFov += input::AnalogueActionValue( util::StaticArray_ToSpan( flAnalogueInputActionValues ), EAnalogueInputActions::ZOOM );
         rendererMainView.m_bGPUDirty = true;
+        */
 
         input::PostProcess( util::StaticArray_ToSpan( inputDevices ) );
 
@@ -444,20 +436,20 @@ int main( const int nArgs, const char *const *const ppszArgs )
             imguiwidgets::Console( util::StaticArray_ToSpan( szConsoleInput ), nullptr, C_ConsoleAutocomplete, C_ConsoleCommandCompletion );
         }
 
+        /*
         if ( pcvarCameraFov->bDirty )
         {
             rendererMainView.m_flCameraFOV = s_flCameraFov;
             rendererMainView.m_bGPUDirty = true;
 
             pcvarCameraFov->bDirty = false;
-        }
+        }*/
 
         if ( imguiwidgets::BeginDebugOverlay() )
         {
             ImGui::Text( "%.0f FPS (%fms)", 1 / flsecDeltaTime, flsecDeltaTime * 1000.f );
-            //ImGui::Text( "Frame %i", flDeltaTime->m_nFramesRendered );
 
-            ImGui::Text( "Camera: %fdeg { %f %f %f } { %f %f %f }", rendererMainView.m_flCameraFOV,
+            /*ImGui::Text( "Camera: %fdeg { %f %f %f } { %f %f %f }", rendererMainView.m_flCameraFOV,
                                                                    rendererMainView.m_vCameraPosition.x, rendererMainView.m_vCameraPosition.y, rendererMainView.m_vCameraPosition.z,
                                                                    rendererMainView.m_vCameraRotation.yaw, rendererMainView.m_vCameraRotation.pitch, rendererMainView.m_vCameraRotation.roll );
 
@@ -466,18 +458,18 @@ int main( const int nArgs, const char *const *const ppszArgs )
             {
                 ImGui::Text( "\tObject %i: { %f %f %f } { %f %f %f }", i, renderObjects[ i ].m_vPosition.x, renderObjects[ i ].m_vPosition.y, renderObjects[ i ].m_vPosition.z,
                            renderObjects[ i ].m_vRotation.yaw, renderObjects[ i ].m_vRotation.pitch, renderObjects[ i ].m_vRotation.roll );
-            }
+            }*/
 
             ImGui::End();
         }
 
-        renderer::Frame( &rendererState, &rendererMainView, util::StaticArray_ToSpan( renderObjects ) );
+        renderer::RenderViewAndObjectsToTarget( &renderDevice, nullptr, {}, &drawTarget, { .bClearBackground = true } );
     }
 
     logger::Info( "Game is over. Exiting..." ENDL );
 
     // free loaded models and textures
-    renderer::FreeGPUModel( hHelmetModel );
+    /*renderer::FreeGPUModel( hHelmetModel );
     for ( uint i = 0; i < util::StaticArray_Length( gpuHelmetTextures ); i++ )
     {
         renderer::FreeGPUTexture( gpuHelmetTextures[ i ] );
@@ -488,9 +480,9 @@ int main( const int nArgs, const char *const *const ppszArgs )
     {
         renderer::RenderObject::Free( &renderObjects[ i ] );
     }
-
-    renderer::Shutdown( &rendererState );
-    renderer::ShutdownDevice( &renderingDevice );
+*/
+    renderer::DrawTarget::Destroy( &drawTarget );
+    renderer::Device::Destroy( &renderDevice );
 
     config::FreeVars(); // TODO: this sucks
 

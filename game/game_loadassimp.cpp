@@ -1,7 +1,5 @@
 #include "game_loadassimp.hpp"
 
-
-
 #include <assimp/material.h>
 #include <assimp/types.h>
 #include <stdio.h>
