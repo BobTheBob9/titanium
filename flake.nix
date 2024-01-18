@@ -47,6 +47,7 @@
                     # we don't load vulkan correctly at runtime without this
                     # TODO: fix
                     LD_LIBRARY_PATH="${pkgs.vulkan-loader}/lib/";
+                    LIBTITANIUM = libtitanium.outPath;
                 };
             }
         );
