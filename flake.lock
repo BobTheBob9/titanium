@@ -43,13 +43,16 @@
       },
       "locked": {
         "lastModified": 1705451952,
-        "narHash": "sha256-C78bafqynVJrUNFKgpwNPkMlOFG1XRIFpFwUcgwIdkA=",
-        "path": "/home/bobthebob/repos/libtitanium",
-        "type": "path"
+        "narHash": "sha256-XfPT8vfALesNBo/EmSHrzF75zFxzpbFKDmbeqsS6tn0=",
+        "owner": "BobTheBob9",
+        "repo": "libtitanium",
+        "rev": "165c9e231972ea1ce4dca11f12770b40f4bdab53",
+        "type": "github"
       },
       "original": {
-        "path": "/home/bobthebob/repos/libtitanium",
-        "type": "path"
+        "owner": "BobTheBob9",
+        "repo": "libtitanium",
+        "type": "github"
       }
     },
     "nixpkgs": {
